@@ -1,0 +1,46 @@
+\title{Identity inference}
+\author{
+        Vitaly Surazhsky \\
+                Department of Computer Science\\
+        Technion---Israel Institute of Technology\\
+        Technion City, Haifa 32000, \underline{Israel}
+            \and
+        Yossi Gil\\
+        Department of Computer Science\\
+        Technion---Israel Institute of Technology\\
+        Technion City, Haifa 32000, \underline{Israel}
+}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This is the paper's abstract \ldots
+\end{abstract}
+
+\section{Introduction}
+This is time for all good men to come to the aid of their party!
+
+\paragraph{Outline}
+The remainder of this article is organized as follows.
+Section~\ref{previous work} gives account of previous work.
+Our new and exciting results are described in Section~\ref{results}.
+Finally, Section~\ref{conclusions} gives the conclusions.
+
+\section{Previous work}\label{previous work}
+A much longer \LaTeXe{} example was written by Gil~\cite{Gil:02}.
+
+\section{Results}\label{results}
+In this section we describe the results.
+
+\section{Conclusions}\label{conclusions}
+We worked hard, and achieved very little.
+
+\bibliographystyle{abbrv}
+\bibliography{main}
+
+\end{document}
+This is never printed

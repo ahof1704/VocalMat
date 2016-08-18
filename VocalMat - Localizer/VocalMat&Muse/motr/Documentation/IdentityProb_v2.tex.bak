@@ -1,0 +1,150 @@
+\title{Identity inference}
+\author{Shay Ohayon \and P. Perona}
+\date{v1 - February 7, 2011 - SO\\
+v2 - February 7, 2011 - PP}
+
+\documentclass[12pt]{article}
+\usepackage{fullpage}
+\usepackage{amsmath}
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+This document summarizes the probability inference employed in the mouse tracking software.
+
+\section{Notation}
+
+\begin{eqnarray*}
+(1, \dots, T ) & - &\hspace{0.2in}  \text{The times of observation, until the current time $T$.}\\
+M & - & \hspace{0.2in} \text{The number of mice.}\\
+N & = & M!  \hspace{0.2in} \text{The number of states in the HMM.}\\
+S_t & - & \hspace{0.2in} \text{The `state' of the HMM at time $t$. It is a permutation assigning image}\\
+& & \hspace{0.2in} \text{ ellipses (tracker trajectories at time $t$) to mouse identities.}\\
+O_t & - & \hspace{0.2in} \text{The `observation' at time $t$. It is the set of pixels inside the four tracker ellipses.}
+\end{eqnarray*}
+
+
+
+\section{Viterbi}
+This section would include the derivations for the Viterbi algorithm in our setting.
+
+Viterbi finds the single best state sequence $S = \left\{ {{S_1},{S_2},...,{S_T}} \right\}$ for the given observation sequence  $O = \left\{ {{O_1},{O_2},...,{O_T}} \right\}$.
+
+\begin{equation}
+\label{Viterbi}
+{\delta _t}\left( i \right) = \mathop {\max }\limits_{{s_1},{s_2},...,{s_{i - 1}}} P\left[ {s_1}, {s_2}, ...{s_t} = i | {O_1}, {O_2}, ...{O_t}, \lambda  \right]
+\end{equation}
+where $\lambda$ represents the model, which includes the transition matrix $A(t)$, the priors on the initial states, and the probabilities of observing the observations at any given state.
+
+${\delta _t}\left( i \right)$ represents the best score along a single path, at time t, which accounts for the first t observations and ends in state $S_i$.
+
+Viterbi is based on the following induction rule:
+
+\begin{equation}
+\label{Viterbi_induction}
+{\delta _t}\left( j \right) = \mathop {\max }\limits_i {\delta _{t - 1}}\left( i \right){a_{ij}}P\left[ {{O_t}|{S_i}} \right]
+\end{equation}
+Vitebi's algorithm has four stages: initialization, recursion, termination and backtracking.
+
+\subsection{Initialization}
+\begin{equation}
+\label{init}
+\begin{array}{l}
+ {\delta _1}\left( i \right) = {\pi _i}P\left[ {{O_1}|{S_i}} \right] \\
+ {\psi _1}\left( i \right) = 0 \\
+ \end{array}
+ \end{equation}
+
+
+${\psi _t}\left( i \right)$ is used to keep track of the argument that is being maximized in equation \ref{Viterbi_induction}.
+
+\subsection{Recursion}
+
+\begin{equation}
+\label{rec}
+\begin{array}{l}
+ {\delta _t}\left( j \right) = \mathop {\max }\limits_i {\delta _{t - 1}}\left( i \right){a_{ij}}P\left[ {{O_t}|{S_i}} \right] \\
+ {\psi _t}\left( i \right) = \mathop {\arg \max }\limits_i {\delta _{t - 1}}\left( i \right){a_{ij}} \\
+ \end{array}
+ \end{equation}
+
+\subsection{Termination}
+Finding the highest score at the last time point:
+\begin{equation}
+\label{termination}
+s_T^* = \mathop {\arg \max }\limits_i {\delta _T}\left( i \right)
+ \end{equation}
+
+\subsection{Backtracking}
+\begin{equation}
+s_t^* = {\psi _{t + 1}}\left( {s_{t + 1}^*} \right)
+ \end{equation}
+
+
+
+\section{Viterbi State inference}
+
+Some definitions.
+
+We have $N = 4$ trackers. Each is assigned a unique identity $\{A,B,C,D\}$
+Our story begins with a set of states $S_i, \le i \le 24$ (for four mice). Each state represents a permutation, or mapping, from trackers to true identities. That is, state [1,4,3,2] corresponds to tracker 1 is A, tracker 2 is D, tracker 3 is C and tracker 4 is B.
+
+What we would like to do is to compute the probability of being in a state given the observable data.
+This is put forth in the following equation:
+
+\begin{equation}
+\label{Eq1}
+P\left[ {{S_i}|D} \right] = \frac{{P\left[ {D|{S_i}} \right]P\left[ {{S_i}} \right]}}{{P\left[ D \right]}} = \frac{{P\left[ {D|{S_i}} \right]P\left[ {{S_i}} \right]}}{{\sum\limits_{j = 1}^{24} {P\left[ {{S_j}} \right]} P\left[ {D|{S_j}} \right]}}
+\end{equation}
+
+That is, the probability of being in state $i$ given the observable data $D$, and the expansion of the expression using bayes rule.
+
+Our prior on the states is uniformally distributed, thus equation \ref{Eq1} becomes:
+
+\begin{equation}
+\label{Eq2}
+P\left[ {{S_i}|D} \right] = \frac{{ \frac{1}{24} P\left[ {D|{S_i}} \right]}}{{\frac{1}{24}\sum\limits_{j = 1}^{24} {P\left[ {D|{S_j}} \right]} }} = \frac{{P\left[ {D|{S_i}} \right]}}{{\sum\limits_{j = 1}^{24} {P\left[ {D|{S_j}} \right]} }}
+\end{equation}
+
+Under the assumption that the data is independent (each ellipse is independent of the others), we obtain:
+
+\begin{equation}
+\label{Eq2}
+P\left[ {D|{S_i}} \right] = P\left[ {{D_1},{D_2},{D_3},{D_4}|{S_i}} \right] = \prod\limits_{j = 1}^4 {P\left[ {{D_j}|ID = {S_i}[j]} \right]}
+\end{equation}
+
+That is, the probability of observing the data given state $S_i$ is the multiplication of seing each one of the small image patches $D_j$ under the assumption that it belongs to identity ${S_i}\left[ j \right]$.
+
+The way we have modeled this distribution was by constructing a projection from the image space to 1D. The projection first extracts the HOG features from the image and then projects them to 1D using a mapping obtained from linear discriminant analysis which takes into account the class of interest. That is, we find the best mapping the separates ${S_i}\left[ j \right]$ from all other identities.
+
+We usually think about $P\left[ {{D_j}|ID = {S_i}[j]} \right]$ in terms of the histogram of the projected HOG features. We had several ideas how to model this distribution (gaussians, t-distribution, non-parametric). Current implementation uses normal distribution.
+
+
+\section{Garbage collection idea}
+Lets consider the standard two class problem (say, class A and class not A). According to Bayes we get:
+
+\begin{equation}
+\label{Eq3}
+P\left[ {A|x} \right] = \frac{{P\left[ {x|A} \right]P\left[ A \right]}}{{P\left[ x \right]}} = \frac{{P\left[ {x|A} \right]P\left[ A \right]}}{{P\left[ {x|A} \right]P\left[ A \right] + P\left[ {x|\neg A} \right]P\left[ {\neg A} \right]}}
+\end{equation}
+
+Pietro put forth the following idea. Let us consider a third class $J$ (i.e., junk), and assume we have some way to model its distribution $P\left[ {x|J} \right]$. Then, we can add its contribution equally to the existing two classes by computing:
+
+\begin{equation}
+\label{Eq4}
+P\left[ {A|x} \right] = \frac{{P\left[ {x|A} \right]P\left[ A \right]}}{{P\left[ x \right]}} = \frac{{P\left[ {x|A} \right]P\left[ A \right] + \frac{1}{2}P\left[ {x|J} \right]P\left[ J \right]}}{{P\left[ {x|A} \right]P\left[ A \right] + P\left[ {x|\neg A} \right]P\left[ {\neg A} \right] + P\left[ {x|J} \right]P\left[ J \right]}}
+\end{equation}
+
+\section{Current problems}
+
+I actually think I have done two mistakes in the implementation. Both are the same. 
+I have erroneously replaced $P\left[ {Data|State} \right]$ with  $P\left[ {State|Data} \right]$.
+
+The first occurrence of this is in the viterbi derivation. I always thought I had to obtain the probability of being in a state given the data, while Vitervi actually requires the probability of the data given a state. 
+
+The same error occurred when I was doing the inference for the specific identity:
+
+$\prod\limits_{j = 1}^4 {P\left[ {{D_j}|ID = {S_i}[j]} \right]} $. I was actually taking
+$\prod\limits_{j = 1}^4 {P\left[ {ID = {S_i}[j]|{D_j}} \right]} $
+\end{document}

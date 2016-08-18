@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Annotation GUI Configuration -->
+
+<Config>
+
+<Directories
+       BehaviorClassifiersFolder="D:\Data\Janelia Farm\BehaviorClassifiers\"
+> </Directories>
+
+<Behaviors>
+	<Behavior 
+        Name="Doing Nothing" 
+        OperatedOnOtherMice = "0"
+     />
+
+	<Behavior 
+        Name="Running" 
+        OperatedOnOtherMice = "0"
+     />
+
+	<Behavior 
+        Name="Following" 
+        OperatedOnOtherMice = "1"
+     />
+
+	<Behavior 
+        Name="Head Sniffing" 
+        OperatedOnOtherMice = "1"
+     />
+
+	<Behavior 
+        Name="Tail Sniffing" 
+        OperatedOnOtherMice = "1"
+     />
+
+	<Behavior 
+        Name="Fighting" 
+        OperatedOnOtherMice = "1"
+     />
+
+	<Behavior 
+        Name="Eating" 
+        OperatedOnOtherMice = "0"
+     />
+
+	<Behavior 
+        Name="Drinking" 
+        OperatedOnOtherMice = "0"
+     />
+
+	<Behavior 
+        Name="Sleeping" 
+        OperatedOnOtherMice = "0"
+     />
+
+
+	<Behavior 
+        Name="Digging" 
+        OperatedOnOtherMice = "0"
+     />
+
+	<Behavior 
+        Name="Mating" 
+        OperatedOnOtherMice = "1"
+     />
+     
+</Behaviors>
+</Config>

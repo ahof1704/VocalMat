@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Smart Mouse Configuration -->
+
+<Config>
+
+<Directories
+   DataRootFolder="/Users/taylora/projects_janelia/mousehouse/test_short_scripted"
+   ResultsRootFolder="/Users/taylora/projects_janelia/mousehouse/reporepo_adam3/results/"
+   JobFolder="/Users/taylora/projects_janelia/mousehouse/reporepo_adam3/jobs/"
+   IdentitiesFolder="/Users/taylora/projects_janelia/mousehouse/reporepo_adam3/identities/"
+> </Directories>
+
+<VideoList>
+	<Video file="/Users/taylora/projects_janelia/mousehouse/test_short_scripted/train_dg.seq"/>
+	<Video file="/Users/taylora/projects_janelia/mousehouse/test_short_scripted/train_hs.seq"/>
+	<Video file="/Users/taylora/projects_janelia/mousehouse/test_short_scripted/train_sp.seq"/>
+	<Video file="/Users/taylora/projects_janelia/mousehouse/test_short_scripted/train_vs.seq"/>
+	<Video file="/Users/taylora/projects_janelia/mousehouse/test_short_scripted/clip5.seq"/>
+</VideoList>
+</Config>

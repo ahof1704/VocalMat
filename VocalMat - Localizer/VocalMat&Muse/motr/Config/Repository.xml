@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Smart Mouse Configuration -->
+
+<Config>
+
+<Directories
+   DataRootFolder="D:\Data\Janelia Farm\"
+   ResultsRootFolder="D:\Data\Janelia Farm\Results\"
+   JobFolder="D:\Data\Janelia Farm\Jobs\"
+   IdentitiesFolder="D:\Data\Janelia Farm\Identities\"
+> </Directories>
+
+<VideoList>
+	<Video file="D:\Data\Janelia Farm\Movies\ExpG\b6_pop_cage_14_12.02.10_09.52.04.882_cropped_5000-54999.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\ExpG\b6_pop_cage_14_dg.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\ExpG\b6_pop_cage_14_hs.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\ExpG\b6_pop_cage_14_sp.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\ExpG\b6_pop_cage_14_vs.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\cage16\b6_popcage_16_singles_dg.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\cage16\b6_popcage_16_singles_hs.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\cage16\b6_popcage_16_singles_sp.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\cage16\b6_popcage_16_singles_vs.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\ExpG\b6_pop_cage_14_12.02.10_09.52.04.882.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\dg_single_mouse.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\ex_single_mouse.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\five_mouse_test_11.20.05.386.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\hs_10.25.05.742.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\one_mouse_test_09.46.47.638.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\pt_single_mouse.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\six_mouse_test_11.50.33.709.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\sp_single_mouse.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\three_mouse_test_10.48.38.783.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\two_mouse_test_10.17.40.761.seq"/>
+	<Video file="D:\Data\Janelia Farm\Movies\not_four_mice\vs_single_mouse.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_12.02.10_09.52.04.882.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_12.02.10_09.52.04.882_cropped_2350-52350.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_12.02.10_09.52.04.882_cropped_250000-300000.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_12.02.10_21.52.06.570.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_12.03.10_09.52.07.992.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_12.05.10_09.55.58.886.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_dg.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_hs.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_sp.seq"/>
+	<Video file="E:\JaneliaMovies\cage14\b6_pop_cage_14_vs.seq"/>
+</VideoList>
+</Config>

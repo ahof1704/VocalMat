@@ -1,0 +1,11 @@
+#!/bin/bash
+
+script_FN_abs=$(dirname `readlink -f -n "$BASH_SOURCE"`)
+
+cd "$script_FN_abs"
+cd Modules/MEX
+find . -name "*.mex*" -exec rm -f '{}' \;
+find . -name "*.dll" -exec rm -f '{}' \;
+
+cd "$script_FN_abs"
+rm -rf Deploy/MouseTrackProj/src/*

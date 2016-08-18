@@ -1,0 +1,53 @@
+aiLengths = X.follow16_d1.m1m2(:,2)-X.follow16_d1.m1m2(:,1)+1;
+[aiLengthSorted,aiSortInd]=sort(aiLengths,'descend');
+
+strctRes = load('D:\Data\Janelia Farm\ResultsFromNewTrunk\cage16\b6_popcage_16_110405_09.58.30.268.mat');
+strctMov = fnReadSeqInfo('E:\cage16\b6_popcage_16_110405_09.58.30.268.seq');
+
+iBefore = 30*5;
+iAfter = 30*10;
+iSelectedInterval = aiSortInd(1);
+aiFrames=(X.follow16_d1.m1m2(iSelectedInterval,1))-iBefore:X.follow16_d1.m1m2(iSelectedInterval,2)+iAfter;
+
+%%
+figure(11);
+clf;
+I=fnReadFrameFromSeq(strctMov, aiFrames(k));
+hImage=imshow(I,[]);
+hold on;
+a2fColors = [255 165 0;
+             255 165 0;   
+             0 0 255;
+             0 255 255]/255;
+for k=1:4
+      ahEllipses(k) = fnPlotEllipse2(strctRes.astrctTrackers(k).m_afX(aiFrames(1)),...
+        strctRes.astrctTrackers(k).m_afY(aiFrames(1)),...
+        strctRes.astrctTrackers(k).m_afA(aiFrames(1)),...
+        strctRes.astrctTrackers(k).m_afB(aiFrames(1)),...
+        strctRes.astrctTrackers(k).m_afTheta(aiFrames(1)), a2fColors(k,:),2, gca);
+      ahTrace(k) = plot(0,0,'color',a2fColors(k,:),'linewidth',2);
+end
+
+hold on;
+for k=1:length(aiFrames)
+    I=fnReadFrameFromSeq(strctMov, aiFrames(k));
+      for j=1:4
+    fnDrawEllipseTupleNew2(ahEllipses(j),strctRes.astrctTrackers(j).m_afX(aiFrames(k)),...
+                        strctRes.astrctTrackers(j).m_afY(aiFrames(k)),...
+                        strctRes.astrctTrackers(j).m_afA(aiFrames(k)),...
+                        strctRes.astrctTrackers(j).m_afB(aiFrames(k)),...
+                    strctRes.astrctTrackers(j).m_afTheta(aiFrames(k))+pi/2,a2fColors(j,:),2);
+                if j>=3 && k >= iBefore && k <= 
+                     = 30*5;
+iAfter = 30*10;
+
+                    set(ahTrace(j),'xdata',strctRes.astrctTrackers(j).m_afX(aiFrames(1:k)),...
+                                'ydata',strctRes.astrctTrackers(j).m_afY(aiFrames(1:k)));
+                end
+    end
+    set(hImage,'cdata',I);
+    drawnow
+    tic
+    while toc < 0.1
+    end
+end

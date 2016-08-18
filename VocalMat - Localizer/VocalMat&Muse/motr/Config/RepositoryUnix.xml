@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Smart Mouse Configuration -->
+
+<Config>
+
+<Directories
+   DataRootFolder="/groups/egnor/mousetrack/adam/"
+   ResultsRootFolder="/groups/egnor/mousetrack/adam/reporepo/results/"
+   JobFolder="/groups/egnor/mousetrack/adam/reporepo/jobs/"
+   IdentitiesFolder="/groups/egnor/mousetrack/adam/reporepo/identities/"
+> </Directories>
+
+<VideoList>
+	<Video file="/groups/egnor/mousetrack/adam/test_short/train_dg.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/test_short/train_hs.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/test_short/train_sp.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/test_short/train_vs.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/test_short/clip5.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_16/b6_popcage_16_single_dg.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_16/b6_popcage_16_single_hs.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_16/b6_popcage_16_single_sp.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_16/b6_popcage_16_single_vs.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_16/b6_popcage_16_2011.04.05_09.58.30.268.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_18_scripted/train_dg.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_18_scripted/train_hs.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_18_scripted/train_sp.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_18_scripted/train_vs.seq"/>
+	<Video file="/groups/egnor/mousetrack/adam/mousetrack_18_scripted/clip_01.seq"/>
+</VideoList>
+</Config>

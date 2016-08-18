@@ -1,0 +1,12 @@
+#!/bin/tcsh
+set seqfiles = `find  .  -iname "*.seq" -print`
+
+foreach f (${seqfiles})
+    echo $f 
+    qsub -V -v InputFile=$f  -N MouseFileSeekJob -cwd /groups/egnor/home/ohayons/Code/JaneliaFarm/genfileseekaux
+end
+
+#echo $seqfiles
+#    
+
+

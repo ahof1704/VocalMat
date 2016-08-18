@@ -1,0 +1,19 @@
+s=fnReadVideoInfo('D:\Data\Janelia Farm\Movies\vs_single_mouse.seq');
+X=randi(s.m_iNumFrames,1,30);
+clear I;
+for k=1:length(X)
+    I(:,:,k)=fnReadFrameFromSeq(s,X(k));
+end;
+M=median(double(I),3);
+figure;
+imshow(M,[]);
+
+figure(1);
+clf;
+imshow(I(:,:,1),[])
+
+J=abs(double(I(:,:,1))-M);
+
+figure;
+imshow(J>95,[]);
+

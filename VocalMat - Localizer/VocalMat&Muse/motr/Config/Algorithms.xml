@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Mouse Track Configuration -->
+
+<Config>
+
+
+<Modules>
+
+   <Module Name = "SingleMouseIdentityTracker"
+        NumImagesForBuffer = "50"
+        MotionThreshold = "50"
+        OutsideFloorIntensityLevelThreshold = "50"
+        TailClippingPixels = "4"
+        HeadTailHighVelocityPixels = "6"
+   > </Module>
+    
+   <Module Name = "Classifiers"
+        Type = "Tdist"
+        NumHOGBins = "10"
+        HOG_Dim = "837"
+        
+        ImagePatchWidth = "111"
+        ImagePatchHeight = "51"
+
+        MaxSamplesPerMouseForIdentityTraining = "10000"
+        MaxSamplesPerMouseForHeadTailTraining = "5000"
+        
+        GoodTrainingSampleMinA = "20"
+        GoodTrainingSampleMinB = "10"
+        
+        CrossValidationFold = "4"
+        
+        NumApperanceSamplesPerMouse = "1000"
+   > </Module>
+      
+   <Module Name = "SetupParameters"
+        ArenaWidthCM = "60"
+        ArenaHeightCM = "60"
+        TimeStampX = "1 290"
+        TimeStampY = "1 24"
+   > </Module>
+    
+    <Module Name = "Jobs"
+       LocalMachineBufferSizeInFrames = "200"
+   > </Module>
+   
+
+    <Module Name = "BackgroundSubtraction"
+        MotionThreshold = "0.2"
+        IntensityThresholdInFloor = "0.7"
+        MotionThresholdOut = "0.2"
+        IntensityThresholdOutsideFloor = "0.7"
+        
+        TailClippingPixels = "5"
+   > </Module>
+
+    <Module Name = "Tracking"
+        NumMissingFramesToDeclareLostMouse = "15"
+        
+        PositionalPredictionGainDamping = "0.1"
+        MaxPredictMajorAxis = "63"
+        MinPredictMajorAxis = "12"
+        MinPredictMinorAxis = "6"
+        AxisBounds = "10, 20, 20, 52"
+        
+        SearchSpaceHighVelocity = "10"
+        SearchSpaceInPixLowVelocity = "60"
+        SearchSpaceInPixHighVelocity = "100"
+        
+        RecoverLostMouseReliableComponentSizePixels = "500"
+        
+        NumExpectationMaximizationInitializations = "15"
+        NumExpectationMaximizationIterations = "20"
+        ExpectationMaximizationDataSubSamplingFactor = "6"
+        ExpectationMaximizationConvergence = "1e-15"
+        
+        HypothesisScorePositionWeight = "0.15"
+        
+        LostMouseBigJumpPixels = "70"
+        LoseMouseReductionInImageCorrelation = "-0.01"
+   > </Module>
+
+</Modules>
+
+</Config>

@@ -1,0 +1,3 @@
+#!/bin/bash
+echo Input file is:  $InputFile
+/groups/egnor/home/ohayons/Code/JaneliaFarm/new_trunk_rev156/Deploy/MouseTrackProj/src/MouseTrackProj $InputFile

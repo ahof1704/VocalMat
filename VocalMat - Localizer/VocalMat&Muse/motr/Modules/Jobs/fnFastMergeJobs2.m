@@ -1,0 +1,16 @@
+function fnFastMergeJobs2(strMovieFileName, strResultRootFolder, strIdentitiesFile)
+%% Fast Merge jobs
+[dummy,strSequence] = fileparts(strMovieFileName);  %#ok
+fprintf('Aggregating results for sequence %s\n',strMovieFileName);
+strResultFolder = fullfile(strResultRootFolder,strSequence);
+astrctJobFiles = dir(fullfile(strResultFolder,'JobOut*.mat'));
+acstrJobOutputFileNames={astrctJobFiles(:).name};
+acstrJobOutputFileNamesAbs= ...
+  arrayfun(@(c)({fullfile(strResultFolder,c{1})}), ...
+                acstrJobOutputFileNames);
+fnFastMergeJobs2Core(strMovieFileName, ...
+                     acstrJobOutputFileNamesAbs, ...
+                     strIdentitiesFile, ...
+                     strResultFolder);
+
+end

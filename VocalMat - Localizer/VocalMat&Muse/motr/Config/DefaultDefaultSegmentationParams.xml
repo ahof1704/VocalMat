@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Config>
+
+<Modules>
+
+  <Module Name = "Segmentation"
+    iLargestSeparationDueToLightAndMarkingPix =  "10"
+    fLargeMotionThreshold = "0.2000"
+    iSmallestMouseRadiusPix =  "11"
+    fMinimalMinorAxes =  "5"
+    fIntensityThrOut= "0.4500"
+    fIntensityThrIn  = "0.9000"
+    iGoodCCopenSize = "5"
+    aiAxisBounds = "8, 26, 15, 63"
+   > </Module>
+
+</Modules>
+
+</Config>

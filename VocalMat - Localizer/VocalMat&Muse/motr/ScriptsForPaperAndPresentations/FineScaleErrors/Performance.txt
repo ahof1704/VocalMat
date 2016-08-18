@@ -1,0 +1,63 @@
+'GroundTruth_b6_pop_cage_14_12.02_10_09.52.04.882_complete.seq.mat'
+No Huddling was labelled
+8607 key frames have status Checked
+8401 correct!
+2 key frames have status ERROR. Same identity assignment
+1 key frames have status Failed Seg
+19 key frames have status Not Checked
+8 key frames have status Semi-Checked
+195 incorrect frames were found! (2.27 %) 
+No confidence level was labelled
+No Head-Tail labelled
+
+'GroundTruth_b6_pop_cage_14_12.02_10_09.52.04.882.new2448.mat'
+2423 key frames have status Checked of which 112 include huddling
+2380 correct!
+7 key frames have status Failed Seg of which 6 include huddling
+6207 key frames have status Not Checked of which 0 include huddling
+36 incorrect frames were found! (1.49 %) 
+out of which 5 include huddling (4.46 % of all huddling frames) 
+0 incorrect undefined-confidence frames were found! (0.00 %) 
+36 incorrect high confidence frames were found! (1.50 %) 
+300 incorrect orientations were found! (3.10 %) 
+out of which 219 (73.00 %) are Head-Tail swaps 
+32 incorrect orientations were found while huddling! (7.14 % of Huddling frames) 
+out of which 23 (71.88 %) are Head-Tail swaps
+
+'GroundTruth_b6_pop_cage_14_12.03.10_09.52.07.992._newcomplete.seq_UnRandomized.mat'
+8452 key frames have status Checked of which 2300 include huddling
+8027 correct!
+179 key frames have status Failed Seg of which 5 include huddling (actually 87, of which 83 include huddling)
+5 key frames have status Not Checked of which 0 include huddling
+2 key frames have status Semi-Checked of which 0 include huddling
+338 incorrect frames were found! (4.00 %) 
+out of which 257 include huddling (11.17 % of all huddling frames) 
+3 incorrect undefined-confidence frames were found! (8.82 %) 
+6 incorrect low confidence frames were found! (100.00 %) 
+36 incorrect mid confidence frames were found! (47.37 %) 
+293 incorrect high confidence frames were found! (3.51 %) 
+No Head-Tail labelled
+
+'GroundTruth_b6_popcage_16_110405_09.58.30.268.seq._5808_UnRandomized.mat'
+5757 key frames have status Checked of which 601 include huddling
+5729 correct!
+1 key frames have status Failed Seg of which 1 include huddling
+2882 key frames have status Not Checked of which 0 include huddling
+1 key frames have status Semi-Checked of which 0 include huddling
+27 incorrect frames were found! (0.47 %) 
+out of which 16 include huddling (2.66 % of all huddling frames) 
+0 incorrect undefined-confidence frames were found! (0.00 %) 
+0 incorrect mid confidence frames were found! (0.00 %) 
+27 incorrect high confidence frames were found! (0.47 %) 
+807 incorrect orientations were found! (3.50 %) 
+out of which 735 (91.08 %) are Head-Tail swaps 
+173 incorrect orientations were found while huddling! (7.20 % of Huddling frames) 
+out of which 137 (79.19 %) are Head-Tail swaps
+
+8607 + 2423 + 8452 + 5757 - 96 = 25143
+8401 + 2380 + 8027 + 5729 = 24537 correct!
+2423 + 5757 - 177 = 8003
+4*8003 - 1107 = 30905
+2423 + 8452 + 5757 = 16632   112 + 2300 + 601 = 3013
+5 + 257 + 16 = 278
+36 + 338 + 27 - 278 - 

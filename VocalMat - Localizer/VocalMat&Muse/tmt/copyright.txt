@@ -1,0 +1,2 @@
+All files included in the Taylor Matlab Toolbox are copyright 
+Adam L. Taylor 2007-2012.

@@ -1,0 +1,1 @@
+function c=fn_position_to_distance(a,b)% position to distance: function to return distance between two x,y points%% form: c=position_to_distance(a,b)%% a and b are two column, single row vectors of x and y values% c is distance between a and b%% program created by roian (jpn did not change it)xdif=abs(a(1,1)-b(1,1));ydif=abs(a(1,2)-b(1,2));c=sqrt(xdif^2 +ydif^2);

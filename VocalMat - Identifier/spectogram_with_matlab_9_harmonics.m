@@ -284,7 +284,6 @@ hold on
 %        end
 %    end
 %  
-%    
 % end
 % 
 % disp('Removing empty cells')

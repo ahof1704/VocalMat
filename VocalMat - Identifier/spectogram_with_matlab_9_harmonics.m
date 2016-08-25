@@ -1,3 +1,6 @@
+%Aug 25th: This version of identifier works with image processing and is
+%being developed to be able to identify harmonics in vocalizations.
+
 % close all
 clc
 clear all

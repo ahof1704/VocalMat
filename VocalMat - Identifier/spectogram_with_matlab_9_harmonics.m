@@ -1,3 +1,9 @@
+%Aug 29th: For some reason, when I make a big time window (> 60s) to calculate the
+%spectogram, the number of detected components is too small (or zero),
+%because the objects get too small. I have to make loops to run through all
+%the the minutes. Hopefully I won't divide any vocalization in the
+%middle... 
+
 %Aug 28th: Possible correction in the loop that builds the vocalizations. I
 %was calling for graindata(k) instead of graindata(min_area(k)).
 
@@ -15,7 +21,7 @@ list = dir('*.wav');
 max_interval = 0.005; %if the distance between two successive points in time is >max_interval, it is new vocalization
 minimum_size = 20;%10; %A valid vocalization must present >minimum_size valid points to be considered a vocalization
 median_dist = 600; %600; If the median of the euclidean distance between succesive pair of points in a vocalization is >median_dist, then it is noise.
-max_vocal_duration = 0.140; %If a vocalization is onger than max_vocal_duration, than it can be a noise that needs to be removed by denoising process
+max_vocal_duration = 0.140; %If a vocalization is onger than max_vocal_duration, than it can be a noise that needs to be removed by denoising process.
 use_median = 1; %If =1, use the median method to detect the noise.
 tic 
 for Name = 5%:size(list,1)
@@ -28,154 +34,210 @@ clear time_vocal freq_vocal intens_vocal output time_vocal_nogaps freq_vocal_nog
 fprintf('\n');
 disp(['Reading audio ' vfilename])
 [y1,fs]=audioread([vfile '.wav']);
-jump = 0;%3*5000000;
-y1 = y1((jump+1):(jump+6*250000),:);
-nfft = 1024;
-nover = (128);
-window = hamming(256);
-% db_threshold = -115; %original
-db_threshold = -200; 
-dx = 0.4;
-disp('Calculating spectrogram')
-% [S,F,T,P] = spectrogram(y1, window, nover, nfft, fs, 'yaxis', 'MinThreshold',db_threshold);
-[S,F,T,P] = spectrogram(y1, window, nover, nfft, fs, 'yaxis');
 
-%cutoff frequency
-min_freq = find(F>45000);
-F = F(min_freq);
-S = S(min_freq,:);
-P = P(min_freq,:);
+grain_total =[];
+T_orig =[];
+% graindata_total = [];
+% cc_total = [];
+A_total = [];
+for minute_frame = 1:size(y1,1)/(60*250000) %run through all the minute windows
+    disp(['Current minute: ' num2str(minute_frame)])
+%     jump = 0;%3*5000000;
+    clear A B y2 S F T P q vocal id F_orig grain
+    y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
+    nfft = 1024;
+    nover = (128);
+    window = hamming(256);
+%     db_threshold = -200; 
+    dx = 0.4;
+    disp('Calculating spectrogram')
+    % [S,F,T,P] = spectrogram(y1, window, nover, nfft, fs, 'yaxis', 'MinThreshold',db_threshold);
+    [S,F,T,P] = spectrogram(y2, window, nover, nfft, fs, 'yaxis');
 
-% T = size(y1,1)+T;
+    %cutoff frequency
+    min_freq = find(F>45000);
+    F = F(min_freq);
+    S = S(min_freq,:);
+    P = P(min_freq,:);
+    P(P==0)=1;
+    A = 10*log10(P);
+    if minute_frame==1
+        A = A(:,200:end); %Cut off the first 0.1s... usually there is a weird noise in the beggining
+        T = T(:,200:end); 
+    end
+    
+    median_db = median(median(A));
+    B = imadjust(imcomplement(abs(A)./max(abs(A(:)))));
+    
+    if size(T_orig,2) %Use this information to make time correction later
+        prev_T_orig = size(T_orig,2);
+    else
+        prev_T_orig = 0;
+    end
+    
+    T_orig = [T_orig T+60*(minute_frame-1)*ones(size(T,2),1)']; %Correcting according to the window 
+    F_orig = F;
+    A_total = [A_total A];
+    % disp('Calc the median of intensity')
+    % min_db = median(median(10*log10(P)));
+    % min_db = median(median(B));
+    % disp(['Intensity threshold: ' num2str(min_db)])
+
+    % Threshold image - adaptive threshold
+    BW = imbinarize(B, 'adaptive', 'Sensitivity', 0.200000, 'ForegroundPolarity', 'bright');
+
+    %Threshold image
+    % BW = B > min_db;
+
+    % Open mask with disk
+    % radius = 1;
+    % decomposition = 0;
+    % se = strel('disk', radius, decomposition);
+    % BW = imopen(BW, se);
+
+    % Threshold image - manual threshold
+    % BW = B > 9.882400e-01; %BEST!
+    % BW = B > 0.8;
+
+    % Clear borders
+    BW = imclearborder(BW);
+
+    % Open mask with line
+    length = 3.000000;
+    angle = 0.000000;
+    se = strel('line', length, angle);
+    BW = imopen(BW, se);
+
+    % Create masked image.
+    maskedImage = B;
+    maskedImage(~BW) = 0;
+    B = maskedImage;
+
+    disp('Connected components')
+    cc = bwconncomp(B, 4);
+    graindata = regionprops(cc,'all');
+    min_area = find([graindata.Area]>20) ;
+    grain = false(size(B));
+    for k=1:size(min_area,2)
+        grain(cc.PixelIdxList{min_area(k)}) = true;
+    %     plot(centroids(:,1),centroids(:,2), 'b*')
+    %     text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(k),'HorizontalAlignment','left','FontSize',20,'Color','b')
+    end
+
+
+    % hold on
+    % for k=1:size(min_area,2)
+    % %     grain(cc.PixelIdxList{min_area(k)}) = true;
+    % %     plot(centroids(:,1),centroids(:,2), 'b*')
+    %     text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(k),'HorizontalAlignment','left','FontSize',20,'Color','b')
+    % end
+
+    se1 = strel('disk', 2, 0);
+    grain2 = imdilate(grain,se1);
+    grain2 = imerode(grain2, se);
+    % figure, imshow(grain2);
+
+    disp('Recalculating Connected components')
+    cc = bwconncomp(grain2, 4);
+%     if minute_frame == 1
+%         cc_total = cc;
+%     else
+% %         cc_total.NumObjects =  cc_total.NumObjects + cc.NumObjects;
+%         cc_total.PixelIdxList = [cc_total.PixelIdxList  cc.PixelIdxList];
+%     end
+    
+    graindata = regionprops(cc,'all');
+    
+    clear grain2
+    clear grain
+
+    min_area = find([graindata.Area]>50) ;
+    grain = false(size(B));
+    for k=1:size(min_area,2)
+    %     if  min(graindata(min_area(k)).PixelList(:,1)) - max(time_vocal{id}) > 20%Is it close to any vocalization or it is just a big noise blob? 
+        grain(cc.PixelIdxList{min_area(k)}) = true;
+    %     plot(centroids(:,1),centroids(:,2), 'b*')
+    %     text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(k),'HorizontalAlignment','left','FontSize',20,'Color','b')
+    end
+    
+    %Correcting the coordinates based on minute_frame
+%     Centroid = {graindata.Centroid}.';
+%     if ~isempty(Centroid)
+%         Centroid = cell2mat(Centroid);
+%         Centroid(:,1) = Centroid(:,1) + prev_T_orig;
+%         PixelList = {graindata.PixelList}.';
+%         PixelList = cell2mat(PixelList);
+%         PixelList(:,1) = PixelList(:,1) + prev_T_orig;
+%     end
+%     Centroid = mat2cell(Centroid,ones(358,1));
+
+%     for k=1:size(graindata,1)
+%         graindata(k).Centroid = Centroid(k,:);
+% %         graindata(k).PixelList = PixelList(k,:);
+%     end
+    
+%     graindata_total = [graindata_total; graindata];
+    grain_total = [grain_total grain];
+
+    % dx=2000;
+    % figure, imshow((grain))
+    % set(gca,'xlim',[0 dx]);
+    % pos=get(gca,'position');
+    % Newpos=[pos(1) pos(2)-0.1 pos(3) 0.05];
+    % xmax=size(grain,2);
+    % Stri=['set(gca,''xlim'',get(gcbo,''value'')+[0 ' num2str(dx) '])'];
+    % h=uicontrol('style','slider',...
+    %     'units','normalized','position',Newpos,...
+    %     'callback',Stri,'min',0,'max',xmax-dx,'SliderStep',[0.0001 0.010]);
+    % 
+    % 
+    % hold on
+    % for k=1:size(min_area,2)
+    % %     grain(cc.PixelIdxList{min_area(k)}) = true;
+    % %     plot(centroids(:,1),centroids(:,2), 'b*')
+    %     text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(min_area(k)),'HorizontalAlignment','left','FontSize',20,'Color','b')
+    % end
+    
+end
+grain = grain_total;
+cc_2 = bwconncomp(grain, 4);
+graindata_2 = regionprops(cc_2,'all');
+
+% min_area = find([graindata_total.Area]>50) ;
+% grain = false(size(grain_total));
+
+% for k=1:size(min_area,2)
+%     grain(cc_total.PixelIdxList{min_area(k)}) = true;
+% end
+    
 figure('Name',vfilename,'NumberTitle','off')
-% for col = 1:size(P,2)
-A = 10*log10(P);
-A = A(:,200:end); %Cut off the first 0.1s... usually there is a weird noise in the beggining
-T = T(:,200:end);
-median_db = median(median(A));
-B = imadjust(imcomplement(abs(A)./max(abs(A(:)))));
-T_orig = T;
-F_orig = F;
-surf(T,F,A,'edgecolor','none')
-axis tight; view(0,90);
-colormap(gray);
+% surf(T_orig,F_orig,A_total,'edgecolor','none')
+% axis tight; view(0,90);
+% colormap(gray);
 xlabel('Time (s)'); ylabel('Freq (Hz)')
 
-% disp('Calc the median of intensity')
-% min_db = median(median(10*log10(P)));
-% min_db = median(median(B));
-% disp(['Intensity threshold: ' num2str(min_db)])
-
-% Threshold image - adaptive threshold
-BW = imbinarize(B, 'adaptive', 'Sensitivity', 0.200000, 'ForegroundPolarity', 'bright');
-
-%Threshold image
-% BW = B > min_db;
-
-% Open mask with disk
-% radius = 1;
-% decomposition = 0;
-% se = strel('disk', radius, decomposition);
-% BW = imopen(BW, se);
-
-% Threshold image - manual threshold
-% BW = B > 9.882400e-01; %BEST!
-% BW = B > 0.8;
-
-% Clear borders
-BW = imclearborder(BW);
-
-% Open mask with line
-length = 3.000000;
-angle = 0.000000;
-se = strel('line', length, angle);
-BW = imopen(BW, se);
-
-% Create masked image.
-maskedImage = B;
-maskedImage(~BW) = 0;
-B = maskedImage;
-
-disp('Connected components')
-cc = bwconncomp(B, 4);
-graindata = regionprops(cc,'all');
-min_area = find([graindata.Area]>20) ;
-grain = false(size(B));
-for k=1:size(min_area,2)
-    grain(cc.PixelIdxList{min_area(k)}) = true;
-%     plot(centroids(:,1),centroids(:,2), 'b*')
-%     text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(k),'HorizontalAlignment','left','FontSize',20,'Color','b')
-end
-
-
-% hold on
-% for k=1:size(min_area,2)
-% %     grain(cc.PixelIdxList{min_area(k)}) = true;
-% %     plot(centroids(:,1),centroids(:,2), 'b*')
-%     text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(k),'HorizontalAlignment','left','FontSize',20,'Color','b')
-% end
-
-se1 = strel('disk', 2, 0);
-grain2 = imdilate(grain,se1);
-grain2 = imerode(grain2, se);
-% figure, imshow(grain2);
-
-disp('Recalculating Connected components')
-cc = bwconncomp(grain2, 4);
-graindata = regionprops(cc,'all');
-clear grain2
-
-min_area = find([graindata.Area]>50) ;
-grain = false(size(B));
-for k=1:size(min_area,2)
-%     if  min(graindata(min_area(k)).PixelList(:,1)) - max(time_vocal{id}) > 20%Is it close to any vocalization or it is just a big noise blob? 
-    grain(cc.PixelIdxList{min_area(k)}) = true;
-%     plot(centroids(:,1),centroids(:,2), 'b*')
-%     text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(k),'HorizontalAlignment','left','FontSize',20,'Color','b')
-end
-
-% dx=2000;
-% figure, imshow((grain))
-% set(gca,'xlim',[0 dx]);
-% pos=get(gca,'position');
-% Newpos=[pos(1) pos(2)-0.1 pos(3) 0.05];
-% xmax=size(grain,2);
-% Stri=['set(gca,''xlim'',get(gcbo,''value'')+[0 ' num2str(dx) '])'];
-% h=uicontrol('style','slider',...
-%     'units','normalized','position',Newpos,...
-%     'callback',Stri,'min',0,'max',xmax-dx,'SliderStep',[0.0001 0.010]);
-% 
-% 
-% hold on
-% for k=1:size(min_area,2)
-% %     grain(cc.PixelIdxList{min_area(k)}) = true;
-% %     plot(centroids(:,1),centroids(:,2), 'b*')
-%     text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(min_area(k)),'HorizontalAlignment','left','FontSize',20,'Color','b')
-% end
+hold on
 
 id = 1;
-for k=1:size(min_area,2)-1
-if min_area(k)==77
-    k
-end
+for k=1:size(graindata_2,1)-1
     if k==1
         time_vocal{id} = [];
-        time_vocal{id}= unique(graindata(min_area(k)).PixelList(:,1))';
+        time_vocal{id}= unique(graindata_2(k).PixelList(:,1))';
         freq_vocal{id}{1}=[];
         for freq_per_time = 1:size(time_vocal{id},2)
-            freq_vocal{id}{freq_per_time} = [find(grain(:,time_vocal{id}(freq_per_time))==1)]; %Storing vector frequency for that vocalization
+            freq_vocal{id}{freq_per_time} = find(grain(:,time_vocal{id}(freq_per_time))==1); %Storing vector frequency for that vocalization
         end
     else    
-        if min(graindata(min_area(k)).PixelList(:,1)) - max(time_vocal{id}) > 20 %If the blobs are close enough in X axis (not in time, yet), then they should be part of same vocalization
+        if min(graindata_2(k).PixelList(:,1)) - max(time_vocal{id}) > 20 %If the blobs are close enough in X axis (not in time, yet), then they should be part of same vocalization
             id=id+1;
             time_vocal{id} = [];
-            time_vocal{id}= unique(graindata(min_area(k)).PixelList(:,1))';
+            time_vocal{id}= unique(graindata_2(k).PixelList(:,1))';
             freq_vocal{id}{1}=[];
             for freq_per_time = 1:size(time_vocal{id},2)
-                freq_vocal{id}{freq_per_time} = [find(grain(:,time_vocal{id}(freq_per_time))==1)]; %Storing vector frequency for that vocalization
+                freq_vocal{id}{freq_per_time} = find(grain(:,time_vocal{id}(freq_per_time))==1); %Storing vector frequency for that vocalization
             end            
         else %if it is not a new vocalization (harmonics also fall into this case)
-            time_vocal{id}= unique([time_vocal{id}, graindata(min_area(k)).PixelList(:,1)']); %Storing vector time for that vocalization
+            time_vocal{id}= unique([time_vocal{id}, graindata_2(k).PixelList(:,1)']); %Storing vector time for that vocalization
             freq_vocal{id}{1}=[];
             for freq_per_time = 1:size(time_vocal{id},2)
                 freq_vocal{id}{freq_per_time} = find(grain(:,time_vocal{id}(freq_per_time))==1); %Storing vector frequency for that vocalization
@@ -354,13 +416,13 @@ disp(['Vocalizations detected before filtering:' num2str(size(time_vocal,2))])
 %there is too much noise and we need to remove noise (>125ms, Based on
 %maximum duration measured at Acoustic variability and distinguishability
 %among mouse, 2003)
-denoiseing=0;
-for k=1:size(time_vocal,2)
-    if (max(time_vocal{k})-min(time_vocal{k}))>max_vocal_duration %125ms
-        denoiseing = 1;
-        disp(['Vocalization #' num2str(k) ' is ' num2str(max(time_vocal{k})-min(time_vocal{k})) 's long'])
-    end
-end
+% denoiseing=0;
+% for k=1:size(time_vocal,2)
+%     if (max(time_vocal{k})-min(time_vocal{k}))>max_vocal_duration %125ms
+%         denoiseing = 1;
+%         disp(['Vocalization #' num2str(k) ' is ' num2str(max(time_vocal{k})-min(time_vocal{k})) 's long'])
+%     end
+% end
 
 % if denoiseing 
 %         close
@@ -477,7 +539,7 @@ output = [];
 freq_harmonic = {};
 time_harmonic = {};
 %Plot names on spectrogram and organize table
-disp('Showing segmented points')
+% disp('Showing segmented points')
 
 % mask = false(size(B));
 for k=1:size(time_vocal,2)
@@ -491,15 +553,15 @@ for k=1:size(time_vocal,2)
     end
 end
 
-clear grain
+% clear grain
 
 disp('Smoothing the lines')
 
 for k=1:size(time_vocal,2)
    for time_stamp = 1:size(time_vocal{k},2)
-        if k == 23 && time_stamp==27
-            k
-        end
+%         if k == 23 && time_stamp==27
+%             k
+%         end
        temp = [];
        if  any((freq_vocal{k}{time_stamp} - circshift(freq_vocal{k}{time_stamp} ,[1,0])) > 1000)        %Verify if there is a jump in frequency
            idx_harmonic = find((freq_vocal{k}{time_stamp} - circshift(freq_vocal{k}{time_stamp} ,[1,0])) > 1000); % index of the first frequency stamp after the jump
@@ -570,7 +632,7 @@ end
 % vfilename
 % size(time_vocal,2)
 % size(output,1)
-X = [vfilename,' has ',num2str(size(output,1)),' vocalizations.'];
+X = [vfilename,' has ',num2str(size(time_vocal,2)),' vocalizations.'];
 disp(X)
 set(gca,'xlim',[0 dx]);
 set(gca,'ylim',[0 max(F)]);
@@ -587,7 +649,7 @@ hb = uicontrol('Style', 'listbox','Position',[pos(1)+10 pos(2)+100 100 pos(4)+70
 
 % This avoids flickering when updating the axis
 Newpos=[pos(1) pos(2)-0.1 pos(3) 0.05];
-xmax=max(T);
+xmax=max(T_orig);
 Stri=['set(gca,''xlim'',get(gcbo,''value'')+[0 ' num2str(dx) '])'];
 h=uicontrol('style','slider',...
     'units','normalized','position',Newpos,...
@@ -595,7 +657,7 @@ h=uicontrol('style','slider',...
 % set(gcf,'Renderer','OpenGL')
 
 % close all
-save(['output_' vfilename],'T','F','time_vocal','freq_vocal','vfilename')
+save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename')
 warning('off', 'MATLAB:save:sizeTooBigForMATFile')
 disp('Cleaning variables: y y1 S F T P fs q nd vocal id' ) 
 clear y y1 S F T P fs q nd vocal id

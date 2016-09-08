@@ -1,3 +1,5 @@
+%Spet 6th: Change the code to make it work in batch.
+
 %Aug 29th: For some reason, when I make a big time window (> 60s) to calculate the
 %spectogram, the number of detected components is too small (or zero),
 %because the objects get too small. I have to make loops to run through all

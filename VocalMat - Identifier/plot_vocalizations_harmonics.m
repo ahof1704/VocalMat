@@ -12,7 +12,7 @@ vfilename = vfilename(1:end-4);
 vfile = fullfile(vpathname,vfilename);
 
 disp(['Reading ' vfilename])
-load([vfile]);
+load(vfile);
 
 dx = 0.4;
 

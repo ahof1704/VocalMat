@@ -6,7 +6,7 @@ clear all
 raiz = pwd;
 [vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
-list = dir('*.wav');
+list = dir('*output*.mat');
 
 vfilename = vfilename(1:end-4);
 vfile = fullfile(vpathname,vfilename);

@@ -30,14 +30,15 @@ for Name=2%1:size(list,1)
     downfm_count=[];
     upfm_count=[];
     complex_count=[];
-    noisy_count=[];
+    noisy_vocal_count=[];
     nonlinear_count = [];
     short_count = [];
+    noise_count = [];
     
     output=[];
     
     for k=1:size(time_vocal,2)
-            if k==23
+            if k==212
                 k
             end
         vocal_classified{k}.step_up = [];
@@ -49,9 +50,11 @@ for Name=2%1:size(list,1)
         vocal_classified{k}.down_fm = [];
         vocal_classified{k}.up_fm = [];
         vocal_classified{k}.complex = [];
-        vocal_classified{k}.noisy = [];
+        vocal_classified{k}.noisy_vocal = [];
         vocal_classified{k}.non_linear = [];
         vocal_classified{k}.short =  [];
+        vocal_classified{k}.noise = [];
+        vocal_classified{k}.harmonic_size = [];
         
         %Verify jump in frequency taking as base the closest frequency detected
         current_freq = [];
@@ -109,14 +112,16 @@ for Name=2%1:size(list,1)
                     if abs(freq_vocal{k}{time_stamp+1} - harmonic_candidate(end)) < abs(freq_vocal{k}{time_stamp+1} - current_freq(end)) %Continued on the line that we thought was harmonic. So it is not harmonic
                         if size(harmonic_candidate,1)> size(current_freq,1)
                             vocal_classified{k}.non_linear = [vocal_classified{k}.harmonic; time_vocal{k}(time_stamp)];
+                            nonlinear_count = [nonlinear_count;k];
                             current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
                             harmonic_candidate = [];
                         else
                             if size(harmonic_candidate,1)>10% && size(harmonic_candidate,1)/ size(current_freq,1)>0.8 %If the harmonic is big and close to the size of current_freq
                                 disp(['Vocalization ' num2str(k) ' had an harmonic in t = ' num2str(start_harmonic) 's']);
+                                vocal_classified{k}.harmonic = [vocal_classified{k}.harmonic; start_harmonic];
+                                vocal_classified{k}.harmonic_size = [vocal_classified{k}.harmonic_size; size(harmonic_candidate,1)];
                                 current_freq = harmonic_candidate;
                                 harmonic_candidate = [];
-                                vocal_classified{k}.harmonic = [vocal_classified{k}.harmonic; start_harmonic];
                                 harmonic_count = [harmonic_count;k];
                             else
                                 current_freq(end-size(harmonic_candidate,1)+1:end) = harmonic_candidate;
@@ -128,14 +133,15 @@ for Name=2%1:size(list,1)
                         test_harmonic = sort(harmonic_candidate);
                         test_harmonic = test_harmonic - circshift(test_harmonic ,[1,0]);
                         test_harmonic = find(test_harmonic>1000);
-                        if size(test_harmonic,1)>1%3 %too many jumps in frequency... should be noise or noisy vocalization.
-                            vocal_classified{k}.noisy = time_vocal{k}(1);
-                            noisy_count = [noisy_count;k];
+                        if size(test_harmonic,1)>1%3 %too many jumps in frequency... should be noise or noisy_vocal vocalization.
+                            vocal_classified{k}.noisy_vocal = time_vocal{k}(1);
+                            noisy_vocal_count = [noisy_vocal_count;k];
                         else
                             current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
                             if size(harmonic_candidate,1)>10 % at least 5 points to say it was really an harmonic
                                 disp(['Vocalization ' num2str(k) ' had an harmonic in t = ' num2str(start_harmonic) 's']);
                                 vocal_classified{k}.harmonic = [vocal_classified{k}.harmonic; start_harmonic];
+                                vocal_classified{k}.harmonic_size = [vocal_classified{k}.harmonic_size; size(harmonic_candidate,1)];
                                 harmonic_count = [harmonic_count;k];
                             end
                         end
@@ -204,14 +210,21 @@ for Name=2%1:size(list,1)
             current_freq(temp2+1:end)=[];
         end
         
-        if (isempty(cell2mat(struct2cell(vocal_classified{k}))) || ~isempty(vocal_classified{k}.harmonic)) %It means there was no step up, down or harmonic
-            if max(current_freq)-min(current_freq) <= 6000 % flat
+        if (isempty(cell2mat(struct2cell(vocal_classified{k}))) || ~isempty(vocal_classified{k}.harmonic)) && size(time_vocal{k},2)<40 %It means there was no step up, down or harmonic
+            if max(current_freq)-min(current_freq) <= 1000 % flat
                 if time_vocal{k}(end) - time_vocal{k}(1) < 0.0065
                     vocal_classified{k}.short =  time_vocal{k}(1);
                     short_count = [short_count;k];
                 else
-                    vocal_classified{k}.flat =  time_vocal{k}(1);
-                    flat_count = [flat_count;k];
+                    if (time_vocal{k}(2)-time_vocal{k}(1))*size(current_freq,1)<0.0065 %6.5ms
+%                         if ~isempty(vocal_classified{k}.harmonic) && max(vocal_classified{k}.harmonic_size)<15 
+                            vocal_classified{k}.noise = time_vocal{k}(1);
+                            noise_count = [noise_count;k];
+%                         end
+                    else
+                        vocal_classified{k}.flat =  time_vocal{k}(1);
+                        flat_count = [flat_count;k];
+                    end
                 end
             else
                 time_stamps = round(linspace(1,size(current_freq',2),10));
@@ -249,6 +262,57 @@ for Name=2%1:size(list,1)
             end
         end
         
+        if (isempty(cell2mat(struct2cell(vocal_classified{k}))) || ~isempty(vocal_classified{k}.harmonic)) %It means there was no step up, down or harmonic
+%             if max(current_freq)-min(current_freq) <= 1000 % flat
+%                 if time_vocal{k}(end) - time_vocal{k}(1) < 0.0065
+%                     vocal_classified{k}.short =  time_vocal{k}(1);
+%                     short_count = [short_count;k];
+%                 else
+%                     if (time_vocal{k}(2)-time_vocal{k}(1))*size(current_freq,1)<0.0065 %6.5ms
+% %                         if ~isempty(vocal_classified{k}.harmonic) && max(vocal_classified{k}.harmonic_size)<15 
+%                             vocal_classified{k}.noise = time_vocal{k}(1);
+%                             noise_count = [noise_count;k];
+% %                         end
+%                     else
+%                         vocal_classified{k}.flat =  time_vocal{k}(1);
+%                         flat_count = [flat_count;k];
+%                     end
+%                 end
+%             else
+                time_stamps = round(linspace(1,size(current_freq',2),10));
+                aux = current_freq;
+                aux = aux-circshift(aux ,[1,0]);
+                if sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
+                    vocal_classified{k}.down_fm = time_vocal{k}(1);
+                    downfm_count = [downfm_count;k];
+                elseif sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
+                    vocal_classified{k}.up_fm = time_vocal{k}(1);
+                    upfm_count = [upfm_count;k];
+                else
+                    if (max(current_freq)-current_freq(1)> 6000 && max(current_freq)-current_freq(end)> 6000) %Chevron
+                        [max_local max_local] = max(current_freq);
+                        aux2 = aux(2:max_local);
+                        aux3 = aux(max_local:end);
+                        if sum(sign(aux2)>0)/size(current_freq,1)>0.7 && sum(sign(aux3)<0)/size(current_freq,1)>0.7 %The "U" shape is verified
+                            vocal_classified{k}.chevron = time_vocal{k}(1);
+                            chevron_count = [chevron_count;k];
+                        end
+                    elseif (current_freq(1) - min(current_freq)> 6000 && current_freq(end) - min(current_freq)> 6000)
+                        [min_local min_local] = min(current_freq);
+                        aux2 = aux(2:min_local);
+                        aux3 = aux(min_local:end);
+                        if sum(sign(aux2)<0)/size(current_freq,1)>0.7 && sum(sign(aux3)>0)/size(current_freq,1)>0.7 %The inverted "U" shape is verified
+                            vocal_classified{k}.rev_chevron = time_vocal{k}(1);
+                            revchevron_count = [revchevron_count;k];
+                        end
+                    end
+                end
+%             end
+            if isempty(cell2mat(struct2cell(vocal_classified{k}))) %If it is still empty, has to be complex
+                vocal_classified{k}.complex = time_vocal{k}(1);
+                complex_count = [complex_count;k];
+            end
+        end
         
         %     if ~isempty(vocal_classified{k}.harmonic) %Had harmonic
         %         k
@@ -257,21 +321,21 @@ for Name=2%1:size(list,1)
         %Plot how many
         
         
-        aux4 = transpose(freq_vocal{k});
-        aux3 = [];
-        for tttt = 1:size(aux4,1)
-            aux3 = [aux3; aux4{tttt}];
-        end
-        tamanho = size(aux3,1);
-        aux7 = Entropy(aux3);
-        aux3 = aux3 - circshift(aux3 ,[1,0]);
-        aux3 = abs(aux3);
-        aux3 = [sum(aux3>1000), tamanho];
-        aux5 = current_freq - circshift(current_freq ,[1,0]);
-        aux6 = find(aux5>1000);
-        if isempty(aux6)
-            aux6=0;
-        end
+%         aux4 = transpose(freq_vocal{k});
+%         aux3 = [];
+%         for tttt = 1:size(aux4,1)
+%             aux3 = [aux3; aux4{tttt}];
+%         end
+%         tamanho = size(aux3,1);
+%         aux7 = Entropy(aux3);
+%         aux3 = aux3 - circshift(aux3 ,[1,0]);
+%         aux3 = abs(aux3);
+%         aux3 = [sum(aux3>1000), tamanho];
+%         aux6 = current_freq - circshift(current_freq ,[1,0]);
+%         aux6 = find(aux5>1000);
+%         if isempty(aux6)
+%             aux6=0;
+%         end
         
         %Extra filtering by removing the points with intensity below 5% of the average
         tabela = [];
@@ -285,9 +349,76 @@ for Name=2%1:size(list,1)
 
 %         ZZ = VocalMat_heatmap(tabela);
         tabela = [tabela intens_vocal{k}];
-        tabela = tabela(tabela(:,3)>mean(tabela(:,3))*(1-0.05),:);
-        ZZ = VocalMat_heatmap(tabela);
-        output = [output; time_vocal{k}(1) aux3 sum(abs(aux5)>1000) size(aux5,1) aux6(1) aux7 Entropy(current_freq) max(max(ZZ))];
+        tamanho = size(tabela,1);
+        aux3 = tabela(:,2) - circshift(tabela(:,2),[1,0]);
+        aux3 = [sum(abs(aux3)>1000), tamanho];
+        [f,xi]=ksdensity(tabela(:,2));
+        [pks,locs]=findpeaks(f);
+        if aux3(1)/aux3(2)>=0.75
+            size_fields = size(vocal_classified{k}.step_up,1)+size(vocal_classified{k}.step_down,1)+size(vocal_classified{k}.harmonic,1)+size(vocal_classified{k}.flat,1)+size(vocal_classified{k}.chevron,1)+size(vocal_classified{k}.rev_chevron,1)+size(vocal_classified{k}.down_fm,1)+size(vocal_classified{k}.up_fm,1)+size(vocal_classified{k}.complex,1)+size(vocal_classified{k}.short,1);
+            if size(pks,2)>1 && size_fields >= size(pks,2) && size_fields<size(pks,2)+floor(tamanho/30)
+                aux5 = 2; %'noisy_vocal vocal';
+                if isempty(vocal_classified{k}.noisy_vocal)
+                    vocal_classified{k}.noisy_vocal = time_vocal{k}(1);
+                    noisy_vocal_count = [noisy_vocal_count;k];
+                end
+            else
+                if ~isempty(vocal_classified{k}.harmonic_size) && max(vocal_classified{k}.harmonic_size)>=15% && max(vocal_classified{k}.harmonic_size)/size(time_vocal{k},2)>0.5
+                    
+                else
+                    aux5 = 1; %'Noise';
+                    vocal_classified{k}.noise = time_vocal{k}(1);
+                    noise_count = [noise_count;k];
+                end
+            end
+        elseif aux3(1)/aux3(2)<0.75 && aux3(1)/aux3(2)>0.5
+            tabela = tabela(tabela(:,3)>mean(tabela(:,3))*(1-0.05),:);
+            tamanho2 = size(tabela,1);
+            aux4 = tabela(:,2) - circshift(tabela(:,2),[1,0]);
+            aux4 = [sum(abs(aux4)>1000), tamanho2];
+            if aux4(1)/aux4(2)<0.5
+                aux5 = 2; %'noisy_vocal vocal';
+                if isempty(vocal_classified{k}.noisy_vocal)
+                    vocal_classified{k}.noisy_vocal = time_vocal{k}(1);
+                    noisy_vocal_count = [noisy_vocal_count;k];
+                end
+            elseif aux4(1)/aux4(2)>=0.7
+                size_fields = size(vocal_classified{k}.step_up,1)+size(vocal_classified{k}.step_down,1)+size(vocal_classified{k}.harmonic,1)+size(vocal_classified{k}.flat,1)+size(vocal_classified{k}.chevron,1)+size(vocal_classified{k}.rev_chevron,1)+size(vocal_classified{k}.down_fm,1)+size(vocal_classified{k}.up_fm,1)+size(vocal_classified{k}.complex,1)+size(vocal_classified{k}.short,1);
+                if size(pks,2)>1 && size_fields >= size(pks,2) && size_fields<size(pks,2)+floor(tamanho/30)
+                    aux5 = 0; %'noisy_vocal vocal';
+                else
+                    if ~isempty(vocal_classified{k}.harmonic_size) && max(vocal_classified{k}.harmonic_size)>=15 % && max(vocal_classified{k}.harmonic_size)/size(time_vocal{k},2)>0.5
+                        
+                    else
+                        aux5 = 1; %'Noise';
+                        vocal_classified{k}.noise = time_vocal{k}(1);
+                        noise_count = [noise_count;k];
+                    end
+                end
+            else
+                if ~isempty(vocal_classified{k}.harmonic_size) && max(vocal_classified{k}.harmonic_size)>=15% && max(vocal_classified{k}.harmonic_size)/size(time_vocal{k},2)>0.5
+                    
+                else
+                    aux5 = 1; %'Noise';
+                    vocal_classified{k}.noise = time_vocal{k}(1);
+                    noise_count = [noise_count;k];
+                end
+            end
+        else
+            aux5 = 0; %'';
+        end
+        aux6 = sort(tabela(:,2));
+        aux6 = aux6 - circshift(aux6,[1,0]);
+        aux6 = find(aux6(2:end)>1000);
+        if isempty(aux6)
+            aux6=0;
+        end
+        
+       
+%         aux6 = [size(aux6,1),size(current_freq,1)]; 
+%         ZZ = VocalMat_heatmap(tabela);
+%         output = [output; time_vocal{k}(1) aux3 aux4 aux5 size(aux6,1) size(pks,2)];
+        
     end
     stepup_count=unique(stepup_count);
     stepdown_count=unique(stepdown_count);
@@ -298,9 +429,10 @@ for Name=2%1:size(list,1)
     downfm_count=unique(downfm_count);
     upfm_count=unique(upfm_count);
     complex_count=unique(complex_count);
-    noisy_count=unique(noisy_count);
+    noisy_vocal_count=unique(noisy_vocal_count);
     nonlinear_count = unique(nonlinear_count);
     short_count = unique(short_count);
+    noise_count = unique(noise_count);
     
     bin_1 = [];
     bin_2 = [];
@@ -337,18 +469,19 @@ for Name=2%1:size(list,1)
     downfm_count_bin = [ sum(downfm_count <= bin_1(end)), sum(downfm_count>=bin_2(1) & downfm_count<=bin_2(end)), sum(downfm_count>=bin_3(1) & downfm_count<=bin_3(end)), sum(downfm_count>=bin_4(1) & downfm_count<=bin_4(end))];
     upfm_count_bin = [ sum(upfm_count <= bin_1(end)), sum(upfm_count>=bin_2(1) & upfm_count<=bin_2(end)), sum(upfm_count>=bin_3(1) & upfm_count<=bin_3(end)), sum(upfm_count>=bin_4(1) & upfm_count<=bin_4(end))];
     complex_count_bin = [ sum(complex_count <= bin_1(end)), sum(complex_count>=bin_2(1) & complex_count<=bin_2(end)), sum(complex_count>=bin_3(1) & complex_count<=bin_3(end)), sum(complex_count>=bin_4(1) & complex_count<=bin_4(end))];
-    noisy_count_bin = [ sum(noisy_count <= bin_1(end)), sum(noisy_count>=bin_2(1) & noisy_count<=bin_2(end)), sum(noisy_count>=bin_3(1) & noisy_count<=bin_3(end)), sum(noisy_count>=bin_4(1) & noisy_count<=bin_4(end))];
+    noisy_vocal_count_bin = [ sum(noisy_vocal_count <= bin_1(end)), sum(noisy_vocal_count>=bin_2(1) & noisy_vocal_count<=bin_2(end)), sum(noisy_vocal_count>=bin_3(1) & noisy_vocal_count<=bin_3(end)), sum(noisy_vocal_count>=bin_4(1) & noisy_vocal_count<=bin_4(end))];
     nonlinear_count_bin = [ sum(nonlinear_count <= bin_1(end)), sum(nonlinear_count>=bin_2(1) & nonlinear_count<=bin_2(end)), sum(nonlinear_count>=bin_3(1) & nonlinear_count<=bin_3(end)), sum(nonlinear_count>=bin_4(1) & nonlinear_count<=bin_4(end))];
     short_count_bin = [ sum(short_count <= bin_1(end)), sum(short_count>=bin_2(1) & short_count<=bin_2(end)), sum(short_count>=bin_3(1) & short_count<=bin_3(end)), sum(short_count>=bin_4(1) & short_count<=bin_4(end))];
+    noise_count_bin = [ sum(noise_count <= bin_1(end)), sum(noise_count>=bin_2(1) & noise_count<=bin_2(end)), sum(noise_count>=bin_3(1) & noise_count<=bin_3(end)), sum(noise_count>=bin_4(1) & noise_count<=bin_4(end))];
     
     
 
     save(['vocal_classified_' vfilename],'vocal_classified')
-%     all_class = [size(stepup_count,1) size(stepdown_count,1) size(harmonic_count,1) size(flat_count,1) size(chevron_count,1) size(revchevron_count,1) size(downfm_count,1) size(upfm_count,1) size(complex_count,1) size(noisy_count,1) size(nonlinear_count,1) size(short_count,1)];
-    all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_count_bin; nonlinear_count_bin; short_count_bin];
+%     all_class = [size(stepup_count,1) size(stepdown_count,1) size(harmonic_count,1) size(flat_count,1) size(chevron_count,1) size(revchevron_count,1) size(downfm_count,1) size(upfm_count,1) size(complex_count,1) size(noisy_vocal_count,1) size(nonlinear_count,1) size(short_count,1)];
+    all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_vocal_count_bin; nonlinear_count_bin; short_count_bin;noise_count_bin];
     figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
     bar(all_class,'stacked')
-    Labels = {'stepup_count', 'stepdown_count', 'harmonic_count', 'flat_count', 'chevron_count', 'revchevron_count', 'downfm_count', 'upfm_count', 'complex_count', 'noisy_count', 'nonlinear_count', 'short_count'};
+    Labels = {'stepup_count', 'stepdown_count', 'harmonic_count', 'flat_count', 'chevron_count', 'revchevron_count', 'downfm_count', 'upfm_count', 'complex_count', 'noisy_vocal_count', 'nonlinear_count', 'short_count','noise_count'};
 %     set(gca, 'XTick', [1:12, 'XTickLabel', Labels);
     set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
     legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');

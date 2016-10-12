@@ -1,4 +1,4 @@
-%Sept 12th: Inserting the method os removal by local median.
+%Sept 12th: Inserting the method of removal by local median.
 
 %Sept 6th: Change the code to make it work in batch.
 
@@ -25,11 +25,11 @@ list = dir('*.wav');
 p = mfilename('fullpath')
 
 % min_db = -220;%-110;%-107; %selec points >min_db
-max_interval = 0.005; %if the distance between two successive points in time is >max_interval, it is new vocalization
-minimum_size = 10;%20; %A valid vocalization must present >minimum_size valid points to be considered a vocalization
-median_dist = 600; %600; If the median of the euclidean distance between succesive pair of points in a vocalization is >median_dist, then it is noise.
-max_vocal_duration = 0.140; %If a vocalization is onger than max_vocal_duration, than it can be a noise that needs to be removed by denoising process.
-use_median = 1; %If =1, use the median method to detect the noise.
+max_interval = 0.005 %if the distance between two successive points in time is >max_interval, it is new vocalization
+minimum_size = 10%20; %A valid vocalization must present >minimum_size valid points to be considered a vocalization
+median_dist = 600 %600; If the median of the euclidean distance between succesive pair of points in a vocalization is >median_dist, then it is noise.
+max_vocal_duration = 0.140 %If a vocalization is onger than max_vocal_duration, than it can be a noise that needs to be removed by denoising process.
+use_median = 1 %If =1, use the median method to detect the noise.
 tic
 for Name = 1:size(list,1)
     vfilename = list(Name).name;
@@ -408,7 +408,7 @@ for Name = 1:size(list,1)
         %     text(time_vocal{i}(round(end/2)),freq_vocal{i}{round(end/2)}(round(end/2))+5000,[num2str(i)],'HorizontalAlignment','left','FontSize',20,'Color','r');
         % %     output = [output; i, size(time_vocal{i},2) , min(time_vocal{i}), max(time_vocal{i}), (max(time_vocal{i})-min(time_vocal{i})) , max(freq_vocal{i}), mean(freq_vocal{i}),(max(freq_vocal{i})-min(freq_vocal{i})) , min(freq_vocal{i}), min(intens_vocal{i}), max(intens_vocal{i}), mean(intens_vocal{i})];
         % end
-        save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename')
+        save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal')
         warning('off', 'MATLAB:save:sizeTooBigForMATFile')
         disp('Cleaning variables: y y1 S F T P fs q nd vocal id' )
         clear y y1 S F T P fs q nd vocal id

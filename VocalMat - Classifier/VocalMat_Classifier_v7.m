@@ -1,3 +1,7 @@
+%Oct 22nd, 2016: Set the Classifier to run throughout all the the mat files
+%classifying the detected vocalizations and use its output to correct the
+%total number of real vocalizations.
+
 % Aug 31th, 2016: This script intends to classify the vocalization in the
 % eleven different categories we currently have described by Grimsley, Jasmine MS, Jessica JM Monaghan, and Jeffrey J. Wenstrup. "Development of social vocalizations in mice." PloS one 6.3 (2011): e17460.
 
@@ -15,13 +19,14 @@ for Name=1:size(list,1)
     vfile = fullfile(vpathname,vfilename);
     
     clearvars -except list raiz vfile vfilename vpathname
-    
+    plot_data=0;
+    fprintf('\n')
     disp(['Reading ' vfilename])
     load(vfile);
     
     %We are gonna get only 10 points (time stamps) to classify the vocalization
     %Grimsley, Jasmine, Marie Gadziola, and Jeff James Wenstrup. "Automated classification of mouse pup isolation syllables: from cluster analysis to an Excel-based “mouse pup syllable classification calculator”." Frontiers in behavioral neuroscience 6 (2013): 89.
-    disp('Verify vocalizations for steps')
+%     disp('Verify vocalizations for steps')
     stepup_count=[];
     stepdown_count=[];
     harmonic_count=[];
@@ -67,6 +72,9 @@ for Name=1:size(list,1)
                     if time_stamp==1 %If the vocalization starts with an harmonic
                         current_freq = freq_vocal{k}{time_stamp}(1);
                         harmonic_candidate = freq_vocal{k}{time_stamp}(2);
+                        if size(harmonic_candidate,1)==1
+                            start_harmonic = time_vocal{k}(time_stamp);
+                        end
                     else
                         aux = freq_vocal{k}{time_stamp+1} - current_freq(end)*ones(size(freq_vocal{k}{time_stamp+1},1),1);
                         [mini,mini]=min(abs(aux));
@@ -118,7 +126,7 @@ for Name=1:size(list,1)
                             harmonic_candidate = [];
                         else
                             if size(harmonic_candidate,1)>10% && size(harmonic_candidate,1)/ size(current_freq,1)>0.8 %If the harmonic is big and close to the size of current_freq
-                                disp(['Vocalization ' num2str(k) ' had an harmonic in t = ' num2str(start_harmonic) 's']);
+%                                 disp(['Vocalization ' num2str(k) ' had an harmonic in t = ' num2str(start_harmonic) 's']);
                                 vocal_classified{k}.harmonic = [vocal_classified{k}.harmonic; start_harmonic];
                                 vocal_classified{k}.harmonic_size = [vocal_classified{k}.harmonic_size; size(harmonic_candidate,1)];
                                 current_freq = harmonic_candidate;
@@ -140,7 +148,7 @@ for Name=1:size(list,1)
                         else
                             current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
                             if size(harmonic_candidate,1)>10 % at least 5 points to say it was really an harmonic
-                                disp(['Vocalization ' num2str(k) ' had an harmonic in t = ' num2str(start_harmonic) 's']);
+%                                 disp(['Vocalization ' num2str(k) ' had an harmonic in t = ' num2str(start_harmonic) 's']);
                                 vocal_classified{k}.harmonic = [vocal_classified{k}.harmonic; start_harmonic];
                                 vocal_classified{k}.harmonic_size = [vocal_classified{k}.harmonic_size; size(harmonic_candidate,1)];
                                 harmonic_count = [harmonic_count;k];
@@ -196,7 +204,7 @@ for Name=1:size(list,1)
         aux = current_freq - circshift(current_freq ,[1,0]);
         temp2 = find(aux(2:end)>=10000);
         if any(aux(2:end)>=10000) && (size(aux,1)-temp2(end)>10)
-            disp(['Vocalization ' num2str(k) ' had a step up in t = ' num2str(time_vocal{k}(find(aux(2:end)>5000)+2)) 's']);
+%             disp(['Vocalization ' num2str(k) ' had a step up in t = ' num2str(time_vocal{k}(find(aux(2:end)>5000)+2)) 's']);
             vocal_classified{k}.step_up = [vocal_classified{k}.step_up; time_vocal{k}(find(aux(2:end)>5000)+2)'];
             stepup_count = [stepup_count;k];
         elseif size(temp2,1)>0 && (size(aux,1)-temp2(end)<10) %Delete the final portion of the vocalization (probabily noise)
@@ -204,7 +212,7 @@ for Name=1:size(list,1)
         end
         temp2 = find(aux(2:end)<=-10000);
         if any(aux(2:end)<=-10000) && (size(aux,1)-temp2(end)>10)
-            disp(['Vocalization ' num2str(k) ' had a step down in t = ' num2str(time_vocal{k}(find(aux(2:end)<-5000)+2)) 's']);
+%             disp(['Vocalization ' num2str(k) ' had a step down in t = ' num2str(time_vocal{k}(find(aux(2:end)<-5000)+2)) 's']);
             vocal_classified{k}.step_down = [vocal_classified{k}.step_down; time_vocal{k}(find(aux(2:end)<-5000)+2)'];
             stepdown_count = [stepdown_count;k];
         elseif size(temp2,1)>0 && (size(aux,1)-temp2(end)<10) %Delete the final portion of the vocalization (probabily noise)
@@ -435,6 +443,19 @@ for Name=1:size(list,1)
     short_count = unique(short_count);
     noise_count = unique(noise_count);
     
+    %Show a list of vocalizations that look like noise
+    for ttt =1:size(noise_count,1)
+        disp(['Vocalization #' num2str(noise_count(ttt)) ' starting in ' num2str(time_vocal{noise_count(ttt)}(1)) 's seems to be noise'])
+    end
+    
+    %Show a list of vocalizations that look like noise
+    for ttt =1:size(noisy_vocal_count,1)
+        disp(['Vocalization #' num2str(noisy_vocal_count(ttt)) ' starting in ' num2str(time_vocal{noisy_vocal_count(ttt)}(1)) 's seems to be noisy vocalization'])
+    end
+    
+    disp(['Total number of vocalizations: ' num2str(size(time_vocal,2))]);
+    disp(['The classifier identified ' num2str(size(noise_count,1)) ' as noise and ' num2str(size(noisy_vocal_count,1)) ' as noisy vocalization']);
+    
     bin_1 = [];
     bin_2 = [];
     bin_3 = [];
@@ -492,3 +513,4 @@ for Name=1:size(list,1)
     
 end
 % disp(['Time to plot all the vocalizations: ' num2str(toc)]);
+diary('off');

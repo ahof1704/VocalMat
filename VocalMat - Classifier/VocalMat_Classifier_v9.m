@@ -1,10 +1,10 @@
+%Oct 26th, 2016: As the hierarchical clustering method also exist in
+%Matlab,I will replace R instructions for Matlab instructions.
 %Oct 23rd, 2016: First steps to implement a hierarchical clustering method
 %using R.
-
 %Oct 22nd, 2016: Set the Classifier to run throughout all the the mat files
 %classifying the detected vocalizations and use its output to correct the
 %total number of real vocalizations.
-
 % Aug 31th, 2016: This script intends to classify the vocalization in the
 % eleven different categories we currently have described by Grimsley, Jasmine MS, Jessica JM Monaghan, and Jeffrey J. Wenstrup. "Development of social vocalizations in mice." PloS one 6.3 (2011): e17460.
 
@@ -558,7 +558,7 @@ for Name=2%size(list,1)
 %     save_plot_vocalizations(vfilename,vpathname)
     figure('Name',vfilename,'NumberTitle','off')
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
-    for names = 4:size(categories,1)
+    for names = 1:size(categories,1)
         cd(raiz)
         name = categories{names};
         if isfield(pre_corr_table, name)

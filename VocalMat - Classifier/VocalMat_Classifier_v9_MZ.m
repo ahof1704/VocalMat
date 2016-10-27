@@ -1,10 +1,10 @@
+%Oct 26th, 2016: As the hierarchical clustering method also exist in
+%Matlab,I will replace R instructions for Matlab instructions.
 %Oct 23rd, 2016: First steps to implement a hierarchical clustering method
 %using R.
-
 %Oct 22nd, 2016: Set the Classifier to run throughout all the the mat files
 %classifying the detected vocalizations and use its output to correct the
 %total number of real vocalizations.
-
 % Aug 31th, 2016: This script intends to classify the vocalization in the
 % eleven different categories we currently have described by Grimsley, Jasmine MS, Jessica JM Monaghan, and Jeffrey J. Wenstrup. "Development of social vocalizations in mice." PloS one 6.3 (2011): e17460.
 
@@ -16,7 +16,7 @@ cd(vpathname);
 list = dir('*output*.mat');
 diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
-for Name=2%size(list,1)
+for Name=3%size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -558,30 +558,30 @@ for Name=2%size(list,1)
 %     save_plot_vocalizations(vfilename,vpathname)
     figure('Name',vfilename,'NumberTitle','off')
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
-    for names = 4:size(categories,1)
+    for names = 1:size(categories,1)
         cd(raiz)
         name = categories{names};
         if isfield(pre_corr_table, name)
             eval(['similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
             corr_table = [vpathname,'SimilarityBatch_',vfilename,'.csv'];
-            corr_table = strrep(corr_table,'\','/');
+%             corr_table = strrep(corr_table,'\','/');
 
             %Cluster syllables
-            delete('clusters.txt')
-            [status,result]=system(['R --slave --args' ' ' char(34) corr_table char(34) ' < clusterUSV_pub.r']);
-            system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
-            clustered = dlmread('clusters.txt');
+%             delete('clusters.txt')
+%             [status,result]=system(['R --slave --args' ' ' char(34) corr_table char(34) ' < clusterUSV_pub.r']);
+%             system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
+%             clustered = dlmread('clusters.txt');
 
             cd(vpathname)
             mkdir(vfilename)
             cd(vfilename)
             mkdir(name)
             
-            for ww1 = 1:size(clustered,1)
-                for ww = 1:size(clustered,2)
+%             for ww1 = 1:size(clustered,1)
+                for ww = 1:eval(['size(list_clusters.' name ',1)'])
                     c = [rand() rand() rand()];
-                    if (clustered(ww1,ww)) > 0
-                        id_vocal = eval(['list_clusters.' name '(clustered(ww1,ww))']);
+%                     if (clustered(ww1,ww)) > 0
+                        id_vocal = eval(['list_clusters.' name '(ww)']);
                         dx = 0.4;
                         clf('reset') 
                         hold on
@@ -594,11 +594,11 @@ for Name=2%size(list,1)
                         x_pos = time_vocal{id_vocal}(ceil(end/2));
                         y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
                         text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
-                        saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal) '_' num2str(ww1) '.png'])
-                    end
+                        saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
+%                     end
                     hold off
                 end
-            end
+%             end
 
     %         vocal_cluster_class = [];
     %         for ttt=1:size(clustered,1)
@@ -611,7 +611,7 @@ for Name=2%size(list,1)
     %         end
         end
    end
-%    save(['vocal_classified_' vfilename],'vocal_classified','vocal_cluster')
+   save(['vocal_classified_' vfilename],'vocal_classified')
     %Generate .wav files for cohesive and split clusters
 %     system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
 

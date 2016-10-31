@@ -16,7 +16,7 @@ cd(vpathname);
 list = dir('*output*.mat');
 diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
-for Name=4%:size(list,1)
+for Name=18%:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -305,7 +305,7 @@ for Name=4%:size(list,1)
                         [max_local max_local] = max(current_freq);
                         aux2 = aux(2:max_local);
                         aux3 = aux(max_local:end);
-                        if sum(sign(aux2)>0)/size(current_freq,1)>0.7 && sum(sign(aux3)<0)/size(current_freq,1)>0.7 %The "U" shape is verified
+                        if sum(sign(aux2)>0)/size(aux2,1)>0.7 && sum(sign(aux3)<0)/size(aux3,1)>0.7 %The "U" shape is verified
                             vocal_classified{k}.chevron = time_vocal{k}(1);
                             chevron_count = [chevron_count;k];
                         end
@@ -313,7 +313,7 @@ for Name=4%:size(list,1)
                         [min_local min_local] = min(current_freq);
                         aux2 = aux(2:min_local);
                         aux3 = aux(min_local:end);
-                        if sum(sign(aux2)<0)/size(current_freq,1)>0.7 && sum(sign(aux3)>0)/size(current_freq,1)>0.7 %The inverted "U" shape is verified
+                        if sum(sign(aux2)<0)/size(aux2,1)>0.7 && sum(sign(aux3)>0)/size(aux3,1)>0.7 %The inverted "U" shape is verified
                             vocal_classified{k}.rev_chevron = time_vocal{k}(1);
                             revchevron_count = [revchevron_count;k];
                         end
@@ -502,7 +502,7 @@ for Name=4%:size(list,1)
     end
     
 
-    save(['vocal_classified_' vfilename],'vocal_classified')
+%     save(['vocal_classified_' vfilename],'vocal_classified')
 %     all_class = [size(stepup_count,1) size(stepdown_count,1) size(harmonic_count,1) size(flat_count,1) size(chevron_count,1) size(revchevron_count,1) size(downfm_count,1) size(upfm_count,1) size(complex_count,1) size(noisy_vocal_count,1) size(nonlinear_count,1) size(short_count,1)];
     if plot_data ==1
         all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_vocal_count_bin; nonlinear_count_bin; short_count_bin;noise_count_bin];
@@ -650,7 +650,7 @@ for Name=4%:size(list,1)
 
         end
    end
-   save(['vocal_classified_' vfilename],'vocal_classified','list_clusters')
+   save(['vocal_classified_' vfilename],'vocal_classified','list_clusters','vfilename')
     %Generate .wav files for cohesive and split clusters
 %     system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
 

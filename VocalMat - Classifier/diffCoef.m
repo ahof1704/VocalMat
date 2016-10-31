@@ -39,10 +39,10 @@ for i=1:minwin
     if i-mindur<=0 && i+mindur<minwin; 
         dataP=P(1:i+mindur,2);
         %dataE=E(1:i+mindur,2);
-    elseif i-mindur>=1 & i+mindur<=minwin
+    elseif i-mindur>=1 && i+mindur<=minwin
         dataP=P(i-mindur:i+mindur,2);
         %dataE=E(i-mindur:i+mindur,2);
-    elseif i-mindur>=1 & i+mindur>=minwin
+    elseif i-mindur>=1 && i+mindur>=minwin
         dataP=P(i-mindur:minwin,2);
         %dataE=E(i-mindur:minwin,2);
     else dataP=P(:,2);

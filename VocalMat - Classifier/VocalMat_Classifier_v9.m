@@ -16,7 +16,7 @@ cd(vpathname);
 list = dir('*output*.mat');
 diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
-for Name=2%size(list,1)
+for Name=4%:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -540,7 +540,6 @@ for Name=2%size(list,1)
        eval(['list_clusters.' name '= [];']);
        for k=1:size(time_vocal,2)
             if ~isempty(eval(['vocal_classified{k}.' name])) && isempty(vocal_classified{k}.noise)
-                eval(['list_clusters.' name '= [list_clusters.' name '; k];']);
                 count = count+1;
                 temp_table = [];
                 for col = 1:size(time_vocal{k},2)
@@ -549,6 +548,13 @@ for Name=2%size(list,1)
                     end
                 end
                 eval(['pre_corr_table.' name '{count} = temp_table;']);
+                [R_pearson,P_value]=corrcoef(temp_table);
+                R_pearson = R_pearson(1,2) ;% P_value = P_value(1,2); 
+                if strcmp(name, 'complex')
+                    eval(['list_clusters.' name '= [list_clusters.' name '; k max(temp_table(:,1))-min(temp_table(:,1)) max(temp_table(:,2))-min(temp_table(:,2)) R_pearson median(temp_table(:,2))];']);
+                else
+                     eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
+                end
             end
        end
     end
@@ -561,27 +567,27 @@ for Name=2%size(list,1)
     for names = 1:size(categories,1)
         cd(raiz)
         name = categories{names};
-        if isfield(pre_corr_table, name)
-            eval(['similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
-            corr_table = [vpathname,'SimilarityBatch_',vfilename,'.csv'];
-            corr_table = strrep(corr_table,'\','/');
+        if isfield(pre_corr_table, name) && ~strcmp(name, 'complex')
+%             eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
+%             corr_table = [vpathname,'SimilarityBatch_',vfilename,'.csv'];
+%             corr_table = strrep(corr_table,'\','/');
 
             %Cluster syllables
-            delete('clusters.txt')
-            [status,result]=system(['R --slave --args' ' ' char(34) corr_table char(34) ' < clusterUSV_pub.r']);
-            system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
-            clustered = dlmread('clusters.txt');
+%             delete('clusters.txt')
+%             [status,result]=system(['R --slave --args' ' ' char(34) corr_table char(34) ' < clusterUSV_pub.r']);
+%             system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
+%             clustered = dlmread('clusters.txt');
 
             cd(vpathname)
             mkdir(vfilename)
             cd(vfilename)
             mkdir(name)
             
-            for ww1 = 1:size(clustered,1)
-                for ww = 1:size(clustered,2)
+%             for ww1 = 1:size(clustered,1)
+                for ww = 1:eval(['size(list_clusters.' name ',1)'])
                     c = [rand() rand() rand()];
-                    if (clustered(ww1,ww)) > 0
-                        id_vocal = eval(['list_clusters.' name '(clustered(ww1,ww))']);
+%                     if (clustered(ww1,ww)) > 0
+                        id_vocal = eval(['list_clusters.' name '(ww)']);
                         dx = 0.4;
                         clf('reset') 
                         hold on
@@ -594,24 +600,57 @@ for Name=2%size(list,1)
                         x_pos = time_vocal{id_vocal}(ceil(end/2));
                         y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
                         text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
-                        saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal) '_' num2str(ww1) '.png'])
-                    end
+                        saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
+%                     end
+                    hold off
+                end
+%             end
+
+        elseif isfield(pre_corr_table, name) && strcmp(name, 'complex')
+            eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
+            corr_test = list_clusters.complex(:,2:end);
+            corr_test(:,2) = corr_test(:,2)/(10^3);
+            corr_test(:,4) = corr_test(:,4)/(10^3);
+            Y = pdist(corr_test);
+            Z = linkage(Y,'single');
+            TT = cluster(Z,'cutoff',1.4,'depth',3);
+            
+            cd(vpathname)
+            mkdir(vfilename)
+            cd(vfilename)
+            mkdir(name)
+            
+            for cluster_number = 1:max(TT)
+                cd([vpathname vfilename '\' name])
+                mkdir(['Cluster_' num2str(cluster_number)]);
+                cd(['Cluster_' num2str(cluster_number)])
+                disp(['Cluster_' num2str(cluster_number)])
+                cluster_list = find(TT==cluster_number);
+                for ww = 1:size(cluster_list,1)
+                    c = [rand() rand() rand()];
+%                     if (clustered(ww1,ww)) > 0
+                        id_vocal = list_clusters.complex(cluster_list(ww));
+                        dx = 0.4;
+                        clf('reset') 
+                        hold on
+                        for time_stamp = 1:size(time_vocal{id_vocal},2)
+                             scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],repmat(c,size(freq_vocal{id_vocal}{time_stamp}',2),1)) 
+                        end
+                        Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])']; 
+                        eval(Stri);
+                        set(gca,'ylim',[0 max(F_orig)]);
+                        x_pos = time_vocal{id_vocal}(ceil(end/2));
+                        y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
+                        text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
+                        saveas(gcf,[vpathname '/' vfilename '/'  name '/' 'Cluster_' num2str(cluster_number) '/' num2str(id_vocal)  '.png'])
+%                     end
                     hold off
                 end
             end
 
-    %         vocal_cluster_class = [];
-    %         for ttt=1:size(clustered,1)
-    %             for ttt1=1:size(clustered,2)
-    %                 if clustered(ttt,ttt1) > 0
-    %                     vocal_classified{clustered(ttt,ttt1)}.id = clustered(ttt,ttt1);
-    %                     eval(['vocal_cluster_class.' name '{ttt}(ttt1) = vocal_classified{clustered(ttt,ttt1)};']);
-    %                 end
-    %             end
-    %         end
         end
    end
-%    save(['vocal_classified_' vfilename],'vocal_classified','vocal_cluster')
+   save(['vocal_classified_' vfilename],'vocal_classified','list_clusters')
     %Generate .wav files for cohesive and split clusters
 %     system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
 

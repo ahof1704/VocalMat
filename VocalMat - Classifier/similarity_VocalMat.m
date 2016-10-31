@@ -1,4 +1,4 @@
-function similarity_VocalMat(folder,id,table)
+function [tosave] = similarity_VocalMat(folder,id,table)
 format compact
 format short g
 startdir = cd;
@@ -272,7 +272,7 @@ tosave=[fns1 fns2 SeqMatch dC_sim];
 %save(savenameInfo,'globalDistance','localDistance','fns1', 'fns2','diffs','calcnum','mindur','winsize','dC_l','dC_g')%'tosave')%'alldist','allGDdist','szLDist','szGDist',
 %toc(ticID)
 
-dlmwrite(savenameSB,tosave);
+% dlmwrite(savenameSB,tosave);
 %delete inprogress.mat
 cd(startdir);
 end

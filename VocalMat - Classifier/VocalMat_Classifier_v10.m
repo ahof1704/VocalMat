@@ -1,3 +1,5 @@
+%Nov 1st, 2016: Turn identified steps in vocalizations (ex: 2 steps, 3
+%steps, etc).
 %Oct 26th, 2016: As the hierarchical clustering method also exist in
 %Matlab,I will replace R instructions for Matlab instructions.
 %Oct 23rd, 2016: First steps to implement a hierarchical clustering method
@@ -16,7 +18,7 @@ cd(vpathname);
 list = dir('*output*.mat');
 diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
-for Name=1%:size(list,1)
+for Name=3:4%:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -534,9 +536,13 @@ for Name=1%:size(list,1)
     %whole group?
     pre_corr_table = [];
     categories = fieldnames(vocal_classified{k});
+   
+    list_clusters.mult_steps = [];
+    list_clusters.two_steps = [];
     for names = 1:size(categories,1)
        count = 0;
        name = categories{names};
+       disp(['Building ' name ' list'])
        eval(['list_clusters.' name '= [];']);
        for k=1:size(time_vocal,2)
             if ~isempty(eval(['vocal_classified{k}.' name])) && isempty(vocal_classified{k}.noise)
@@ -547,14 +553,26 @@ for Name=1%:size(list,1)
                         temp_table = [temp_table; time_vocal{k}(col) freq_vocal{k}{col}(col2)];
                     end
                 end
+
                 eval(['pre_corr_table.' name '{count} = temp_table;']);
-                [R_pearson,P_value]=corrcoef(temp_table);
-                R_pearson = R_pearson(1,2) ;% P_value = P_value(1,2); 
                 if strcmp(name, 'complex')
+                    [R_pearson,P_value]=corrcoef(temp_table);
+                    R_pearson = R_pearson(1,2) ;% P_value = P_value(1,2); 
                     eval(['list_clusters.' name '= [list_clusters.' name '; k max(temp_table(:,1))-min(temp_table(:,1)) max(temp_table(:,2))-min(temp_table(:,2)) R_pearson median(temp_table(:,2))];']);
                 else
-                     eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
+                    if strcmp(name, 'step_up') || strcmp(name, 'step_down')
+                        if size(vocal_classified{k}.step_up,1)==1 && size(vocal_classified{k}.step_down,1)==1
+                            list_clusters.two_steps = unique([list_clusters.two_steps ; k]);
+                        elseif size(vocal_classified{k}.step_up,1)+ size(vocal_classified{k}.step_down,1)>1
+                            list_clusters.mult_steps = unique([list_clusters.mult_steps ; k]);
+                        else
+                             eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
+                        end
+                    else
+                        eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
+                    end
                 end
+                
             end
        end
     end
@@ -564,10 +582,12 @@ for Name=1%:size(list,1)
 %     save_plot_vocalizations(vfilename,vpathname)
     figure('Name',vfilename,'NumberTitle','off')
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
+    categories = [categories; 'two_steps'; 'mult_steps'];
     for names = 1:size(categories,1)
         cd(raiz)
         name = categories{names};
-        if isfield(pre_corr_table, name) && ~strcmp(name, 'complex')
+        disp(['Saving plots for ' name])
+        if isfield(list_clusters, name) && ~strcmp(name, 'complex') && ~strcmp(name, 'harmonic_size')
 %             eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
 %             corr_table = [vpathname,'SimilarityBatch_',vfilename,'.csv'];
 %             corr_table = strrep(corr_table,'\','/');
@@ -606,7 +626,7 @@ for Name=1%:size(list,1)
                 end
 %             end
 
-        elseif isfield(pre_corr_table, name) && strcmp(name, 'complex')
+        elseif isfield(list_clusters, name) && strcmp(name, 'complex') && ~strcmp(name, 'harmonic_size') 
             eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
             corr_test = list_clusters.complex(:,2:end);
             corr_test(:,2) = corr_test(:,2)/(10^3);

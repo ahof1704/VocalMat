@@ -18,7 +18,7 @@ cd(vpathname);
 list = dir('*output*.mat');
 diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
-for Name=3:4%:size(list,1)
+for Name=4%:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -49,9 +49,9 @@ for Name=3:4%:size(list,1)
     output=[];
     
     for k=1:size(time_vocal,2)
-%             if k==212
-%                 k
-%             end
+            if k==142
+                k
+            end
         vocal_classified{k}.step_up = [];
         vocal_classified{k}.step_down = [];
         vocal_classified{k}.harmonic = [];
@@ -207,10 +207,19 @@ for Name=3:4%:size(list,1)
         %    end
         
         aux = current_freq - circshift(current_freq ,[1,0]);
+        
+        % eliminate outlier
+        test_outlier = find(abs(aux(2:end))>=10000);
+        t1 = test_outlier - circshift(test_outlier ,[1,0]);
+        if find(t1(2:end)>0 & t1(2:end)<3)
+            current_freq(test_outlier(find(t1(2:end)>0 & t1(2:end)<3))+1)=[];
+            aux = current_freq - circshift(current_freq ,[1,0]);
+        end
+        
         temp2 = find(aux(2:end)>=10000);
         if any(aux(2:end)>=10000) && (size(aux,1)-temp2(end)>10)
 %             disp(['Vocalization ' num2str(k) ' had a step up in t = ' num2str(time_vocal{k}(find(aux(2:end)>5000)+2)) 's']);
-            vocal_classified{k}.step_up = [vocal_classified{k}.step_up; time_vocal{k}(find(aux(2:end)>5000))'];
+            vocal_classified{k}.step_up = [vocal_classified{k}.step_up; time_vocal{k}(find(aux(2:end)>10000))'];
             stepup_count = [stepup_count;k];
         elseif size(temp2,1)>0 && (size(aux,1)-temp2(end)<10) %Delete the final portion of the vocalization (probabily noise)
             current_freq(temp2+1:end)=[];
@@ -218,7 +227,7 @@ for Name=3:4%:size(list,1)
         temp2 = find(aux(2:end)<=-10000);
         if any(aux(2:end)<=-10000) && (size(aux,1)-temp2(end)>10)
 %             disp(['Vocalization ' num2str(k) ' had a step down in t = ' num2str(time_vocal{k}(find(aux(2:end)<-5000)+2)) 's']);
-            vocal_classified{k}.step_down = [vocal_classified{k}.step_down; time_vocal{k}(find(aux(2:end)<-5000))'];
+            vocal_classified{k}.step_down = [vocal_classified{k}.step_down; time_vocal{k}(find(aux(2:end)<-10000))'];
             stepdown_count = [stepdown_count;k];
         elseif size(temp2,1)>0 && (size(aux,1)-temp2(end)<10) %Delete the final portion of the vocalization (probabily noise)
             current_freq(temp2+1:end)=[];
@@ -255,7 +264,7 @@ for Name=3:4%:size(list,1)
                         [max_local max_local] = max(current_freq);
                         aux2 = aux(2:max_local);
                         aux3 = aux(max_local:end);
-                        if sum(sign(aux2)>0)/size(current_freq,1)>0.7 && sum(sign(aux3)<0)/size(current_freq,1)>0.7 %The "U" shape is verified
+                        if sum(sign(aux2)>0)/size(current_freq,1)>0.7 && sum(sign(aux3)<0)/size(current_freq,1)>0.7 %The inverted "U" shape is verified
                             vocal_classified{k}.chevron = time_vocal{k}(1);
                             chevron_count = [chevron_count;k];
                         end
@@ -263,7 +272,7 @@ for Name=3:4%:size(list,1)
                         [min_local min_local] = min(current_freq);
                         aux2 = aux(2:min_local);
                         aux3 = aux(min_local:end);
-                        if sum(sign(aux2)<0)/size(current_freq,1)>0.7 && sum(sign(aux3)>0)/size(current_freq,1)>0.7 %The inverted "U" shape is verified
+                        if sum(sign(aux2)<0)/size(current_freq,1)>0.7 && sum(sign(aux3)>0)/size(current_freq,1)>0.7 %The "U" shape is verified
                             vocal_classified{k}.rev_chevron = time_vocal{k}(1);
                             revchevron_count = [revchevron_count;k];
                         end
@@ -563,7 +572,7 @@ for Name=3:4%:size(list,1)
                     if strcmp(name, 'step_up') || strcmp(name, 'step_down')
                         if size(vocal_classified{k}.step_up,1)==1 && size(vocal_classified{k}.step_down,1)==1
                             list_clusters.two_steps = unique([list_clusters.two_steps ; k]);
-                        elseif size(vocal_classified{k}.step_up,1)+ size(vocal_classified{k}.step_down,1)>1
+                        elseif size(vocal_classified{k}.step_up,1)+ size(vocal_classified{k}.step_down,1)>1 && isempty(vocal_classified{k}.noisy_vocal)
                             list_clusters.mult_steps = unique([list_clusters.mult_steps ; k]);
                         else
                              eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);

@@ -16,7 +16,7 @@ raiz = pwd;
 [vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
 list = dir('*output*.mat');
-% diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
+diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
 for Name=1:size(list,1)
     vfilename = list(Name).name;
@@ -813,4 +813,4 @@ end
 end
 
 % disp(['Time to plot all the vocalizations: ' num2str(toc)]);
-% diary('off');
+diary('off');

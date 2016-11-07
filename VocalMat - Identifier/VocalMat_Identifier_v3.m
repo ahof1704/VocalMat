@@ -322,7 +322,7 @@ for Name = 1:size(list,1)
                 %             else
                 %                 median_db = median(median(A(find(min_local_freq(k)==F_orig),find(T_orig==time_vocal{k}(ceil(end/2)))-200 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200)));
                 %             end
-                if find(min_local_freq(k)==F_orig)-5 < 0
+                if find(min_local_freq(k)==F_orig)-5 <= 0
                     min_freq=1;
                     max_freq = find(max_local_freq(k)==F_orig)+5;
                     max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;

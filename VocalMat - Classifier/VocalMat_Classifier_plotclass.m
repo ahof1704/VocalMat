@@ -16,7 +16,7 @@ raiz = pwd;
 [vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
 list = dir('*output*.mat');
-diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
+% diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
 for Name=1:size(list,1)
     vfilename = list(Name).name;
@@ -24,7 +24,7 @@ for Name=1:size(list,1)
     vfile = fullfile(vpathname,vfilename);
     
     clearvars -except list raiz vfile vfilename vpathname
-    plot_data=0;
+    plot_data=1;
     fprintf('\n')
     disp(['Reading ' vfilename])
     load(vfile);
@@ -517,64 +517,66 @@ for Name=1:size(list,1)
     disp(['Total number of vocalizations: ' num2str(size(time_vocal,2))]);
     disp(['The classifier identified ' num2str(size(noise_count,1)) ' as noise and ' num2str(size(noisy_vocal_count,1)) ' as noisy vocalization']);
     
-    bin_1 = [];
-    bin_2 = [];
-    bin_3 = [];
-    bin_4 = [];
+%     bin_1 = [];
+%     bin_2 = [];
+%     bin_3 = [];
+%     bin_4 = [];
 
-    for k=1:size(time_vocal,2)
-        if time_vocal{k}(1) < 5*60 %5min
-            bin_1 = [bin_1, k];
-        elseif time_vocal{k}(1) >= 5*60 && time_vocal{k}(1) < 10*60
-            bin_2 = [bin_2, k];
-        elseif time_vocal{k}(1) >= 10*60 && time_vocal{k}(1) < 15*60
-            bin_3 = [bin_3, k];
-        else
-            bin_4 = [bin_4, k];
-        end
-    end
-    
-    for i=1:4
-        eval(['if ~isempty(bin_' num2str(i) ') ', ...
-            'bin_' num2str(i) ' = [bin_' num2str(i) '(1); bin_' num2str(i) '(end)];',...
-            'else ',...
-            'bin_' num2str(i) ' = [0; 0];',...
-            'end']);
-    end
-    
+%     for k=1:size(time_vocal,2)
+%         if time_vocal{k}(1) < 5*60 %5min
+%             bin_1 = [bin_1, k];
+%         elseif time_vocal{k}(1) >= 5*60 && time_vocal{k}(1) < 10*60
+%             bin_2 = [bin_2, k];
+%         elseif time_vocal{k}(1) >= 10*60 && time_vocal{k}(1) < 15*60
+%             bin_3 = [bin_3, k];
+%         else
+%             bin_4 = [bin_4, k];
+%         end
+%     end
+%     
+%     for i=1:4
+%         eval(['if ~isempty(bin_' num2str(i) ') ', ...
+%             'bin_' num2str(i) ' = [bin_' num2str(i) '(1); bin_' num2str(i) '(end)];',...
+%             'else ',...
+%             'bin_' num2str(i) ' = [0; 0];',...
+%             'end']);
+%     end
+%     
     % Identifying how many types of vocal happened in each bin
-    if plot_data == 1
-        stepup_count_bin = [ sum(stepup_count <= bin_1(end)), sum(stepup_count>=bin_2(1) & stepup_count<=bin_2(end)), sum(stepup_count>=bin_3(1) & stepup_count<=bin_3(end)), sum(stepup_count>=bin_4(1) & stepup_count<=bin_4(end))];
-        stepdown_count_bin = [ sum(stepdown_count <= bin_1(end)), sum(stepdown_count>=bin_2(1) & stepdown_count<=bin_2(end)), sum(stepdown_count>=bin_3(1) & stepdown_count<=bin_3(end)), sum(stepdown_count>=bin_4(1) & stepdown_count<=bin_4(end))];
-        harmonic_count_bin = [ sum(harmonic_count <= bin_1(end)), sum(harmonic_count>=bin_2(1) & harmonic_count<=bin_2(end)), sum(harmonic_count>=bin_3(1) & harmonic_count<=bin_3(end)), sum(harmonic_count>=bin_4(1) & harmonic_count<=bin_4(end))];
-        flat_count_bin = [ sum(flat_count <= bin_1(end)), sum(flat_count>=bin_2(1) & flat_count<=bin_2(end)), sum(flat_count>=bin_3(1) & flat_count<=bin_3(end)), sum(flat_count>=bin_4(1) & flat_count<=bin_4(end))];
-        chevron_count_bin = [ sum(chevron_count <= bin_1(end)), sum(chevron_count>=bin_2(1) & chevron_count<=bin_2(end)), sum(chevron_count>=bin_3(1) & chevron_count<=bin_3(end)), sum(chevron_count>=bin_4(1) & chevron_count<=bin_4(end))];
-        revchevron_count_bin = [ sum(revchevron_count <= bin_1(end)), sum(revchevron_count>=bin_2(1) & revchevron_count<=bin_2(end)), sum(revchevron_count>=bin_3(1) & revchevron_count<=bin_3(end)), sum(revchevron_count>=bin_4(1) & revchevron_count<=bin_4(end))];
-        downfm_count_bin = [ sum(downfm_count <= bin_1(end)), sum(downfm_count>=bin_2(1) & downfm_count<=bin_2(end)), sum(downfm_count>=bin_3(1) & downfm_count<=bin_3(end)), sum(downfm_count>=bin_4(1) & downfm_count<=bin_4(end))];
-        upfm_count_bin = [ sum(upfm_count <= bin_1(end)), sum(upfm_count>=bin_2(1) & upfm_count<=bin_2(end)), sum(upfm_count>=bin_3(1) & upfm_count<=bin_3(end)), sum(upfm_count>=bin_4(1) & upfm_count<=bin_4(end))];
-        complex_count_bin = [ sum(complex_count <= bin_1(end)), sum(complex_count>=bin_2(1) & complex_count<=bin_2(end)), sum(complex_count>=bin_3(1) & complex_count<=bin_3(end)), sum(complex_count>=bin_4(1) & complex_count<=bin_4(end))];
-        noisy_vocal_count_bin = [ sum(noisy_vocal_count <= bin_1(end)), sum(noisy_vocal_count>=bin_2(1) & noisy_vocal_count<=bin_2(end)), sum(noisy_vocal_count>=bin_3(1) & noisy_vocal_count<=bin_3(end)), sum(noisy_vocal_count>=bin_4(1) & noisy_vocal_count<=bin_4(end))];
-        nonlinear_count_bin = [ sum(nonlinear_count <= bin_1(end)), sum(nonlinear_count>=bin_2(1) & nonlinear_count<=bin_2(end)), sum(nonlinear_count>=bin_3(1) & nonlinear_count<=bin_3(end)), sum(nonlinear_count>=bin_4(1) & nonlinear_count<=bin_4(end))];
-        short_count_bin = [ sum(short_count <= bin_1(end)), sum(short_count>=bin_2(1) & short_count<=bin_2(end)), sum(short_count>=bin_3(1) & short_count<=bin_3(end)), sum(short_count>=bin_4(1) & short_count<=bin_4(end))];
-        noise_count_bin = [ sum(noise_count <= bin_1(end)), sum(noise_count>=bin_2(1) & noise_count<=bin_2(end)), sum(noise_count>=bin_3(1) & noise_count<=bin_3(end)), sum(noise_count>=bin_4(1) & noise_count<=bin_4(end))];
-    end
+%     if plot_data == 1
+%         stepup_count_bin = [ sum(stepup_count <= bin_1(end)), sum(stepup_count>=bin_2(1) & stepup_count<=bin_2(end)), sum(stepup_count>=bin_3(1) & stepup_count<=bin_3(end)), sum(stepup_count>=bin_4(1) & stepup_count<=bin_4(end))];
+%         stepdown_count_bin = [ sum(stepdown_count <= bin_1(end)), sum(stepdown_count>=bin_2(1) & stepdown_count<=bin_2(end)), sum(stepdown_count>=bin_3(1) & stepdown_count<=bin_3(end)), sum(stepdown_count>=bin_4(1) & stepdown_count<=bin_4(end))];
+%         harmonic_count_bin = [ sum(harmonic_count <= bin_1(end)), sum(harmonic_count>=bin_2(1) & harmonic_count<=bin_2(end)), sum(harmonic_count>=bin_3(1) & harmonic_count<=bin_3(end)), sum(harmonic_count>=bin_4(1) & harmonic_count<=bin_4(end))];
+%         flat_count_bin = [ sum(flat_count <= bin_1(end)), sum(flat_count>=bin_2(1) & flat_count<=bin_2(end)), sum(flat_count>=bin_3(1) & flat_count<=bin_3(end)), sum(flat_count>=bin_4(1) & flat_count<=bin_4(end))];
+%         chevron_count_bin = [ sum(chevron_count <= bin_1(end)), sum(chevron_count>=bin_2(1) & chevron_count<=bin_2(end)), sum(chevron_count>=bin_3(1) & chevron_count<=bin_3(end)), sum(chevron_count>=bin_4(1) & chevron_count<=bin_4(end))];
+%         revchevron_count_bin = [ sum(revchevron_count <= bin_1(end)), sum(revchevron_count>=bin_2(1) & revchevron_count<=bin_2(end)), sum(revchevron_count>=bin_3(1) & revchevron_count<=bin_3(end)), sum(revchevron_count>=bin_4(1) & revchevron_count<=bin_4(end))];
+%         downfm_count_bin = [ sum(downfm_count <= bin_1(end)), sum(downfm_count>=bin_2(1) & downfm_count<=bin_2(end)), sum(downfm_count>=bin_3(1) & downfm_count<=bin_3(end)), sum(downfm_count>=bin_4(1) & downfm_count<=bin_4(end))];
+%         upfm_count_bin = [ sum(upfm_count <= bin_1(end)), sum(upfm_count>=bin_2(1) & upfm_count<=bin_2(end)), sum(upfm_count>=bin_3(1) & upfm_count<=bin_3(end)), sum(upfm_count>=bin_4(1) & upfm_count<=bin_4(end))];
+%         complex_count_bin = [ sum(complex_count <= bin_1(end)), sum(complex_count>=bin_2(1) & complex_count<=bin_2(end)), sum(complex_count>=bin_3(1) & complex_count<=bin_3(end)), sum(complex_count>=bin_4(1) & complex_count<=bin_4(end))];
+%         noisy_vocal_count_bin = [ sum(noisy_vocal_count <= bin_1(end)), sum(noisy_vocal_count>=bin_2(1) & noisy_vocal_count<=bin_2(end)), sum(noisy_vocal_count>=bin_3(1) & noisy_vocal_count<=bin_3(end)), sum(noisy_vocal_count>=bin_4(1) & noisy_vocal_count<=bin_4(end))];
+%         nonlinear_count_bin = [ sum(nonlinear_count <= bin_1(end)), sum(nonlinear_count>=bin_2(1) & nonlinear_count<=bin_2(end)), sum(nonlinear_count>=bin_3(1) & nonlinear_count<=bin_3(end)), sum(nonlinear_count>=bin_4(1) & nonlinear_count<=bin_4(end))];
+%         short_count_bin = [ sum(short_count <= bin_1(end)), sum(short_count>=bin_2(1) & short_count<=bin_2(end)), sum(short_count>=bin_3(1) & short_count<=bin_3(end)), sum(short_count>=bin_4(1) & short_count<=bin_4(end))];
+%         noise_count_bin = [ sum(noise_count <= bin_1(end)), sum(noise_count>=bin_2(1) & noise_count<=bin_2(end)), sum(noise_count>=bin_3(1) & noise_count<=bin_3(end)), sum(noise_count>=bin_4(1) & noise_count<=bin_4(end))];
+%     end
     
 
 %     save(['vocal_classified_' vfilename],'vocal_classified')
 %     all_class = [size(stepup_count,1) size(stepdown_count,1) size(harmonic_count,1) size(flat_count,1) size(chevron_count,1) size(revchevron_count,1) size(downfm_count,1) size(upfm_count,1) size(complex_count,1) size(noisy_vocal_count,1) size(nonlinear_count,1) size(short_count,1)];
-    if plot_data ==1
-        all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_vocal_count_bin; nonlinear_count_bin; short_count_bin;noise_count_bin];
-        figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
-        bar(all_class,'stacked')
-        Labels = {'stepup_count', 'stepdown_count', 'harmonic_count', 'flat_count', 'chevron_count', 'revchevron_count', 'downfm_count', 'upfm_count', 'complex_count', 'noisy_vocal_count', 'nonlinear_count', 'short_count','noise_count'};
-    %     set(gca, 'XTick', [1:12, 'XTickLabel', Labels);
-        set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
-        legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
-    end
-    
+%     if plot_data ==1
+%         all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_vocal_count_bin; nonlinear_count_bin; short_count_bin;noise_count_bin];
+%         figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
+%         bar(all_class,'stacked')
+%         Labels = {'stepup_count', 'stepdown_count', 'harmonic_count', 'flat_count', 'chevron_count', 'revchevron_count', 'downfm_count', 'upfm_count', 'complex_count', 'noisy_vocal_count', 'nonlinear_count', 'short_count','noise_count'};
+%     %     set(gca, 'XTick', [1:12, 'XTickLabel', Labels);
+%         set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
+%         legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
+%     end
+%     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
+%     saveas(gcf,[vpathname '/' vfilename   '.png'])
+
     %% 
     %%%%%%%%%%%% At this point start the clustering method%%%%%%%%%%%%%%
-    
+if 1    
     %Start organizing a struct where each element brings the time vs frequency vs intensity table
 %     pre_corr_table = [];
 %     for k=1:size(time_vocal,2)
@@ -634,18 +636,66 @@ for Name=1:size(list,1)
        end
     end
     
+    bin_1 = [];
+    bin_2 = [];
+    bin_3 = [];
+    bin_4 = [];
+
+    for k=1:size(time_vocal,2)
+        if time_vocal{k}(1) < 5*60 %5min
+            bin_1 = [bin_1, k];
+        elseif time_vocal{k}(1) >= 5*60 && time_vocal{k}(1) < 10*60
+            bin_2 = [bin_2, k];
+        elseif time_vocal{k}(1) >= 10*60 && time_vocal{k}(1) < 15*60
+            bin_3 = [bin_3, k];
+        else
+            bin_4 = [bin_4, k];
+        end
+    end
+    
+    for i=1:4
+        eval(['if ~isempty(bin_' num2str(i) ') ', ...
+            'bin_' num2str(i) ' = [bin_' num2str(i) '(1); bin_' num2str(i) '(end)];',...
+            'else ',...
+            'bin_' num2str(i) ' = [0; 0];',...
+            'end']);
+    end
+    
+        stepup_count_bin  = [ sum(list_clusters.step_up <= bin_1(end)), sum(list_clusters.step_up >=bin_2(1) & list_clusters.step_up <=bin_2(end)), sum(list_clusters.step_up >=bin_3(1) & list_clusters.step_up <=bin_3(end)), sum(list_clusters.step_up >=bin_4(1) & list_clusters.step_up <=bin_4(end))];
+        stepdown_count_bin = [ sum(stepdown_count <= bin_1(end)), sum(stepdown_count>=bin_2(1) & stepdown_count<=bin_2(end)), sum(stepdown_count>=bin_3(1) & stepdown_count<=bin_3(end)), sum(stepdown_count>=bin_4(1) & stepdown_count<=bin_4(end))];
+        harmonic_count_bin  = [ sum(list_clusters.harmonic <= bin_1(end)), sum(list_clusters.harmonic >=bin_2(1) & list_clusters.harmonic <=bin_2(end)), sum(list_clusters.harmonic >=bin_3(1) & list_clusters.harmonic <=bin_3(end)), sum(list_clusters.harmonic >=bin_4(1) & list_clusters.harmonic <=bin_4(end))];
+       flat_count_bin  = [ sum(list_clusters.flat <= bin_1(end)), sum(list_clusters.flat >=bin_2(1) & list_clusters.flat <=bin_2(end)), sum(list_clusters.flat >=bin_3(1) & list_clusters.flat <=bin_3(end)), sum(list_clusters.flat >=bin_4(1) & list_clusters.flat <=bin_4(end))];
+       chevron_count_bin  = [ sum(list_clusters.chevron <= bin_1(end)), sum(list_clusters.chevron >=bin_2(1) & list_clusters.chevron <=bin_2(end)), sum(list_clusters.chevron >=bin_3(1) & list_clusters.chevron <=bin_3(end)), sum(list_clusters.chevron >=bin_4(1) & list_clusters.chevron <=bin_4(end))];
+       revchevron_count_bin  = [ sum(list_clusters.rev_chevron <= bin_1(end)), sum(list_clusters.rev_chevron >=bin_2(1) & list_clusters.rev_chevron <=bin_2(end)), sum(list_clusters.rev_chevron >=bin_3(1) & list_clusters.rev_chevron <=bin_3(end)), sum(list_clusters.rev_chevron >=bin_4(1) & list_clusters.rev_chevron <=bin_4(end))];
+      downfm_count_bin  = [ sum(list_clusters.down_fm <= bin_1(end)), sum(list_clusters.down_fm >=bin_2(1) & list_clusters.down_fm <=bin_2(end)), sum(list_clusters.down_fm >=bin_3(1) & list_clusters.down_fm <=bin_3(end)), sum(list_clusters.down_fm >=bin_4(1) & list_clusters.down_fm <=bin_4(end))];
+      upfm_count_bin  = [ sum(list_clusters.up_fm <= bin_1(end)), sum(list_clusters.up_fm >=bin_2(1) & list_clusters.up_fm <=bin_2(end)), sum(list_clusters.up_fm >=bin_3(1) & list_clusters.up_fm <=bin_3(end)), sum(list_clusters.up_fm >=bin_4(1) & list_clusters.up_fm <=bin_4(end))];
+      complex_count_bin  = [ sum(list_clusters.complex(:,1) <= bin_1(end)), sum(list_clusters.complex(:,1) >=bin_2(1) & list_clusters.complex(:,1) <=bin_2(end)), sum(list_clusters.complex(:,1) >=bin_3(1) & list_clusters.complex(:,1) <=bin_3(end)), sum(list_clusters.complex(:,1) >=bin_4(1) & list_clusters.complex(:,1) <=bin_4(end))];
+      noisy_vocal_count_bin  = [ sum(list_clusters.noisy_vocal <= bin_1(end)), sum(list_clusters.noisy_vocal >=bin_2(1) & list_clusters.noisy_vocal <=bin_2(end)), sum(list_clusters.noisy_vocal >=bin_3(1) & list_clusters.noisy_vocal <=bin_3(end)), sum(list_clusters.noisy_vocal >=bin_4(1) & list_clusters.noisy_vocal <=bin_4(end))];
+      nonlinear_count_bin  = [ sum(list_clusters.non_linear <= bin_1(end)), sum(list_clusters.non_linear >=bin_2(1) & list_clusters.non_linear <=bin_2(end)), sum(list_clusters.non_linear >=bin_3(1) & list_clusters.non_linear <=bin_3(end)), sum(list_clusters.non_linear >=bin_4(1) & list_clusters.non_linear <=bin_4(end))];
+      short_count_bin  = [ sum(list_clusters.short <= bin_1(end)), sum(list_clusters.short >=bin_2(1) & list_clusters.short <=bin_2(end)), sum(list_clusters.short >=bin_3(1) & list_clusters.short <=bin_3(end)), sum(list_clusters.short >=bin_4(1) & list_clusters.short <=bin_4(end))];
+      noise_count_bin  = [ sum(list_clusters.noise <= bin_1(end)), sum(list_clusters.noise >=bin_2(1) & list_clusters.noise <=bin_2(end)), sum(list_clusters.noise >=bin_3(1) & list_clusters.noise <=bin_3(end)), sum(list_clusters.noise >=bin_4(1) & list_clusters.noise <=bin_4(end))];
+       two_steps_count_bin  = [ sum(list_clusters.two_steps <= bin_1(end)), sum(list_clusters.two_steps >=bin_2(1) & list_clusters.two_steps <=bin_2(end)), sum(list_clusters.two_steps >=bin_3(1) & list_clusters.two_steps <=bin_3(end)), sum(list_clusters.two_steps >=bin_4(1) & list_clusters.two_steps <=bin_4(end))];
+       mult_steps_count_bin  = [ sum(list_clusters.mult_steps <= bin_1(end)), sum(list_clusters.mult_steps >=bin_2(1) & list_clusters.mult_steps <=bin_2(end)), sum(list_clusters.mult_steps >=bin_3(1) & list_clusters.mult_steps <=bin_3(end)), sum(list_clusters.mult_steps >=bin_4(1) & list_clusters.mult_steps <=bin_4(end))];
+       
+       all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_vocal_count_bin; nonlinear_count_bin; short_count_bin; noise_count_bin; mult_steps_count_bin; two_steps_count_bin];
+        figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
+        bar(all_class,'stacked')
+        Labels = {'stepup_count', 'stepdown_count', 'harmonic_count', 'flat_count', 'chevron_count', 'revchevron_count', 'downfm_count', 'upfm_count', 'complex_count', 'noisy_vocal_count', 'nonlinear_count', 'short_count','noise_count','mult_steps_count_bin','two_steps_count_bin'};
+    %     set(gca, 'XTick', [1:12, 'XTickLabel', Labels);
+        set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
+        legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
     %Get correlation table for this vocalizations
-    cd(raiz)
-%     save_plot_vocalizations(vfilename,vpathname)
-    figure('Name',vfilename,'NumberTitle','off')
+%     cd(raiz)
+% %     save_plot_vocalizations(vfilename,vpathname)
+%     figure('Name',vfilename,'NumberTitle','off')
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
-    categories = [categories; 'two_steps'; 'mult_steps'];
-    for names = 1:size(categories,1)
-        cd(raiz)
-        name = categories{names};
-        disp(['Saving plots for ' name])
-        if isfield(list_clusters, name) && ~strcmp(name, 'complex') && ~strcmp(name, 'harmonic_size')
-%             eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
+%     categories = [categories; 'two_steps'; 'mult_steps'];
+%     for names = 1:size(categories,1)
+%         cd(raiz)
+%         name = categories{names};
+%         disp(['Saving plots for ' name])
+%         if isfield(list_clusters, name) && ~strcmp(name, 'complex') && ~strcmp(name, 'harmonic_size')
+% %             eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
 %             corr_table = [vpathname,'SimilarityBatch_',vfilename,'.csv'];
 %             corr_table = strrep(corr_table,'\','/');
 
@@ -655,112 +705,112 @@ for Name=1:size(list,1)
 %             system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
 %             clustered = dlmread('clusters.txt');
 
-            cd(vpathname)
-            mkdir(vfilename)
-            cd(vfilename)
-            mkdir(name)
-            
-%             for ww1 = 1:size(clustered,1)
-                for ww = 1:eval(['size(list_clusters.' name ',1)'])
-                    c = [rand() rand() rand()];
-%                     if (clustered(ww1,ww)) > 0
-                        id_vocal = eval(['list_clusters.' name '(ww)']);
-                        dx = 0.4;
-                        clf('reset') 
-                        hold on
-                        for time_stamp = 1:size(time_vocal{id_vocal},2)
-                             scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],repmat(c,size(freq_vocal{id_vocal}{time_stamp}',2),1)) 
-                        end
-                        Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])']; 
-                        eval(Stri);
-                        set(gca,'ylim',[0 max(F_orig)]);
-                        x_pos = time_vocal{id_vocal}(ceil(end/2));
-                        y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
-                        text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
-                        saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
-%                     end
-                    hold off
-                end
+%             cd(vpathname)
+%             mkdir(vfilename)
+%             cd(vfilename)
+%             mkdir(name)
+%             
+% %             for ww1 = 1:size(clustered,1)
+%                 for ww = 1:eval(['size(list_clusters.' name ',1)'])
+%                     c = [rand() rand() rand()];
+% %                     if (clustered(ww1,ww)) > 0
+%                         id_vocal = eval(['list_clusters.' name '(ww)']);
+%                         dx = 0.4;
+%                         clf('reset') 
+%                         hold on
+%                         for time_stamp = 1:size(time_vocal{id_vocal},2)
+%                              scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],repmat(c,size(freq_vocal{id_vocal}{time_stamp}',2),1)) 
+%                         end
+%                         Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])']; 
+%                         eval(Stri);
+%                         set(gca,'ylim',[0 max(F_orig)]);
+%                         x_pos = time_vocal{id_vocal}(ceil(end/2));
+%                         y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
+%                         text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
+%                         saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
+% %                     end
+%                     hold off
+%                 end
+% %             end
+% 
+%         elseif isfield(list_clusters, name) && strcmp(name, 'complex') 
+%             eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
+%             corr_test = list_clusters.complex(:,2:end);
+%             corr_test(:,2) = corr_test(:,2)/(10^3);
+%             corr_test(:,4) = corr_test(:,4)/(10^3);
+%             Y = pdist(corr_test);
+%             Z = linkage(Y,'single');
+%             TT = cluster(Z,'cutoff',1.4,'depth',3); %TT = cluster(Z,'cutoff',2.3,'depth',4); Use this one for a test.
+%             
+%             cd(vpathname)
+%             mkdir(vfilename)
+%             cd(vfilename)
+%             mkdir(name)
+% %             
+%             for cluster_number = 1:max(TT)
+%                 cd([vpathname vfilename '/' name])
+%                 mkdir(['Cluster_' num2str(cluster_number)]);
+%                 cd(['Cluster_' num2str(cluster_number)])
+%                 disp(['Cluster_' num2str(cluster_number)])
+%                 cluster_list = find(TT==cluster_number);
+%                 for ww = 1:size(cluster_list,1)
+%                     c = [rand() rand() rand()];
+% %                     if (clustered(ww1,ww)) > 0
+%                         id_vocal = list_clusters.complex(cluster_list(ww));
+%                         dx = 0.4;
+%                         clf('reset') 
+%                         hold on
+%                         for time_stamp = 1:size(time_vocal{id_vocal},2)
+%                              scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],repmat(c,size(freq_vocal{id_vocal}{time_stamp}',2),1)) 
+%                         end
+%                         Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])']; 
+%                         eval(Stri);
+%                         set(gca,'ylim',[0 max(F_orig)]);
+%                         x_pos = time_vocal{id_vocal}(ceil(end/2));
+%                         y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
+%                         text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
+%                         saveas(gcf,[vpathname '/' vfilename '/'  name '/' 'Cluster_' num2str(cluster_number) '/' num2str(id_vocal)  '.png'])
+% %                     end
+%                     hold off
+%                 end
 %             end
-
-        elseif isfield(list_clusters, name) && strcmp(name, 'complex') 
-            eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
-            corr_test = list_clusters.complex(:,2:end);
-            corr_test(:,2) = corr_test(:,2)/(10^3);
-            corr_test(:,4) = corr_test(:,4)/(10^3);
-            Y = pdist(corr_test);
-            Z = linkage(Y,'single');
-            TT = cluster(Z,'cutoff',1.4,'depth',3); %TT = cluster(Z,'cutoff',2.3,'depth',4); Use this one for a test.
-            
-            cd(vpathname)
-            mkdir(vfilename)
-            cd(vfilename)
-            mkdir(name)
-            
-            for cluster_number = 1:max(TT)
-                cd([vpathname vfilename '/' name])
-                mkdir(['Cluster_' num2str(cluster_number)]);
-                cd(['Cluster_' num2str(cluster_number)])
-                disp(['Cluster_' num2str(cluster_number)])
-                cluster_list = find(TT==cluster_number);
-                for ww = 1:size(cluster_list,1)
-                    c = [rand() rand() rand()];
-%                     if (clustered(ww1,ww)) > 0
-                        id_vocal = list_clusters.complex(cluster_list(ww));
-                        dx = 0.4;
-                        clf('reset') 
-                        hold on
-                        for time_stamp = 1:size(time_vocal{id_vocal},2)
-                             scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],repmat(c,size(freq_vocal{id_vocal}{time_stamp}',2),1)) 
-                        end
-                        Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])']; 
-                        eval(Stri);
-                        set(gca,'ylim',[0 max(F_orig)]);
-                        x_pos = time_vocal{id_vocal}(ceil(end/2));
-                        y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
-                        text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
-                        saveas(gcf,[vpathname '/' vfilename '/'  name '/' 'Cluster_' num2str(cluster_number) '/' num2str(id_vocal)  '.png'])
-%                     end
-                    hold off
-                end
-            end
-            
-        elseif isfield(list_clusters, name) && strcmp(name, 'noise')
-            cd(vpathname)
-            mkdir(vfilename)
-            cd(vfilename)
-            mkdir(name)
-            
-%             for ww1 = 1:size(clustered,1)
-                for ww = 1:eval(['size(list_clusters.' name ',1)'])
-                    c = [rand() rand() rand()];
-%                     if (clustered(ww1,ww)) > 0
-                        id_vocal = eval(['list_clusters.' name '(ww)']);
-                        dx = 0.4;
-                        clf('reset') 
-                        hold on
-                        for time_stamp = 1:size(time_vocal{id_vocal},2)
-                             scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],repmat(c,size(freq_vocal{id_vocal}{time_stamp}',2),1)) 
-                        end
-                        Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])']; 
-                        eval(Stri);
-                        set(gca,'ylim',[0 max(F_orig)]);
-                        x_pos = time_vocal{id_vocal}(ceil(end/2));
-                        y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
-                        text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
-                        saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
-%                     end
-                    hold off
-                end
-%             end
-        end
-   end
-   save(['vocal_classified_' vfilename],'vocal_classified','list_clusters','vfilename')
-   close all
+%             
+%         elseif isfield(list_clusters, name) && strcmp(name, 'noise')
+%             cd(vpathname)
+%             mkdir(vfilename)
+%             cd(vfilename)
+%             mkdir(name)
+%             
+% %             for ww1 = 1:size(clustered,1)
+%                 for ww = 1:eval(['size(list_clusters.' name ',1)'])
+%                     c = [rand() rand() rand()];
+% %                     if (clustered(ww1,ww)) > 0
+%                         id_vocal = eval(['list_clusters.' name '(ww)']);
+%                         dx = 0.4;
+%                         clf('reset') 
+%                         hold on
+%                         for time_stamp = 1:size(time_vocal{id_vocal},2)
+%                              scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],repmat(c,size(freq_vocal{id_vocal}{time_stamp}',2),1)) 
+%                         end
+%                         Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])']; 
+%                         eval(Stri);
+%                         set(gca,'ylim',[0 max(F_orig)]);
+%                         x_pos = time_vocal{id_vocal}(ceil(end/2));
+%                         y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
+%                         text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
+                        saveas(gcf,[vpathname '/' vfilename  '.png'])
+% %                     end
+%                     hold off
+%                 end
+% %             end
+%         end
+%    end
+%    save(['vocal_classified_' vfilename],'vocal_classified','list_clusters','vfilename')
+%    close all
     %Generate .wav files for cohesive and split clusters
 %     system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
-
+end
 end
 
 % disp(['Time to plot all the vocalizations: ' num2str(toc)]);
-diary('off');
+% diary('off');

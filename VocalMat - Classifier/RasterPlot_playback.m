@@ -136,15 +136,16 @@ for k=1:4
 %    eval(['general_analysis.Animal.bin' num2str(k) '.duration = duration;']) 
 end
 
-disp('Calculating frequency range');
-for k=1:4
-   freq_range = [];
-   for j=1:size(eval(['bin_' num2str(k)]),2)
-      freq_range = [freq_range, max(freq_vocal{j})-min(freq_vocal{j})];
-   end
-   eval(['general_analysis.Animal_' vfilename '.bin' num2str(k) '.freq_range = freq_range;'])
-%    eval(['general_analysis.Animal.bin' num2str(k) '.freq_range = freq_range;']) 
-end
+% disp('Calculating frequency range');
+% for k=1:4
+%    freq_range = [];
+%    for j=1:size(eval(['bin_' num2str(k)]),2)
+%       
+%       freq_range = [freq_range, max(freq_vocal{j})-min(freq_vocal{j})];
+%    end
+%    eval(['general_analysis.Animal_' vfilename '.bin' num2str(k) '.freq_range = freq_range;'])
+% %    eval(['general_analysis.Animal.bin' num2str(k) '.freq_range = freq_range;']) 
+% end
 
 % 
 % output = [];
@@ -166,87 +167,87 @@ list_names = fieldnames(general_analysis);
 % Asorted = cell2struct(Acell, list_names, 1);
 
 %Import XY coordinates of the files
-[vfilename_xy,vpathname_xy] = uigetfile({'*.xlsx'},'Select the tracking file');
-filename_xy = vfilename_xy(1:end-5);
-vfile_xy = fullfile(vpathname_xy,vfilename_xy);
-
-[type,sheetname_xy] = xlsfinfo(vfile_xy);
-m=size(sheetname_xy,2);
-
-alldata_xy = cell(1, m);
-ID = {};
-txt = {};
+% [vfilename_xy,vpathname_xy] = uigetfile({'*.xlsx'},'Select the tracking file');
+% filename_xy = vfilename_xy(1:end-5);
+% vfile_xy = fullfile(vpathname_xy,vfilename_xy);
+% 
+% [type,sheetname_xy] = xlsfinfo(vfile_xy);
+% m=size(sheetname_xy,2);
+% 
+% alldata_xy = cell(1, m);
+% ID = {};
+% txt = {};
 
 %Load all sheets from the tracking file
-for i=1:1:m;
-    Sheet = char(sheetname_xy(1,i)) ;
-    alldata_xy{i} = xlsread(vfile_xy, Sheet);
-    [ID,txt] = xlsread(vfile_xy, Sheet, 'E1:H3');
-%     ID{i} = ID_aux;
-%     txt{i} = txt_aux;
-end
+% for i=1:1:m;
+%     Sheet = char(sheetname_xy(1,i)) ;
+%     alldata_xy{i} = xlsread(vfile_xy, Sheet);
+%     [ID,txt] = xlsread(vfile_xy, Sheet, 'E1:H3');
+% %     ID{i} = ID_aux;
+% %     txt{i} = txt_aux;
+% end
 
 %Correcting time in all the sheets
-for h=1:size(alldata_xy,2)
-    %     t = alldata_xy{1,h}(:,1);
-    alldata_xy{1,h}((isnan(alldata_xy{1,h}(:,1))),:)=[];
-    t = datestr(alldata_xy{1,h}(:,1),'HH:MM:SS.FFF');  %Transforms time from excel (which was converted to number) to this format
-    t = datevec(t);  %Separates time in columns (hours, minutes, seconds, mili)
-    t = t(:,5)*60+t(:,6);
-    alldata_xy{1,h}(:,1)=t;
-end
-
-all_xy = [];
-for k=1:size(alldata_xy,2)
-    aux = alldata_xy{1,k}(:,1);
-    all_xy = [all_xy; [(k-1)*600+aux alldata_xy{1,k}(:,2:9)]];
-end
-
-
-% control_bin1 = [];
-% control_bin2 = [];
-% control_bin3 = [];
-% control_bin4 = [];
-% agrp_bin1 = [];
-% agrp_bin2 = [];
-% agrp_bin3 = [];
-% agrp_bin4 = [];
-% 
-% for k=1:size(list_names,1)
-%     for bin_num=1:4
-%         if ~isempty(cell2mat(strfind(list_names(k),'Control')))
-%            eval(['control_bin' num2str(bin_num) '= [control_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];']) 
-%         else
-%            eval(['agrp_bin' num2str(bin_num) '= [agrp_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];'])  
-%         end
-%     end
+% for h=1:size(alldata_xy,2)
+%     %     t = alldata_xy{1,h}(:,1);
+%     alldata_xy{1,h}((isnan(alldata_xy{1,h}(:,1))),:)=[];
+%     t = datestr(alldata_xy{1,h}(:,1),'HH:MM:SS.FFF');  %Transforms time from excel (which was converted to number) to this format
+%     t = datevec(t);  %Separates time in columns (hours, minutes, seconds, mili)
+%     t = t(:,5)*60+t(:,6);
+%     alldata_xy{1,h}(:,1)=t;
 % end
-% 
-% disp('Calculating total vocalizations through all the files')
-% % figure
-% agrp = [agrp_bin1, agrp_bin2, agrp_bin3, agrp_bin4];
-% list_size = 1:size(agrp,1);
+
+% all_xy = [];
+% for k=1:size(alldata_xy,2)
+%     aux = alldata_xy{1,k}(:,1);
+%     all_xy = [all_xy; [(k-1)*600+aux alldata_xy{1,k}(:,2:9)]];
+% end
+
+
+control_bin1 = [];
+control_bin2 = [];
+control_bin3 = [];
+control_bin4 = [];
+agrp_bin1 = [];
+agrp_bin2 = [];
+agrp_bin3 = [];
+agrp_bin4 = [];
+
+for k=1:size(list_names,1)
+    for bin_num=1:4
+        if ~isempty(cell2mat(strfind(list_names(k),'Control')))
+           eval(['control_bin' num2str(bin_num) '= [control_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];']) 
+        else
+           eval(['agrp_bin' num2str(bin_num) '= [agrp_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];'])  
+        end
+    end
+end
+
+disp('Calculating total vocalizations through all the files')
+% figure
+agrp = [agrp_bin1, agrp_bin2, agrp_bin3, agrp_bin4];
+list_size = 1:size(agrp,1);
 % agrp1 = agrp(find(mod(list_size,2)>0),:);
 % agrp1 = sum(agrp1,1);
 % subplot(2,1,1), plot(agrp1,'--*');
 % title('1st stage')
-% control = [control_bin1, control_bin2, control_bin3, control_bin4];
+control = [control_bin1, control_bin2, control_bin3, control_bin4];
 % list_size2 = 1:size(control,1);
 % control1 = control(find(mod(list_size2,2)>0),:);
 % control1 = sum(control1,1);
 % hold on
 % plot(control1,'--*')
 % legend('agrp1','control')
-% 
+
 % agrp1 = agrp(find(mod(list_size,2)==0),:);
-% agrp1 = sum(agrp1,1);
-% subplot(2,1,2), plot(agrp1,'--*' );
-% title('2nd stage')
+agrp1 = sum(agrp,1);
+plot([1,2,3,4],agrp1,'--*' );
+title('2nd stage')
 % control1 = control(find(mod(list_size2,2)==0),:);
-% control1 = sum(control1,1);
-% hold on
-% plot(control1, '--*')
-% legend('agrp1','control')
+control1 = sum(control,1);
+hold on
+plot(control1, '--*')
+legend('agrp1','control')
 % 
 % disp('Calculating interval distribution through all the files')
 % control_bin1 = [];
@@ -485,20 +486,23 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 raster_list = {};
 list_selected = {};
+count = 0;
 disp('Raster plot for the pair in 1st and 2nd stage')
-for k=[1 3];%1:size(list_names,1)/2
+for k=[6 12 14 20 24 34 38 42 50 2 4 8 10 16 18 22 26 28 30 32 36 40 44 46 48];%1:size(list_names,1)/2
 %     if ~isempty(cell2mat(strfind(list_names(k),'Control'))) && ~isempty(cell2mat(strfind(list_names(k),'1st')))
 %         if ~isempty(cell2mat(strfind(list_names(k+1),'Control'))) && ~isempty(cell2mat(strfind(list_names(k+1),'2nd')))
+count = count+1;
             all = [];
-            for j=k:k+1
+            for j=k
                 for bin_num=1:4
                     eval(['all'  '= [all' ','  '(j-k)*600+cell2mat(general_analysis.' char(list_names(j)) '.bin' num2str(bin_num) '.total_vocal)];']) ;
                 end
             end
-            raster_list{k} = all; 
+            raster_list{count} = all; 
             name1 = char(list_names(k));
-            name2 = char(list_names(k+1));
-            list_selected{k} = strcat(name1(8:end-6), ' & ', name2(8:end-6));
+%             name2 = char(list_names(k+1));
+%             list_selected{k} = strcat(name1(8:end-6), ' & ', name2(8:end-6));
+            list_selected{count} = strcat(name1(8:end-6));
 %         end
 %     end
 end
@@ -507,16 +511,16 @@ disp('Removing empty cells')
 raster_list = raster_list(~cellfun('isempty',raster_list));
 list_selected = list_selected(~cellfun('isempty',list_selected));
 
-disp('Also the moms coordinates');
-mom_left = find(all_xy(:,6)==1);
-mom_left = all_xy(mom_left,1);
-mom_right = find(all_xy(:,5)==1);
-mom_right = all_xy(mom_right,1);
+% disp('Also the moms coordinates');
+% mom_left = find(all_xy(:,6)==1);
+% mom_left = all_xy(mom_left,1);
+% mom_right = find(all_xy(:,5)==1);
+% mom_right = all_xy(mom_right,1);
 
-raster_list{3} = mom_left';
-raster_list{4} = mom_right';
-list_selected{3} = strcat('Mom left side (', num2str(ID(2)), ')');
-list_selected{4} = strcat('Mom right side (', num2str(ID(1)), ')');
+% raster_list{3} = mom_left';
+% raster_list{4} = mom_right';
+% list_selected{3} = strcat('Mom left side (', num2str(ID(2)), ')');
+% list_selected{4} = strcat('Mom right side (', num2str(ID(1)), ')');
 
 cd(raiz)
 disp('Removing empty cells')

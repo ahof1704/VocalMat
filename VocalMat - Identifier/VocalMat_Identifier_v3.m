@@ -31,7 +31,7 @@ median_dist = 600 %600; If the median of the euclidean distance between succesiv
 max_vocal_duration = 0.140 %If a vocalization is onger than max_vocal_duration, than it can be a noise that needs to be removed by denoising process.
 use_median = 1 %If =1, use the median method to detect the noise.
 tic
-for Name = 1:size(list,1)
+for Name = 1:6%size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);

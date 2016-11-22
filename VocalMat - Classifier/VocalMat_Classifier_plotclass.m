@@ -18,12 +18,28 @@ cd(vpathname);
 list = dir('*output*.mat');
 diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
-for Name=1:size(list,1)
+stepup_count_bin_total  = 0;
+stepdown_count_bin_total = 0 ;
+harmonic_count_bin_total  = 0;
+flat_count_bin_total  = 0;
+chevron_count_bin_total  = 0;
+revchevron_count_bin_total  = 0;
+downfm_count_bin_total  = 0;
+upfm_count_bin_total  = 0;
+complex_count_bin_total  = 0;
+noisy_vocal_count_bin_total  = 0;
+nonlinear_count_bin_total  = 0;
+short_count_bin_total  = 0;
+noise_count_bin_total  = 0;
+two_steps_count_bin_total  = 0;
+mult_steps_count_bin_total  = 0;
+
+for Name=2%:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
     
-    clearvars -except list raiz vfile vfilename vpathname
+    clearvars -except list raiz vfile vfilename vpathname stepup_count_bin_total stepdown_count_bin_total harmonic_count_bin_total flat_count_bin_total chevron_count_bin_total revchevron_count_bin_total downfm_count_bin_total upfm_count_bin_total complex_count_bin_total noisy_vocal_count_bin_total nonlinear_count_bin_total short_count_bin_total noise_count_bin_total two_steps_count_bin_total mult_steps_count_bin_total 
     plot_data=1;
     fprintf('\n')
     disp(['Reading ' vfilename])
@@ -49,9 +65,9 @@ for Name=1:size(list,1)
     output=[];
     
     for k=1:size(time_vocal,2)
-%             if k==2
-%                 k
-%             end
+            if k==51
+                k
+            end
         vocal_classified{k}.step_up = [];
         vocal_classified{k}.step_down = [];
         vocal_classified{k}.harmonic = [];
@@ -178,7 +194,8 @@ for Name=1:size(list,1)
                     
                 else
                     aux = freq_vocal{k}{time_stamp+1} - freq_vocal{k}{time_stamp};
-                    current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
+%                     current_freq = [current_freq; freq_vocal{k}{time_stamp+1}]; Testing
+                    current_freq = [current_freq; freq_vocal{k}{time_stamp}];
 %                     if (aux>=10000)
 % %                         current_freq = freq_vocal{k}{time_stamp+1};
 %                         idx_stepdown_time = time_vocal{k}(time_stamp);
@@ -287,10 +304,10 @@ for Name=1:size(list,1)
                 time_stamps = round(linspace(1,size(current_freq',2),10));
                 aux = current_freq;
                 aux = aux-circshift(aux ,[1,0]);
-                if sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
+                if (abs(current_freq(end) - current_freq(1))> 6000) && sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
                     vocal_classified{k}.down_fm = time_vocal{k}(1);
                     downfm_count = [downfm_count;k];
-                elseif sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
+                elseif (abs(current_freq(end) - current_freq(1))> 6000) && sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
                     vocal_classified{k}.up_fm = time_vocal{k}(1);
                     upfm_count = [upfm_count;k];
                 else
@@ -339,10 +356,10 @@ for Name=1:size(list,1)
                 time_stamps = round(linspace(1,size(current_freq',2),10));
                 aux = current_freq;
                 aux = aux-circshift(aux ,[1,0]);
-                if sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
+                if (abs(current_freq(end) - current_freq(1))> 6000) && sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
                     vocal_classified{k}.down_fm = time_vocal{k}(1);
                     downfm_count = [downfm_count;k];
-                elseif sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
+                elseif (abs(current_freq(end) - current_freq(1))> 6000) && sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
                     vocal_classified{k}.up_fm = time_vocal{k}(1);
                     upfm_count = [upfm_count;k];
                 else
@@ -365,7 +382,8 @@ for Name=1:size(list,1)
                     end
                 end
 %             end
-            if isempty(cell2mat(struct2cell(vocal_classified{k}))) %If it is still empty, has to be complex
+            check_if_only_harmonic = struct2cell(vocal_classified{k}); check_if_only_harmonic([3 14])=[];
+            if isempty(cell2mat(check_if_only_harmonic))  %If it is still empty, has to be complex
                 vocal_classified{k}.complex = time_vocal{k}(1);
                 complex_count = [complex_count;k];
             end
@@ -677,18 +695,18 @@ if 1
        two_steps_count_bin  = [ sum(list_clusters.two_steps <= bin_1(end)), sum(list_clusters.two_steps >=bin_2(1) & list_clusters.two_steps <=bin_2(end)), sum(list_clusters.two_steps >=bin_3(1) & list_clusters.two_steps <=bin_3(end)), sum(list_clusters.two_steps >=bin_4(1) & list_clusters.two_steps <=bin_4(end))];
        mult_steps_count_bin  = [ sum(list_clusters.mult_steps <= bin_1(end)), sum(list_clusters.mult_steps >=bin_2(1) & list_clusters.mult_steps <=bin_2(end)), sum(list_clusters.mult_steps >=bin_3(1) & list_clusters.mult_steps <=bin_3(end)), sum(list_clusters.mult_steps >=bin_4(1) & list_clusters.mult_steps <=bin_4(end))];
        
-       all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_vocal_count_bin; nonlinear_count_bin; short_count_bin; noise_count_bin; mult_steps_count_bin; two_steps_count_bin];
-        figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
-        bar(all_class,'stacked')
-        Labels = {'stepup_count', 'stepdown_count', 'harmonic_count', 'flat_count', 'chevron_count', 'revchevron_count', 'downfm_count', 'upfm_count', 'complex_count', 'noisy_vocal_count', 'nonlinear_count', 'short_count','noise_count','mult_steps_count_bin','two_steps_count_bin'};
-    %     set(gca, 'XTick', [1:12, 'XTickLabel', Labels);
-        set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
-        legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
+%        all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_vocal_count_bin; nonlinear_count_bin; short_count_bin; noise_count_bin; mult_steps_count_bin; two_steps_count_bin];
+%         figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
+%         bar(all_class,'stacked')
+%         Labels = {'stepup_count', 'stepdown_count', 'harmonic_count', 'flat_count', 'chevron_count', 'revchevron_count', 'downfm_count', 'upfm_count', 'complex_count', 'noisy_vocal_count', 'nonlinear_count', 'short_count','noise_count','mult_steps_count_bin','two_steps_count_bin'};
+%     %     set(gca, 'XTick', [1:12, 'XTickLabel', Labels);
+%         set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
+%         legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
     %Get correlation table for this vocalizations
 %     cd(raiz)
 % %     save_plot_vocalizations(vfilename,vpathname)
 %     figure('Name',vfilename,'NumberTitle','off')
-    set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
+%     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
 %     categories = [categories; 'two_steps'; 'mult_steps'];
 %     for names = 1:size(categories,1)
 %         cd(raiz)
@@ -798,19 +816,53 @@ if 1
 %                         x_pos = time_vocal{id_vocal}(ceil(end/2));
 %                         y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
 %                         text(x_pos,y_pos,num2str(id_vocal),'HorizontalAlignment','left','FontSize',20,'Color','r');
-                        saveas(gcf,[vpathname '/' vfilename  '.png'])
+%                         saveas(gcf,[vpathname '/' vfilename  '.png'])
 % %                     end
 %                     hold off
 %                 end
 % %             end
 %         end
 %    end
-%    save(['vocal_classified_' vfilename],'vocal_classified','list_clusters','vfilename')
+   save(['vocal_classified_' vfilename],'vocal_classified','list_clusters','vfilename')
 %    close all
     %Generate .wav files for cohesive and split clusters
 %     system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
 end
+
+stepup_count_bin_total  = stepup_count_bin_total + stepup_count_bin;
+stepdown_count_bin_total = stepdown_count_bin_total +  stepdown_count_bin ;
+harmonic_count_bin_total  = harmonic_count_bin_total+ harmonic_count_bin;
+flat_count_bin_total  = flat_count_bin_total + flat_count_bin;
+chevron_count_bin_total  = chevron_count_bin_total + chevron_count_bin;
+revchevron_count_bin_total  = revchevron_count_bin_total + revchevron_count_bin;
+downfm_count_bin_total  = downfm_count_bin_total + downfm_count_bin;
+upfm_count_bin_total  = upfm_count_bin_total + upfm_count_bin;
+complex_count_bin_total  = complex_count_bin_total + complex_count_bin;
+noisy_vocal_count_bin_total  = noisy_vocal_count_bin_total + noisy_vocal_count_bin;
+nonlinear_count_bin_total  = nonlinear_count_bin_total + nonlinear_count_bin;
+short_count_bin_total  = short_count_bin_total + short_count_bin;
+noise_count_bin_total  = noise_count_bin_total + noise_count_bin;
+two_steps_count_bin_total  = two_steps_count_bin_total + two_steps_count_bin;
+mult_steps_count_bin_total  = mult_steps_count_bin_total + mult_steps_count_bin;
+       
 end
 
+total = stepup_count_bin_total + stepdown_count_bin_total + harmonic_count_bin_total  + flat_count_bin_total + chevron_count_bin_total + revchevron_count_bin_total  + downfm_count_bin_total + upfm_count_bin_total + complex_count_bin_total  + noisy_vocal_count_bin_total + nonlinear_count_bin_total + short_count_bin_total + noise_count_bin_total + two_steps_count_bin_total + mult_steps_count_bin_total ;
+
+all_class = [stepup_count_bin_total; stepdown_count_bin_total; harmonic_count_bin_total; flat_count_bin_total; chevron_count_bin_total; revchevron_count_bin_total; downfm_count_bin_total; upfm_count_bin_total; complex_count_bin_total; noisy_vocal_count_bin_total; nonlinear_count_bin_total; short_count_bin_total; noise_count_bin_total; mult_steps_count_bin_total; two_steps_count_bin_total];
+figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
+bar(all_class,'stacked')
+Labels = {'step_up ', 'step_down ', 'harmonic ', 'flat ', 'chevron ', 'rev_chevron ', 'down_fm ', 'up_fm ', 'complex ', 'noisy_vocal ', 'non_linear ', 'short ','noise ','mult_steps','two_steps'};
+set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
+legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
+set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
+
+all_class2 = all_class/sum(total);
+figure('Name',['vocal_classified_' vfilename '(%)'],'NumberTitle','off')
+bar(all_class2,'stacked') 
+Labels = {'step_up ', 'step_down ', 'harmonic ', 'flat ', 'chevron ', 'rev_chevron ', 'down_fm ', 'up_fm ', 'complex ', 'noisy_vocal ', 'non_linear ', 'short ','noise ','mult_steps','two_steps'};
+set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
+legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
+set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
 % disp(['Time to plot all the vocalizations: ' num2str(toc)]);
 diary('off');

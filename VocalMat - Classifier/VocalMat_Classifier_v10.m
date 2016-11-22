@@ -18,7 +18,7 @@ cd(vpathname);
 list = dir('*output*.mat');
 diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
-for Name=1:size(list,1)
+for Name=1%2:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -287,10 +287,10 @@ for Name=1:size(list,1)
                 time_stamps = round(linspace(1,size(current_freq',2),10));
                 aux = current_freq;
                 aux = aux-circshift(aux ,[1,0]);
-                if sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
+                if (abs(current_freq(end) - current_freq(1))> 6000) && sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
                     vocal_classified{k}.down_fm = time_vocal{k}(1);
                     downfm_count = [downfm_count;k];
-                elseif sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
+                elseif (abs(current_freq(end) - current_freq(1))> 6000) && sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
                     vocal_classified{k}.up_fm = time_vocal{k}(1);
                     upfm_count = [upfm_count;k];
                 else
@@ -339,10 +339,10 @@ for Name=1:size(list,1)
                 time_stamps = round(linspace(1,size(current_freq',2),10));
                 aux = current_freq;
                 aux = aux-circshift(aux ,[1,0]);
-                if sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
+                if (abs(current_freq(end) - current_freq(1))> 6000) && sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
                     vocal_classified{k}.down_fm = time_vocal{k}(1);
                     downfm_count = [downfm_count;k];
-                elseif sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
+                elseif (abs(current_freq(end) - current_freq(1))> 6000) && sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
                     vocal_classified{k}.up_fm = time_vocal{k}(1);
                     upfm_count = [upfm_count;k];
                 else

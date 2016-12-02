@@ -65,7 +65,7 @@ for Name=2%:size(list,1)
     output=[];
     
     for k=1:size(time_vocal,2)
-        if k==82
+        if k==306
             k
         end
         vocal_classified{k}.step_up = [];
@@ -358,7 +358,7 @@ for Name=2%:size(list,1)
                 [max_local max_local] = max(current_freq);
                 aux2 = aux(2:max_local);
                 aux3 = aux(max_local:end);
-                if sum(sign(aux2)>0)/size(aux2,1)>0.7 && sum(sign(aux3)<0)/size(aux3,1)>0.7 %The "U" shape is verified
+                if sum(sign(aux2)>0)/size(aux2,1)>=0.7 && sum(sign(aux3)<0)/size(aux3,1)>=0.7 %The "U" shape is verified
                     vocal_classified{k}.chevron = time_vocal{k}(1);
                     chevron_count = [chevron_count;k];
                 end
@@ -366,7 +366,7 @@ for Name=2%:size(list,1)
                 [min_local min_local] = min(current_freq);
                 aux2 = aux(2:min_local);
                 aux3 = aux(min_local:end);
-                if sum(sign(aux2)<0)/size(aux2,1)>0.7 && sum(sign(aux3)>0)/size(aux3,1)>0.7 %The inverted "U" shape is verified
+                if sum(sign(aux2)<0)/size(aux2,1)>=0.7 && sum(sign(aux3)>0)/size(aux3,1)>=0.7 %The inverted "U" shape is verified
                     vocal_classified{k}.rev_chevron = time_vocal{k}(1);
                     revchevron_count = [revchevron_count;k];
                 end
@@ -820,7 +820,7 @@ for Name=2%:size(list,1)
         %         end
         %    end
         save(['vocal_classified_' vfilename],'vocal_classified','list_clusters','vfilename')
-        %    close all
+           close all
         %Generate .wav files for cohesive and split clusters
         %     system(['R --slave --args' ' ' char(34) corr_table char(34) ' ' 'wavs "0.80" "5" < getClusterCenterUSV_pub.r']);
     end

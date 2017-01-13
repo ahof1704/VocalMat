@@ -34,7 +34,7 @@ noise_count_bin_total  = 0;
 two_steps_count_bin_total  = 0;
 mult_steps_count_bin_total  = 0;
 
-for Name=2%:size(list,1)
+for Name=4%:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);

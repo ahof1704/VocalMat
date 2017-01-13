@@ -31,7 +31,7 @@ median_dist = 600 %600; If the median of the euclidean distance between succesiv
 max_vocal_duration = 0.140 %If a vocalization is onger than max_vocal_duration, than it can be a noise that needs to be removed by denoising process.
 use_median = 1 %If =1, use the median method to detect the noise.
 tic
-for Name = 1:6%size(list,1)
+for Name = 1:3%:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -408,7 +408,7 @@ for Name = 1:6%size(list,1)
         %     text(time_vocal{i}(round(end/2)),freq_vocal{i}{round(end/2)}(round(end/2))+5000,[num2str(i)],'HorizontalAlignment','left','FontSize',20,'Color','r');
         % %     output = [output; i, size(time_vocal{i},2) , min(time_vocal{i}), max(time_vocal{i}), (max(time_vocal{i})-min(time_vocal{i})) , max(freq_vocal{i}), mean(freq_vocal{i}),(max(freq_vocal{i})-min(freq_vocal{i})) , min(freq_vocal{i}), min(intens_vocal{i}), max(intens_vocal{i}), mean(intens_vocal{i})];
         % end
-        save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal')
+        save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal','A_total','-v7.3')
         warning('off', 'MATLAB:save:sizeTooBigForMATFile')
         disp('Cleaning variables: y y1 S F T P fs q nd vocal id' )
         clear y y1 S F T P fs q nd vocal id

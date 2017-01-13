@@ -998,15 +998,17 @@ for Name=1:3%:size(list,1)
     end
     
     %Move all the pics to 'All' folder
-    mkdir('All')
-    p = pwd;
-    cd(raiz)
-    lista = rdir([p, '\**\*.png']);
-    cd(p)
-    p = strcat(p, '\All');
-    
-    for i=1:size(lista,1)
-        copyfile(lista(i).name,p)
+    if save_plot_spectrograms==1
+        mkdir('All')
+        p = pwd;
+        cd(raiz)
+        lista = rdir([p, '\**\*.png']);
+        cd(p)
+        p = strcat(p, '\All');
+        
+        for i=1:size(lista,1)
+            copyfile(lista(i).name,p)
+        end
     end
 end
 
@@ -1066,7 +1068,7 @@ if plot_stats_per_bin ==1
     legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
     % disp(['Time to plot all the vocalizations: ' num2str(toc)]);
-    saveas(gcf,[vpathname  vfilename experiment_name{1} '_%_' '.jpg'])
+    saveas(gcf,[vpathname  experiment_name{1} '_%_' '.jpg'])
 end
 
 diary('off');

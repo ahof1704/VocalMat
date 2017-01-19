@@ -1022,7 +1022,7 @@ if plot_stats_per_bin ==1
     set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
     legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
-    experiment_name = strsplit(vpathname,'\');
+    experiment_name = strsplit(vpathname,{'\','/'});
     experiment_name = experiment_name(end-2);
     saveas(gcf,[vpathname  experiment_name{1} '.jpg'])
     

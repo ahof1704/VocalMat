@@ -22,9 +22,9 @@ diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
 %Setting up
 p = mfilename('fullpath')
-plot_stats_per_bin=1
+plot_stats_per_bin=0
 save_plot_spectrograms=1
-save_histogram_per_animal=1
+save_histogram_per_animal=0
 save_excel_file=1
 
 stepup_count_bin_total  = 0;
@@ -43,7 +43,7 @@ noise_count_bin_total  = 0;
 two_steps_count_bin_total  = 0;
 mult_steps_count_bin_total  = 0;
 
-for Name=6%1:size(list,1)
+for Name=1:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -76,9 +76,9 @@ for Name=6%1:size(list,1)
     output=[];
     
     for k=1:size(time_vocal,2)
-        if k==190
-            k
-        end
+%         if k==636
+%             k
+%         end
         vocal_classified{k}.step_up = [];
         vocal_classified{k}.step_down = [];
         vocal_classified{k}.harmonic = [];
@@ -97,6 +97,7 @@ for Name=6%1:size(list,1)
         %Verify jump in frequency taking as base the closest frequency detected
         current_freq = [];
         harmonic_candidate = [];
+        skip_current = 0;
         for time_stamp = 1:size(time_vocal{k},2)-1
             
             if size(freq_vocal{k}{time_stamp+1},1)>1 %Probably we have an harmonic
@@ -131,7 +132,12 @@ for Name=6%1:size(list,1)
                         end
                     end
                 else %Find the closests freq to be the current and classify the other as harmonic candidate
-                    aux = freq_vocal{k}{time_stamp+1} - freq_vocal{k}{time_stamp}*ones(size(freq_vocal{k}{time_stamp+1},1),1);
+                    try 
+                        aux = freq_vocal{k}{time_stamp+1} - current_freq(end)*ones(size(freq_vocal{k}{time_stamp+1},1),1);
+                    catch
+                        aux = freq_vocal{k}{time_stamp+1} - freq_vocal{k}{time_stamp}*ones(size(freq_vocal{k}{time_stamp+1},1),1);
+                    end
+                    
                     [mini,mini]=min(abs(aux));
                     temp = freq_vocal{k}{time_stamp+1};
                     current_freq = [current_freq; temp(mini)]; temp(mini) = [];
@@ -141,18 +147,10 @@ for Name=6%1:size(list,1)
                     end
                 end
                 
-                %            [maxi,maxi]=max(abs(aux));
-                %            if (sign(aux(maxi))>0 && abs(aux(maxi))>5000)
-                %                idx_stepdown_time = time_vocal{k}(time_stamp);
-                %                disp(['Vocalization ' num2str(k) ' had a step down in t=' num2str(idx_stepdown_time)]);
-                %            elseif (sign(aux(maxi))<0 && abs(aux(maxi))>5000)
-                %                idx_stepup_time = time_vocal{k}(time_stamp);
-                %                disp(['Vocalization ' num2str(k) ' had a step up in t=' num2str(idx_stepup_time)]);
-                %            end
             else %There is nothing similar to harmonic right now... but there was before?
                 if (size(freq_vocal{k}{time_stamp},1)>1);
                     %                So... Was it an harmonic or not?
-                    if time_stamp == 1 %If the vocalization starts with something that reminds a vocalziation
+                    if time_stamp == 1 %If the vocalization starts with something that reminds a vocalization
                         aux = freq_vocal{k}{time_stamp} - freq_vocal{k}{time_stamp+1}*ones(size(freq_vocal{k}{time_stamp},1),1);
                         [mini,mini]=min(abs(aux));
                         temp = freq_vocal{k}{time_stamp};
@@ -175,9 +173,14 @@ for Name=6%1:size(list,1)
                                 %                                 vocal_classified{k}.harmonic = [vocal_classified{k}.harmonic; start_harmonic];
                                 %                                 vocal_classified{k}.harmonic_size = [vocal_classified{k}.harmonic_size; size(harmonic_candidate,1)];
                                 %                                 current_freq = harmonic_candidate;
-                                current_freq(end-size(harmonic_candidate,1)+1:end) = harmonic_candidate;
-                                current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
-                                harmonic_candidate = [];
+                                if (time_stamp+2 < size(time_vocal{k},2)) && any(abs(freq_vocal{k}{time_stamp+2} - current_freq(end)) < abs(freq_vocal{k}{time_stamp+2} - harmonic_candidate(end))) %Is there any chance of continuing with the current_freq?
+                                    harmonic_candidate = [harmonic_candidate; freq_vocal{k}{time_stamp+1}];
+                                    skip_current = 1;
+                                else
+                                    current_freq(end-size(harmonic_candidate,1)+1:end) = harmonic_candidate;
+                                    current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
+                                    harmonic_candidate = [];
+                                end
                                 %                                 harmonic_count = [harmonic_count;k];
                                 %                             else
                                 %                                 current_freq(end-size(harmonic_candidate,1)+1:end) = harmonic_candidate;
@@ -208,7 +211,10 @@ for Name=6%1:size(list,1)
                 else
                     aux = freq_vocal{k}{time_stamp+1} - freq_vocal{k}{time_stamp};
                     %                     current_freq = [current_freq; freq_vocal{k}{time_stamp+1}]; Testing
-                    current_freq = [current_freq; freq_vocal{k}{time_stamp}];
+                    if skip_current==0
+                        current_freq = [current_freq; freq_vocal{k}{time_stamp}];
+                    end
+                    skip_current = 0;
                     %                     if (aux>=10000)
                     % %                         current_freq = freq_vocal{k}{time_stamp+1};
                     %                         idx_stepdown_time = time_vocal{k}(time_stamp);
@@ -307,6 +313,19 @@ for Name=6%1:size(list,1)
             current_freq(temp2+1:end)=[];
         end
         
+        %Eliminate too short steps.
+        for lin = 1:size(vocal_classified{k}.step_up,1)
+           for lin2 = 1:size(vocal_classified{k}.step_down,1)
+               if abs(vocal_classified{k}.step_up(lin) - vocal_classified{k}.step_down(lin2)) < 0.003 %at least 3ms
+                   vocal_classified{k}.step_up(lin) = -100;
+                   vocal_classified{k}.step_down(lin2) = -100;
+               end
+           end
+        end
+        
+        vocal_classified{k}.step_up(vocal_classified{k}.step_up==-100) = []; if size(vocal_classified{k}.step_up,2)<1;  vocal_classified{k}.step_up = []; end  
+        vocal_classified{k}.step_down(vocal_classified{k}.step_down==-100) = []; if size(vocal_classified{k}.step_down,2)<1;  vocal_classified{k}.step_down = []; end
+        
         if (isempty(cell2mat(struct2cell(vocal_classified{k}))) || ~isempty(vocal_classified{k}.harmonic)) && size(time_vocal{k},2)<40 %It means there was no step up, down or harmonic
             if max(current_freq)-min(current_freq) <= 1000 % flat
                 if time_vocal{k}(end) - time_vocal{k}(1) < 0.0065
@@ -331,7 +350,7 @@ for Name=6%1:size(list,1)
                     [max_local max_local] = max(current_freq);
                     aux2 = aux(2:max_local);
                     aux3 = aux(max_local:end);
-                    if sum(sign(aux2)>0)/size(aux2,1)>0.7 && sum(sign(aux3)<0)/size(aux3,1)>0.7 %The "U" shape is verified
+                    if sum(sign(aux2)>0)/size(aux2,1)>=0.7 && sum(sign(aux3)<0)/size(aux3,1)>=0.7 && mean(diff(current_freq(2:max_local)))/size(current_freq(2:max_local),1)>3 && mean(diff(current_freq(max_local:end)))/size(current_freq(max_local:end),1)<-3%The "U" shape is verified
                         vocal_classified{k}.chevron = time_vocal{k}(1);
                         chevron_count = [chevron_count;k];
                     end
@@ -381,7 +400,7 @@ for Name=6%1:size(list,1)
                 [max_local max_local] = max(current_freq);
                 aux2 = aux(2:max_local);
                 aux3 = aux(max_local:end);
-                if sum(sign(aux2)>0)/size(aux2,1)>=0.7 && sum(sign(aux3)<0)/size(aux3,1)>=0.7 %The "U" shape is verified
+                if sum(sign(aux2)>0)/size(aux2,1)>=0.7 && sum(sign(aux3)<0)/size(aux3,1)>=0.7 && mean(diff(current_freq(2:max_local)))/size(current_freq(2:max_local),1)>3 && mean(diff(current_freq(max_local:end)))/size(current_freq(max_local:end),1)<-3%The "U" shape is verified
                     vocal_classified{k}.chevron = time_vocal{k}(1);
                     chevron_count = [chevron_count;k];
                 end
@@ -414,17 +433,32 @@ for Name=6%1:size(list,1)
         %         for jj = 207% 1:size(time_vocal,2)
         for kk = 1:size(time_vocal{k},2)
             for ll = 1:size(freq_vocal{k}{kk},1)
-                tabela = [tabela; time_vocal{k}(kk) freq_vocal{k}{kk}(ll)];
+                tabela = [tabela; time_vocal{k}(kk) freq_vocal{k}{kk}(ll) intens_vocal{k}{kk}(ll)];
             end
         end
         %         end
         
-        
-        tabela = [tabela intens_vocal{k}];
+          T_min_max = [time_vocal{k}(1) time_vocal{k}(end)];
+          [T_min T_min] = min(abs(T_orig - T_min_max(1)));
+          [T_max T_max] = min(abs(T_orig - T_min_max(2)));
+%           
+          test2 = max(A_total(:,T_min:T_max),[],2);
+        test3 = sqrt(test2.^2)/max(abs(test2));
+        test3 = 1-test3;
+        test3 = test3*1/max(test3);
+%         figure, surf(T_orig(T_min:T_max),F_orig,A_total(:,T_min:T_max),'edgecolor','none')
+%         figure, plot(F_orig,test3)
+%         hold on
+        yy2 = smooth(F_orig,test3,0.15,'rloess');
+%         plot(F_orig,yy2,'--r')
+%         hold off
+            
+%         tabela = [tabela intens_vocal{k}];
         tamanho = size(tabela,1);
         aux3 = tabela(:,2) - circshift(tabela(:,2),[1,0]);
         aux3 = [sum(abs(aux3)>1000), tamanho];
         [f,xi]=ksdensity(tabela(:,2));
+%         figure, plot(xi,f)
         [pks,locs]=findpeaks(f);
         if aux3(1)/aux3(2)>=0.75
             %       If number of clusters  > 2 * size_fields, then is noisy vocal
@@ -474,9 +508,17 @@ for Name=6%1:size(list,1)
                     if ~isempty(vocal_classified{k}.harmonic_size) && max(vocal_classified{k}.harmonic_size)>=15 % && max(vocal_classified{k}.	)/size(time_vocal{k},2)>0.5
                         
                     else
-                        aux5 = 1; %'Noise';
-                        vocal_classified{k}.noise = time_vocal{k}(1);
-                        noise_count = [noise_count;k];
+                        [pks,locs]=findpeaks(yy2);
+                        % evaluate relation to the peaks
+                        [max_peak1 max_peak1]=max(pks);
+                        max_peak.peak = max(pks); pks(max_peak1)=[];
+                        max_peak2.peak = max(pks); pks(max_peak1)=[];
+                        
+                        if ~isempty(max_peak2.peak) && max_peak.peak / max_peak2.peak <= 2
+                            aux5 = 1; %'Noise';
+                            vocal_classified{k}.noise = time_vocal{k}(1);
+                            noise_count = [noise_count;k];
+                        end
                     end
                 end
             else
@@ -612,6 +654,7 @@ for Name=6%1:size(list,1)
     
     list_clusters.mult_steps = [];
     list_clusters.two_steps = [];
+    list_clusters.noisy_vocal = [];
     for names = 1:size(categories,1)
         count = 0;
         name = categories{names};
@@ -636,10 +679,14 @@ for Name=6%1:size(list,1)
                     if strcmp(name, 'step_up') || strcmp(name, 'step_down')
                         if size(vocal_classified{k}.step_up,1)==1 && size(vocal_classified{k}.step_down,1)==1
                             list_clusters.two_steps = unique([list_clusters.two_steps ; k]);
-                        elseif size(vocal_classified{k}.step_up,1)+ size(vocal_classified{k}.step_down,1)>1 && isempty(vocal_classified{k}.noisy_vocal)
+                        elseif size(vocal_classified{k}.step_up,1)+ size(vocal_classified{k}.step_down,1)>1 && isempty(vocal_classified{k}.noisy_vocal) && size(vocal_classified{k}.step_up,1)>0 && size(vocal_classified{k}.step_down,1)>0
                             list_clusters.mult_steps = unique([list_clusters.mult_steps ; k]);
                         elseif size(vocal_classified{k}.step_up,1)>0 && size(vocal_classified{k}.step_down,1)>0 && ~isempty(vocal_classified{k}.noisy_vocal) %There is step up, down and it is a noisy vocal -> Noisy Vocal
-                            list_clusters.noisy_vocal = unique([list_clusters.noisy_vocal ; k]);
+                            if abs(size(vocal_classified{k}.step_up,1)-size(vocal_classified{k}.step_down,1)) <= 2
+                                list_clusters.mult_steps = unique([list_clusters.mult_steps ; k]);
+                            else
+                                list_clusters.noisy_vocal = unique([list_clusters.noisy_vocal ; k]);
+                            end
                         else
                             eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
                         end
@@ -728,9 +775,13 @@ for Name=6%1:size(list,1)
                 %clustered = dlmread('clusters.txt');
                 
                 cd(vpathname)
-                mkdir(vfilename)
+                if ~exist(vfilename, 'dir')
+                    mkdir(vfilename)
+                end
                 cd(vfilename)
-                mkdir(name)
+                if ~exist(name, 'dir')
+                    mkdir(name)
+                end
                 
                 
                 %                 for ww1 = 1:size(clustered,1)
@@ -778,9 +829,14 @@ for Name=6%1:size(list,1)
                     TT = cluster(Z,'cutoff',1.4,'depth',3); %TT = cluster(Z,'cutoff',2.3,'depth',4); Use this one for a test.
                     
                     cd(vpathname)
-                    mkdir(vfilename)
+                    if ~exist(vfilename, 'dir')
+                        mkdir(vfilename)
+                    end
                     cd(vfilename)
-                    mkdir(name)
+                    if ~exist(name, 'dir')
+                        mkdir(name)
+                    end
+                    
                     %
                     for cluster_number = 1:max(TT)
                         cd([vpathname vfilename '/' name])
@@ -821,9 +877,13 @@ for Name=6%1:size(list,1)
                     
                 else
                     cd(vpathname)
-                    mkdir(vfilename)
+                    if ~exist(vfilename, 'dir')
+                        mkdir(vfilename)
+                    end
                     cd(vfilename)
-                    mkdir(name)
+                    if ~exist(name, 'dir')
+                        mkdir(name)
+                    end
                     c = [rand() rand() rand()];
                     id_vocal = list_clusters.complex(1,1);
                     dx = 0.4;
@@ -852,9 +912,13 @@ for Name=6%1:size(list,1)
                 
             elseif isfield(list_clusters, name) && strcmp(name, 'noise')
                 cd(vpathname)
-                mkdir(vfilename)
+                if ~exist(vfilename, 'dir')
+                    mkdir(vfilename)
+                end
                 cd(vfilename)
-                mkdir(name)
+                if ~exist(name, 'dir')
+                    mkdir(name)
+                end
                 
                 %                 for ww1 = 1:size(clustered,1)
                 for ww = 1:eval(['size(list_clusters.' name ',1)'])
@@ -891,7 +955,9 @@ for Name=6%1:size(list,1)
         end
     else
         cd(vpathname)
-        mkdir(vfilename)
+        if ~exist(vfilename, 'dir')
+            mkdir(vfilename)
+        end
         cd(vfilename)
     end
     save(['vocal_classified_' vfilename],'vocal_classified','list_clusters','vfilename')

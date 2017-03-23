@@ -43,7 +43,7 @@ noise_count_bin_total  = 0;
 two_steps_count_bin_total  = 0;
 mult_steps_count_bin_total  = 0;
 
-for Name=6%1:size(list,1)
+for Name=1:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -76,9 +76,9 @@ for Name=6%1:size(list,1)
     output=[];
     
     for k=1:size(time_vocal,2)
-        if k==190
-            k
-        end
+%         if k==190
+%             k
+%         end
         vocal_classified{k}.step_up = [];
         vocal_classified{k}.step_down = [];
         vocal_classified{k}.harmonic = [];
@@ -612,6 +612,7 @@ for Name=6%1:size(list,1)
     
     list_clusters.mult_steps = [];
     list_clusters.two_steps = [];
+    list_clusters.noisy_vocal = [];
     for names = 1:size(categories,1)
         count = 0;
         name = categories{names};

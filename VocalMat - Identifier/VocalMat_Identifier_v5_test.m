@@ -29,7 +29,7 @@ max_vocal_duration = 0.140 %If a vocalization is onger than max_vocal_duration, 
 use_median = 1 %If =1, use the median method to detect the noise.
 save_spectogram_background = 1
 tic
-for Name = 6%1:size(list,1)
+for Name =1:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -51,6 +51,8 @@ for Name = 6%1:size(list,1)
         %     jump = 0;%3*5000000;
         clear A B y2 S F T P q vocal id F_orig grain
         y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
+        %         y2 = y1(1:250000); %Analyze first one second.
+        %         y2 = y1(0*250000+1:5*250000); %Window size in seconds
         nfft = 1024;
         nover = (128);
         window = hamming(256);
@@ -91,10 +93,19 @@ for Name = 6%1:size(list,1)
         %     BW = imclearborder(BW);
         
         % Open mask with line
-        length = 3.000000;
-        angle = 0.000000;
-        se = strel('line', length, angle);
+        %         length = 3.000000;
+        %         angle = 0.000000;
+        %         se = strel('line', length, angle);
+        %         BW = imopen(BW, se);
+        % Open mask with rectangle
+        dimensions = [4 2];
+        se = strel('rectangle', dimensions);
         BW = imopen(BW, se);
+        
+        length = 4.000000;
+        angle = 90.000000;
+        se = strel('line', length, angle);
+        BW = imdilate(BW, se);
         
         % Create masked image.
         maskedImage = B;
@@ -110,10 +121,11 @@ for Name = 6%1:size(list,1)
             grain(cc.PixelIdxList{min_area(k)}) = true;
         end
         
-        se1 = strel('disk', 2, 0);
-        grain2 = imdilate(grain,se1);
-        grain2 = imerode(grain2, se);
+        %         se1 = strel('disk', 2, 0);
+        %         grain2 = imdilate(grain,se1);
+        %         grain2 = imerode(grain2, se);
         % figure, imshow(grain2);
+        grain2 = grain;
         
         disp('Recalculating Connected components')
         cc = bwconncomp(grain2, 4);
@@ -123,14 +135,19 @@ for Name = 6%1:size(list,1)
         clear grain2
         clear grain
         
-        min_area = find([graindata.Area]>50) ;
+        min_area = find([graindata.Area]>60) ;
         grain = false(size(B));
         for k=1:size(min_area,2)
-            if ~any(graindata(min_area(k)).PixelList(:,2)>size(grain,1)-5) %5 pixels as tolerance
-                grain(cc.PixelIdxList{min_area(k)}) = true;
-                %             text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(k),'HorizontalAlignment','left','FontSize',20,'Color','b')
-            end
+            %             if ~any(graindata(min_area(k)).PixelList(:,2)>size(grain,1)-5) %5 pixels as tolerance
+            grain(cc.PixelIdxList{min_area(k)}) = true;
+            %             text(graindata(min_area(k)).Centroid(:,1),graindata(min_area(k)).Centroid(:,2),num2str(k),'HorizontalAlignment','left','FontSize',20,'Color','b')
+            %             end
         end
+        
+        length = 3.000000;
+        angle = 0;
+        se = strel('line', length, angle);
+        grain = imdilate(grain, se);
         
         grain_total = [grain_total grain];
         % dx=2000;
@@ -297,6 +314,10 @@ for Name = 6%1:size(list,1)
         
         disp('Removing noise by local median')
         for k=1:size(time_vocal,2)
+            skip_max_freq = 0;
+            %             if k==247
+            %                 k
+            %             end
             %     median_db = median(median(A(find(F_orig==min(freq_vocal{k})):find(F_orig==max(freq_vocal{k})),find(T_orig==time_vocal{k}(ceil(end/2)))-200 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200))); %Calculating median in the freq range of identified vocalization
             %     median_freq = find(F_orig==median(freq_vocal{k}));
             %         median_freq = abs(F_orig-median(freq_vocal{k}));
@@ -321,12 +342,26 @@ for Name = 6%1:size(list,1)
                 %                 median_db = median(median(A(find(min_local_freq(k)==F_orig),find(T_orig==time_vocal{k}(ceil(end/2)))-200 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200)));
                 %             end
                 if find(min_local_freq(k)==F_orig)-5 <= 0
-                    min_freq=1;
-                    max_freq = find(max_local_freq(k)==F_orig)+5;
-                    max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;
-                    min_time = find(T_orig==time_vocal{k}(ceil(end/2)))-200;
+                    if find(max_local_freq(k)==F_orig)+5 > size(A_total,1)
+                        min_freq=1;
+                        max_freq = size(A,1);
+                        max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;
+                        min_time = find(T_orig==time_vocal{k}(ceil(end/2)))-200;
+                        if min_time<1
+                            min_time=1;
+                        end
+                        skip_max_freq = 1;
+                    else
+                        min_freq=1;
+                        max_freq = find(max_local_freq(k)==F_orig)+5;
+                        max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;
+                        min_time = find(T_orig==time_vocal{k}(ceil(end/2)))-200;
+                        if min_time<1
+                            min_time=1;
+                        end
+                    end
                 end
-                if find(max_local_freq(k)==F_orig)+5 > size(A_total,1)
+                if find(max_local_freq(k)==F_orig)+5 > size(A_total,1) && skip_max_freq==0
                     max_freq = size(A,1);
                     min_freq = find(min_local_freq(k)==F_orig)-5;
                     max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;
@@ -356,6 +391,7 @@ for Name = 6%1:size(list,1)
                         min_freq=1;
                     end
                 end
+                %                 skip_max_freq = 0;
                 median_db = median(median(A_total(min_freq:max_freq,min_time:max_time)));
                 
             end
@@ -363,7 +399,8 @@ for Name = 6%1:size(list,1)
             %             k
             %         end
             temp = sort(intens_vocal{k});
-            if median(temp(end-5:end)) < median_db-0.1*median_db
+            if median(temp(end-5:end)) < median_db-0.1*median_db %it is a subtraction because the intensity is already negative. So it is increasing the
+                %             if median(intens_vocal{k}) < median_db-0.1*median_db
                 disp(['eliminating vocal starting in ' num2str(time_vocal{k}(1))]);
                 time_vocal{k}=[];
                 freq_vocal{k}=[];
@@ -375,6 +412,123 @@ for Name = 6%1:size(list,1)
         time_vocal = time_vocal(~cellfun('isempty',time_vocal));
         freq_vocal = freq_vocal(~cellfun('isempty',freq_vocal));
         intens_vocal = intens_vocal(~cellfun('isempty',intens_vocal));
+        intens_vocal_orig = intens_vocal;
+        freq_vocal_orig = freq_vocal;
+        time_vocal_orig = time_vocal;
+        %         time_vocal = time_vocal_orig;
+        %         intens_vocal = intens_vocal_orig;
+        %         freq_vocal = freq_vocal_orig;
+        
+        
+
+        disp('Eliinating points with low intensity (based on STD)')
+        freq_vocal_distribution = {};
+        intens_vocal_distribution = {};
+        for k=1:size(time_vocal,2)
+            %            min_intensity = mean(cellfun(@mean, intens_vocal{k}))-sqrt(mean(cellfun(@std, intens_vocal{k})));
+            
+            %Identify the peak with highest intensity and calculate gaussian around this peak
+            [dist_intens,xi,bw]=ksdensity(intens_vocal{k});
+            dist_intens = sqrt(dist_intens.^2)/max(abs(dist_intens));
+            %            bw
+            %            [f,xi,bw]=ksdensity(intens_vocal{k},'width',1.5);
+%                         figure,plot(xi,dist_intens)
+            [pks,locs]=findpeaks(dist_intens);
+            
+            % evaluate relation to the peaks
+            [max_peak1 max_peak1]=max(pks);
+            max_peak.intensity = xi(locs(max_peak1)); xi(max_peak1)=[];
+            max_peak.peak = max(pks); pks(max_peak1)=[];
+            [max_peak1 max_peak1]=max(pks);
+            max_peak2.intensity = xi(locs(max_peak1)); xi(max_peak1)=[];
+            max_peak2.peak = max(pks); pks(max_peak1)=[];
+            sigma = std(intens_vocal{k});
+            
+                %            f = exp(-(sort(intens_vocal{k})-xi(max(locs))).^2./(2*sigma^2))./(sigma*sqrt(2*pi));
+                %            figure(k),plot(sort(intens_vocal{k}),f)
+                
+                min_intensity = xi(max(locs))- sigma;
+                %            min_intensity = mean(intens_vocal{k})- sigma;
+                T_min_max = [time_vocal{k}(1) time_vocal{k}(end)];
+                [T_min T_min] = min(abs(T_orig - T_min_max(1)));
+                [T_max T_max] = min(abs(T_orig - T_min_max(2)));
+                test2 = max(A_total(:,T_min:T_max),[],2);
+                test3 = sqrt(test2.^2)/max(abs(test2));
+                test3 = 1-test3;
+                dist_freq = test3*1/max(test3);
+%                             figure, plot(F_orig,dist_freq)
+                
+                temp={};
+                for kk=1:size(freq_vocal{k},2) %organize the intens_vocal in the same way as freq_vocal
+                    temp = [ temp intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1))];
+                    intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1)) = [];
+                end
+                intens_vocal{k} = temp;
+                
+             if ~isempty(max_peak2.peak) && max_peak.peak / max_peak2.peak < 3
+                probability_vector{k} = temp;
+                
+                for kk=1:size(intens_vocal{k},2)
+                    for kkk=1:size(intens_vocal{k}{kk},1)
+                        [intens intens] = min(abs(intens_vocal{k}{kk}(kkk)-xi));
+                        [freq freq] = min(abs(freq_vocal{k}{kk}(kkk)-F_orig));
+                        probability_vector{k}{kk}(kkk) = dist_intens(intens)*dist_freq(freq);
+                    end
+                end
+                
+                temp=[];
+                for kk=1:size(probability_vector{k},2)
+                    for kkk=1:size(probability_vector{k}{kk},1)
+                        temp = [temp; probability_vector{k}{kk}(kkk)];
+                    end
+                end
+                probability_vector_dist{k} = temp;
+                
+                for kk=1:size(intens_vocal{k},2)
+                    %               too_low = intens_vocal{k}{kk} < min_intensity;
+                    too_low = probability_vector{k}{kk} < 0.25;
+                    intens_vocal{k}{kk}(too_low) = [];
+                    freq_vocal{k}{kk}(too_low) = [];
+                    if isempty(intens_vocal{k}{kk})
+                        time_vocal{k}(kk) = -100;
+                    end
+                end
+                freq_vocal{k} = freq_vocal{k}(~cellfun('isempty',freq_vocal{k}));
+                intens_vocal{k} = intens_vocal{k}(~cellfun('isempty',intens_vocal{k}));
+                time_vocal{k}(time_vocal{k}==-100) = [];
+                
+            end
+            
+            %apply attenuation band
+            %            T_min_max = [time_vocal{k}(1) time_vocal{k}(end)];
+            %            [T_min T_min] = min(abs(T_orig - T_min_max(1)));
+            %            [T_max T_max] = min(abs(T_orig - T_min_max(2)));
+            %            figure, surf(T_orig(T_min:T_max),F_orig,A_total(:,T_min:T_max),'edgecolor','none')
+            %            test2 = max(A_total(:,T_min:T_max),[],2);
+            %            test3 = sqrt(test2.^2)/max(abs(test2));
+            %            test3 = test3*1/max(test3);
+            %
+            %            copy_intensity = intens_vocal{k};
+            %            for kk=1:size(intens_vocal{k},2)
+            %                for kkk=1:size(intens_vocal{k}{kk},1)
+            %                 [min_aa min_aa] = min(abs(F_orig-freq_vocal{k}{kk}(kkk)));
+            %                 factor = test3(min_aa);
+            %                 copy_intensity{kk}(kkk) = factor * copy_intensity{kk}(kkk);
+            %                end
+            %            end
+            
+            %create a new vector for distribution
+            %            temp = [];
+            %            temp1 =[];
+            %            for kk=1:size(freq_vocal{k},2)
+            %             temp = [temp; freq_vocal{k}{kk}];
+            %             temp1 = [temp1; intens_vocal{k}{kk}];
+            %            end
+            %            freq_vocal_distribution{k} = temp;
+            %            intens_vocal_distribution{k} = temp1;
+        end
+        
+        %Plotting histograms to check intensity and frequency distribution
         
         
         % disp('Plotting vocalizations detected')

@@ -29,7 +29,7 @@ max_vocal_duration = 0.140 %If a vocalization is onger than max_vocal_duration, 
 use_median = 1 %If =1, use the median method to detect the noise.
 save_spectogram_background = 1
 tic
-for Name = 6%1:size(list,1)
+for Name = 1%:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -50,7 +50,8 @@ for Name = 6%1:size(list,1)
         disp(['Current minute: ' num2str(minute_frame)])
         %     jump = 0;%3*5000000;
         clear A B y2 S F T P q vocal id F_orig grain
-        y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
+%         y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
+        y2 = y1(1:250000); %Analyze first onse second.
         nfft = 1024;
         nover = (128);
         window = hamming(256);
@@ -375,6 +376,37 @@ for Name = 6%1:size(list,1)
         time_vocal = time_vocal(~cellfun('isempty',time_vocal));
         freq_vocal = freq_vocal(~cellfun('isempty',freq_vocal));
         intens_vocal = intens_vocal(~cellfun('isempty',intens_vocal));
+        intens_vocal_orig = intens_vocal;
+        freq_vocal_orig = freq_vocal;
+        time_vocal_orig = time_vocal;
+%         time_vocal = time_vocal_orig;
+%         intens_vocal = intens_vocal_orig;
+%         freq_vocal = freq_vocal_orig;
+        
+        disp('Eliinating points with low intensity (based on STD)')
+
+        for k=1:size(time_vocal,2)
+           min_intensity = mean(intens_vocal{k})-std(intens_vocal{k});
+           temp={};
+           next_pos=1;
+           for kk=1:size(freq_vocal{k},2) %organize the intens_vocal in the same way as freq_vocal
+               temp = [ temp intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1))]; 
+               intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1)) = [];
+           end
+           intens_vocal{k} = temp;
+           
+           for kk=1:size(intens_vocal{k},2)
+              too_low = intens_vocal{k}{kk} < min_intensity;
+              intens_vocal{k}{kk}(too_low) = [];
+              freq_vocal{k}{kk}(too_low) = [];
+              if isempty(intens_vocal{k}{kk})
+                 time_vocal{k}(kk) = -100;
+              end
+           end
+           freq_vocal{k} = freq_vocal{k}(~cellfun('isempty',freq_vocal{k}));
+           intens_vocal{k} = intens_vocal{k}(~cellfun('isempty',intens_vocal{k}));
+           time_vocal{k}(time_vocal{k}==-100) = [];
+        end
         
         
         % disp('Plotting vocalizations detected')

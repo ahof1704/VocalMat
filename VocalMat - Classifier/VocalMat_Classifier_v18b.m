@@ -26,7 +26,7 @@ diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 %Setting up
 p = mfilename('fullpath')
 plot_stats_per_bin=0
-save_plot_spectrograms=0
+save_plot_spectrograms=1
 save_histogram_per_animal=0
 save_excel_file=0
 save_plot_3d_info=0
@@ -899,6 +899,8 @@ for Name=1:size(list,1)
             end
         end
         
+        sum_total_bins = [size(bin_1,2) size(bin_2,2) size(bin_3,2) size(bin_4,2)];
+        
         for i=1:4
             eval(['if ~isempty(bin_' num2str(i) ') ', ...
                 'bin_' num2str(i) ' = [bin_' num2str(i) '(1); bin_' num2str(i) '(end)];',...
@@ -908,7 +910,7 @@ for Name=1:size(list,1)
         end
         %
         stepup_count_bin  = [ sum(list_clusters.step_up <= bin_1(end)), sum(list_clusters.step_up >=bin_2(1) & list_clusters.step_up <=bin_2(end)), sum(list_clusters.step_up >=bin_3(1) & list_clusters.step_up <=bin_3(end)), sum(list_clusters.step_up >=bin_4(1) & list_clusters.step_up <=bin_4(end))];
-        stepdown_count_bin = [ sum(stepdown_count <= bin_1(end)), sum(stepdown_count>=bin_2(1) & stepdown_count<=bin_2(end)), sum(stepdown_count>=bin_3(1) & stepdown_count<=bin_3(end)), sum(stepdown_count>=bin_4(1) & stepdown_count<=bin_4(end))];
+        stepdown_count_bin = [ sum(list_clusters.step_down <= bin_1(end)), sum(list_clusters.step_down>=bin_2(1) & list_clusters.step_down<=bin_2(end)), sum(list_clusters.step_down>=bin_3(1) & list_clusters.step_down<=bin_3(end)), sum(list_clusters.step_down>=bin_4(1) & list_clusters.step_down<=bin_4(end))];
         harmonic_count_bin  = [ sum(list_clusters.harmonic <= bin_1(end)), sum(list_clusters.harmonic >=bin_2(1) & list_clusters.harmonic <=bin_2(end)), sum(list_clusters.harmonic >=bin_3(1) & list_clusters.harmonic <=bin_3(end)), sum(list_clusters.harmonic >=bin_4(1) & list_clusters.harmonic <=bin_4(end))];
         flat_count_bin  = [ sum(list_clusters.flat <= bin_1(end)), sum(list_clusters.flat >=bin_2(1) & list_clusters.flat <=bin_2(end)), sum(list_clusters.flat >=bin_3(1) & list_clusters.flat <=bin_3(end)), sum(list_clusters.flat >=bin_4(1) & list_clusters.flat <=bin_4(end))];
         chevron_count_bin  = [ sum(list_clusters.chevron <= bin_1(end)), sum(list_clusters.chevron >=bin_2(1) & list_clusters.chevron <=bin_2(end)), sum(list_clusters.chevron >=bin_3(1) & list_clusters.chevron <=bin_3(end)), sum(list_clusters.chevron >=bin_4(1) & list_clusters.chevron <=bin_4(end))];
@@ -931,6 +933,9 @@ for Name=1:size(list,1)
         %         set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
         %         legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
         
+        sum_total_bins = sum_total_bins  - noise_count_bin - harmonic_count_bin ;
+        disp('Total number of vocalizations in each bin:')
+        disp(['Bin1: ' num2str(sum_total_bins(1)) '; Bin2: ' num2str(sum_total_bins(2)) '; Bin3: ' num2str(sum_total_bins(3)) '; Bin4: ' num2str(sum_total_bins(4))]);
     end
     
     %Get correlation table for this vocalizations

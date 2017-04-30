@@ -29,7 +29,7 @@ max_vocal_duration = 0.140 %If a vocalization is onger than max_vocal_duration, 
 use_median = 1 %If =1, use the median method to detect the noise.
 save_spectogram_background = 1
 tic
-for Name = [25 28:size(list,1)]
+for Name = 1:size(list,1)
     vfilename = list(Name).name;
     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
@@ -435,7 +435,7 @@ for Name = [25 28:size(list,1)]
             %            bw
             %            [f,xi,bw]=ksdensity(intens_vocal{k},'width',1.5);
 %                         figure,plot(xi,dist_intens)
-            [pks,locs]=findpeaks(dist_intens);
+            [pks,locs]=findpeaks(dist_intens,'MinPeakProminence',0.1);
             
             % evaluate relation to the peaks
             [max_peak1, max_peak1]=max(pks);
@@ -448,11 +448,11 @@ for Name = [25 28:size(list,1)]
             
                 %            f = exp(-(sort(intens_vocal{k})-xi(max(locs))).^2./(2*sigma^2))./(sigma*sqrt(2*pi));
                 %            figure(k),plot(sort(intens_vocal{k}),f)
-                try
-                    min_intensity = xi(max(locs))- sigma;
-                catch
+                
+                min_intensity = xi(max(locs))- sigma;
+                
                     
-                end
+                
                 %            min_intensity = mean(intens_vocal{k})- sigma;
                 T_min_max = [time_vocal{k}(1) time_vocal{k}(end)];
                 [T_min T_min] = min(abs(T_orig - T_min_max(1)));

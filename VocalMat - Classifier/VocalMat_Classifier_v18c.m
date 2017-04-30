@@ -16,6 +16,8 @@ clc
 clear all
 raiz = pwd;
 % model_noise=load('model_noise.mat');
+% table_total = [table_1346_1st; table_1347_1st; table_1347_2nd; table_1386_1st; table_1387_1st; table_1669_Control_1st; table_1669_control_2nd; table_1670_Control_1st; table_1771_Control_1st; table_1772_Control_1st; table_1794_Agpr_1st; table_1795_Agrp_1st; table_1795_Agrp_2nd; table_2114_1st; table_2115_1st; table_2302_1st; table_2303_Agrp_1st];
+% Mdl = TreeBagger(200,table_total,'gt_noise','Method','regression','Surrogate','on','OOBPredictorImportance','on');
 model_noise=load('model_noise_randomTree3.mat')
 model_noise = model_noise.model_noise_randomTree3;
 [vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
@@ -26,10 +28,10 @@ diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 %Setting up
 p = mfilename('fullpath')
 plot_stats_per_bin=1
-save_plot_spectrograms=0
+save_plot_spectrograms=1
 save_histogram_per_animal=1
 save_excel_file=1
-save_plot_3d_info=0
+save_plot_3d_info=1
 
 stepup_count_bin_total  = 0;
 stepdown_count_bin_total = 0 ;
@@ -44,6 +46,7 @@ noisy_vocal_count_bin_total  = 0;
 nonlinear_count_bin_total  = 0;
 short_count_bin_total  = 0;
 noise_count_bin_total  = 0;
+noise_dist_count_bin_total = 0;
 two_steps_count_bin_total  = 0;
 mult_steps_count_bin_total  = 0;
 
@@ -53,7 +56,7 @@ for Name=1:size(list,1)
     vfile = fullfile(vpathname,vfilename);
     
     clearvars -except   noise_count_bin_total two_steps_count_bin_total mult_steps_count_bin_total model_noise...
-        plot_stats_per_bin save_plot_spectrograms list raiz vfile vfilename vpathname stepup_count_bin_total stepdown_count_bin_total harmonic_count_bin_total flat_count_bin_total chevron_count_bin_total ...
+        plot_stats_per_bin save_plot_spectrograms list raiz vfile vfilename vpathname stepup_count_bin_total stepdown_count_bin_total harmonic_count_bin_total flat_count_bin_total chevron_count_bin_total noise_dist_count_bin_total ...
         revchevron_count_bin_total downfm_count_bin_total upfm_count_bin_total complex_count_bin_total noisy_vocal_count_bin_total nonlinear_count_bin_total short_count_bin_total save_histogram_per_animal save_excel_file save_plot_3d_info
     
     fprintf('\n')
@@ -947,7 +950,7 @@ for Name=1:size(list,1)
         %         set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
         %         legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
         
-        sum_total_bins = sum_total_bins  - noise_count_bin  ;
+        sum_total_bins = sum_total_bins  - noise_dist_count_bin  ;
         disp('Total number of vocalizations in each bin:')
         disp(['Bin1: ' num2str(sum_total_bins(1)) '; Bin2: ' num2str(sum_total_bins(2)) '; Bin3: ' num2str(sum_total_bins(3)) '; Bin4: ' num2str(sum_total_bins(4)) '; Bin5: ' num2str(sum_total_bins(5)) '; Bin6: ' num2str(sum_total_bins(6))]);
     end
@@ -1182,6 +1185,7 @@ for Name=1:size(list,1)
         nonlinear_count_bin_total  = nonlinear_count_bin_total + nonlinear_count_bin;
         short_count_bin_total  = short_count_bin_total + short_count_bin;
         noise_count_bin_total  = noise_count_bin_total + noise_count_bin;
+        noise_dist_count_bin_total = noise_dist_count_bin_total+noise_dist_count_bin;
         two_steps_count_bin_total  = two_steps_count_bin_total + two_steps_count_bin;
         mult_steps_count_bin_total  = mult_steps_count_bin_total + mult_steps_count_bin;
         
@@ -1213,6 +1217,8 @@ for Name=1:size(list,1)
         disp(['Bin1: ' num2str(short_count_bin(1)) ', Bin2: ' num2str(short_count_bin(2)) ', Bin3: ' num2str(short_count_bin(3)) ', Bin4: ' num2str(short_count_bin(4)) ', Bin5: ' num2str(short_count_bin(5)) ', Bin6: ' num2str(short_count_bin(6))]);
         disp('Noise:')
         disp(['Bin1: ' num2str(noise_count_bin(1)) ', Bin2: ' num2str(noise_count_bin(2)) ', Bin3: ' num2str(noise_count_bin(3)) ', Bin4: ' num2str(noise_count_bin(4)) ', Bin5: ' num2str(noise_count_bin(5)) ', Bin6: ' num2str(noise_count_bin(6))]);
+        disp('Noise_dist:')
+        disp(['Bin1: ' num2str(noise_dist_count_bin(1)) ', Bin2: ' num2str(noise_dist_count_bin(2)) ', Bin3: ' num2str(noise_dist_count_bin(3)) ', Bin4: ' num2str(noise_dist_count_bin(4)) ', Bin5: ' num2str(noise_dist_count_bin(5)) ', Bin6: ' num2str(noise_dist_count_bin(6))]);
         disp('Two steps:')
         disp(['Bin1: ' num2str(two_steps_count_bin(1)) ', Bin2: ' num2str(two_steps_count_bin(2)) ', Bin3: ' num2str(two_steps_count_bin(3)) ', Bin4: ' num2str(two_steps_count_bin(4)) ', Bin5: ' num2str(two_steps_count_bin(5)) ', Bin6: ' num2str(two_steps_count_bin(6))]);
         disp('Mult steps:')
@@ -1222,7 +1228,7 @@ for Name=1:size(list,1)
             all_class = [stepup_count_bin; stepdown_count_bin; harmonic_count_bin; flat_count_bin; chevron_count_bin; revchevron_count_bin; downfm_count_bin; upfm_count_bin; complex_count_bin; noisy_vocal_count_bin; nonlinear_count_bin; short_count_bin; noise_count_bin; mult_steps_count_bin; two_steps_count_bin];
             figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
             bar(all_class,'stacked')
-            Labels = {'step_up ', 'step_down ', 'harmonic ', 'flat ', 'chevron ', 'rev_chevron ', 'down_fm ', 'up_fm ', 'complex ', 'noisy_vocal ', 'non_linear ', 'short ','noise ','mult_steps','two_steps'};
+            Labels = {'step_up ', 'step_down ', 'harmonic ', 'flat ', 'chevron ', 'rev_chevron ', 'down_fm ', 'up_fm ', 'complex ', 'noisy_vocal ', 'non_linear ', 'short ','noise ','noise_dist','mult_steps','two_steps'};
             set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
             legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4','Bin 5','Bin 6');
             set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
@@ -1289,7 +1295,7 @@ if plot_stats_per_bin ==1
     all_class = [stepup_count_bin_total; stepdown_count_bin_total; harmonic_count_bin_total; flat_count_bin_total; chevron_count_bin_total; revchevron_count_bin_total; downfm_count_bin_total; upfm_count_bin_total; complex_count_bin_total; noisy_vocal_count_bin_total; nonlinear_count_bin_total; short_count_bin_total; noise_count_bin_total; mult_steps_count_bin_total; two_steps_count_bin_total];
     figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
     bar(all_class,'stacked')
-    Labels = {'step_up ', 'step_down ', 'harmonic ', 'flat ', 'chevron ', 'rev_chevron ', 'down_fm ', 'up_fm ', 'complex ', 'noisy_vocal ', 'non_linear ', 'short ','noise ','mult_steps','two_steps'};
+    Labels = {'step_up ', 'step_down ', 'harmonic ', 'flat ', 'chevron ', 'rev_chevron ', 'down_fm ', 'up_fm ', 'complex ', 'noisy_vocal ', 'non_linear ', 'short ','noise','noise_dist','mult_steps','two_steps'};
     set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
     legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4');
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
@@ -1325,6 +1331,8 @@ if plot_stats_per_bin ==1
     disp(['Bin1: ' num2str(short_count_bin_total(1)) ', Bin2: ' num2str(short_count_bin_total(2)) ', Bin3: ' num2str(short_count_bin_total(3)) ', Bin4: ' num2str(short_count_bin_total(4)) ', Bin5: ' num2str(short_count_bin_total(5)) ', Bin6: ' num2str(short_count_bin_total(6))]);
     disp('Noise:')
     disp(['Bin1: ' num2str(noise_count_bin_total(1)) ', Bin2: ' num2str(noise_count_bin_total(2)) ', Bin3: ' num2str(noise_count_bin_total(3)) ', Bin4: ' num2str(noise_count_bin_total(4)) ', Bin5: ' num2str(noise_count_bin_total(5)) ', Bin6: ' num2str(noise_count_bin_total(6))]);
+    disp('Noise_dist:')
+    disp(['Bin1: ' num2str(noise_dist_count_bin_total(1)) ', Bin2: ' num2str(noise_dist_count_bin_total(2)) ', Bin3: ' num2str(noise_dist_count_bin_total(3)) ', Bin4: ' num2str(noise_dist_count_bin_total(4)) ', Bin5: ' num2str(noise_dist_count_bin_total(5)) ', Bin6: ' num2str(noise_dist_count_bin_total(6))]);
     disp('Two steps:')
     disp(['Bin1: ' num2str(two_steps_count_bin_total(1)) ', Bin2: ' num2str(two_steps_count_bin_total(2)) ', Bin3: ' num2str(two_steps_count_bin_total(3)) ', Bin4: ' num2str(two_steps_count_bin_total(4)) ', Bin5: ' num2str(two_steps_count_bin_total(5)) ', Bin6: ' num2str(two_steps_count_bin_total(6))]);
     disp('Mult steps:')
@@ -1334,7 +1342,7 @@ if plot_stats_per_bin ==1
     all_class2 = all_class/sum(total);
     figure('Name',['vocal_classified_' vfilename '(%)'],'NumberTitle','off')
     bar(all_class2,'stacked')
-    Labels = {'step_up ', 'step_down ', 'harmonic ', 'flat ', 'chevron ', 'rev_chevron ', 'down_fm ', 'up_fm ', 'complex ', 'noisy_vocal ', 'non_linear ', 'short ','noise ','mult_steps','two_steps'};
+    Labels = {'step_up ', 'step_down ', 'harmonic ', 'flat ', 'chevron ', 'rev_chevron ', 'down_fm ', 'up_fm ', 'complex ', 'noisy_vocal ', 'non_linear ', 'short ','noise ','noise_dist','mult_steps','two_steps'};
     set(gca,'TickLabelInterpreter','none','XTick',1:size(all_class,1), 'XTickLabel',Labels','YColor','black');
     legend(gca,'Bin 1','Bin 2','Bin 3','Bin 4','Bin 5','Bin 6');
     set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);

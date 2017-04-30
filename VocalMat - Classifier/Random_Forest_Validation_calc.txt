@@ -1,0 +1,49 @@
+
+gt_noise = find(table_3994_0_11.gt_noise==1);
+
+noise_count_dist = list_clusters.noise_dist;
+noise_count = list_clusters.noise;
+%noise_count = noise_count_orig;
+%noise_count_dist = noise_count_dist_orig;
+total_elem=[];
+missed_noise_count=[];
+for ddd=1:size(gt_noise,1)
+	element = noise_count(find(gt_noise(ddd)==noise_count));
+	if isempty(element)
+		missed_noise_count = [missed_noise_count ; element];
+	else
+		total_elem = [total_elem; element];
+		noise_count(find(gt_noise(ddd)==noise_count))=[]; %The remaining in this list will be false noise
+	end
+end
+
+total_elem2=[];
+missed_noise_dist = [];
+for ddd=1:size(gt_noise,1)
+	element = noise_count_dist(find(gt_noise(ddd)==noise_count_dist));
+	if isempty(element)
+		missed_noise_dist = [missed_noise_dist ; ddd];
+	else
+		total_elem2 = [total_elem2; element];
+		noise_count_dist(find(gt_noise(ddd)==noise_count_dist))=[]; %The remaining in this list will be false noise
+	end
+	
+end
+
+
+%Stats
+% Correct
+correct1 = size(total_elem,1)/size(gt_noise,1)
+% False postive
+false_positive1 = size(noise_count,1)/size(list_clusters.noise,1)
+% Missed noise
+missed1 = [size(gt_noise,1)-size(total_elem,1)]/size(gt_noise,1)
+
+% Correct detection
+correct2 = size(total_elem2,1)/size(gt_noise,1)
+% False positive
+false_positive2 = size(noise_count_dist,1)/size(list_clusters.noise_dist,1)
+% Missed noise
+missed2 = [size(gt_noise,1)-size(total_elem2,1)]/size(gt_noise,1)
+
+output = [{vfilename}; correct1; false_positive1; missed1; correct2; false_positive2;missed2 ]

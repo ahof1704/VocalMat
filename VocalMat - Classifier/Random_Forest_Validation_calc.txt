@@ -10,7 +10,7 @@ missed_noise_count=[];
 for ddd=1:size(gt_noise,1)
 	element = noise_count(find(gt_noise(ddd)==noise_count));
 	if isempty(element)
-		missed_noise_count = [missed_noise_count ; element];
+		missed_noise_count = [missed_noise_count ; gt_noise(ddd)];
 	else
 		total_elem = [total_elem; element];
 		noise_count(find(gt_noise(ddd)==noise_count))=[]; %The remaining in this list will be false noise
@@ -22,7 +22,7 @@ missed_noise_dist = [];
 for ddd=1:size(gt_noise,1)
 	element = noise_count_dist(find(gt_noise(ddd)==noise_count_dist));
 	if isempty(element)
-		missed_noise_dist = [missed_noise_dist ; ddd];
+		missed_noise_dist = [missed_noise_dist ; gt_noise(ddd)];
 	else
 		total_elem2 = [total_elem2; element];
 		noise_count_dist(find(gt_noise(ddd)==noise_count_dist))=[]; %The remaining in this list will be false noise

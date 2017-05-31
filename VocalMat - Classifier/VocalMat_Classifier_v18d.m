@@ -12,23 +12,21 @@
 % Aug 31th, 2016: This script intends to classify the vocalization in the
 % eleven different categories we currently have described by Grimsley, Jasmine MS, Jessica JM Monaghan, and Jeffrey J. Wenstrup. "Development of social vocalizations in mice." PloS one 6.3 (2011): e17460.
 
-clc
-clear all
+%clc
+%clear all
 raiz = pwd;
 % model_noise=load('model_noise.mat');
-% table_total = [table_1346_1st; table_1347_1st; table_1347_2nd; table_1386_1st; table_1387_1st; table_1669_Control_1st; table_1669_control_2nd; table_1670_Control_1st; table_1771_Control_1st; table_1772_Control_1st; table_1794_Agpr_1st; table_1795_Agrp_1st; table_1795_Agrp_2nd; table_2114_1st; table_2115_1st; table_2302_1st; table_2303_Agrp_1st];
-% Mdl = TreeBagger(200,table_total,'gt_noise','Method','regression','Surrogate','on','OOBPredictorImportance','on');
 model_noise=load('model_noise_randomTree3.mat')
 model_noise = model_noise.model_noise_randomTree3;
-[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
+%[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
 list = dir('*output*.mat');
-diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
+%diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
 %Setting up
 p = mfilename('fullpath')
 plot_stats_per_bin=1
-save_plot_spectrograms=0
+save_plot_spectrograms=1
 save_histogram_per_animal=0
 save_excel_file=1
 save_plot_3d_info=0
@@ -50,10 +48,11 @@ noise_dist_count_bin_total = 0;
 two_steps_count_bin_total  = 0;
 mult_steps_count_bin_total  = 0;
 
-for Name=1:size(list,1)
-    vfilename = list(Name).name;
-    vfilename = vfilename(1:end-4);
-    vfile = fullfile(vpathname,vfilename);
+%for Name=1:size(list,1)
+    %vfilename = list(Name).name;
+    %vfilename = vfilename(1:end-4);
+    vfile = fullfile(vpathname,vfilename)
+   
     
     clearvars -except   noise_count_bin_total two_steps_count_bin_total mult_steps_count_bin_total model_noise...
         plot_stats_per_bin save_plot_spectrograms list raiz vfile vfilename vpathname stepup_count_bin_total stepdown_count_bin_total harmonic_count_bin_total flat_count_bin_total chevron_count_bin_total noise_dist_count_bin_total ...
@@ -64,7 +63,7 @@ for Name=1:size(list,1)
     load(vfile);
     
     %We are gonna get only 10 points (time stamps) to classify the vocalization
-    %Grimsley, Jasmine, Marie Gadziola, and Jeff James Wenstrup. "Automated classification of mouse pup isolation syllables: from cluster analysis to an Excel-based “mouse pup syllable classification calculator”."
+    %Grimsley, Jasmine, Marie Gadziola, and Jeff James Wenstrup. "Automated classification of mouse pup isolation syllables: from cluster analysis to an Excel-based ï¿½mouse pup syllable classification calculatorï¿½."
     %Frontiers in behavioral neuroscience 6 (2013): 89.
     %     disp('Verify vocalizations for steps')
     stepup_count=[];
@@ -850,7 +849,7 @@ for Name=1:size(list,1)
         disp(['Building ' name ' list'])
         eval(['list_clusters.' name '= [];']);
         for k=1:size(time_vocal,2)
-            if ~isempty(eval(['vocal_classified{k}.' name])) && isempty(vocal_classified{k}.noise)
+            if ~isempty(eval(['vocal_classified{k}.' name])) && isempty(vocal_classified{k}.noise_dist)
                 count = count+1;
                 temp_table = [];
                 for col = 1:size(time_vocal{k},2)
@@ -965,8 +964,11 @@ for Name=1:size(list,1)
         for names = 1:size(categories,1)
             cd(raiz)
             name = categories{names};
+            if strcmp(name, 'noise')
+                name
+            end
             disp(['Saving plots for ' name])
-            if isfield(list_clusters, name) && ~strcmp(name, 'complex') && ~strcmp(name, 'harmonic_size')
+            if isfield(list_clusters, name) && ~strcmp(name, 'complex') && ~strcmp(name, 'harmonic_size') && ~strcmp(name, 'noise')
                 %             eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
                 %                 corr_table = [vpathname,'SimilarityBatch_',vfilename,'.csv'];
                 %                 corr_table = strrep(corr_table,'\','/');
@@ -1042,7 +1044,7 @@ for Name=1:size(list,1)
                     
                     %
                     for cluster_number = 1:max(TT)
-                        cd([vpathname vfilename '/' name])
+                        cd([vpathname '/' vfilename '/' name])
                         mkdir(['Cluster_' num2str(cluster_number)]);
                         cd(['Cluster_' num2str(cluster_number)])
                         disp(['Cluster_' num2str(cluster_number)])
@@ -1113,7 +1115,7 @@ for Name=1:size(list,1)
                     saveas(gcf,[vpathname '/' vfilename '/'  name '/'  num2str(id_vocal)  '.png'])
                 end
                 
-            elseif isfield(list_clusters, name) && strcmp(name, 'noise')
+            elseif isfield(list_clusters, name) && strcmp(name, 'noise_dist')
                 cd(vpathname)
                 if ~exist(vfilename, 'dir')
                     mkdir(vfilename)
@@ -1242,11 +1244,10 @@ for Name=1:size(list,1)
         names = [{'Names_vocal'};{'Start_time'}; names];
         tabela = zeros(size(vocal_classified,2),size(names,1));
         tabela(:,1) = 1:size(vocal_classified,2);
-        
+
         for i=1:size(time_vocal,2)
             time_start(i) = time_vocal{i}(1);
         end 
-        
         tabela(:,2) = time_start';
         
         for i = 3:size(names,1)
@@ -1255,7 +1256,11 @@ for Name=1:size(list,1)
             end
         end
         
-        names = transpose(names);
+	for i=1:size(time_vocal,2)
+	    time_start(i) = time_vocal{i}(1);
+	end 
+        
+	names = transpose(names);
         T = array2table(tabela);
         T.Properties.VariableNames = names;
         
@@ -1285,17 +1290,17 @@ for Name=1:size(list,1)
         mkdir('All')
         p = pwd;
         cd(raiz)
-        lista = rdir([p, '\**\*.png']);
+        lista = rdir([p, '/**/*.png']);
         cd(p)
-        p = strcat(p, '\All');
+        p = strcat(p, '/All');
         
         for i=1:size(lista,1)
             copyfile(lista(i).name,p)
         end
     end
-end
+%end
 
-if plot_stats_per_bin ==1
+if 1==0
     total = stepup_count_bin_total + stepdown_count_bin_total + harmonic_count_bin_total  + flat_count_bin_total + chevron_count_bin_total + revchevron_count_bin_total  + downfm_count_bin_total + upfm_count_bin_total + complex_count_bin_total  + noisy_vocal_count_bin_total + nonlinear_count_bin_total + short_count_bin_total + noise_count_bin_total + two_steps_count_bin_total + mult_steps_count_bin_total ;
     
     all_class = [stepup_count_bin_total; stepdown_count_bin_total; harmonic_count_bin_total; flat_count_bin_total; chevron_count_bin_total; revchevron_count_bin_total; downfm_count_bin_total; upfm_count_bin_total; complex_count_bin_total; noisy_vocal_count_bin_total; nonlinear_count_bin_total; short_count_bin_total; noise_count_bin_total; mult_steps_count_bin_total; two_steps_count_bin_total];
@@ -1356,4 +1361,4 @@ if plot_stats_per_bin ==1
     saveas(gcf,[vpathname  experiment_name{1} '_%_' '.jpg'])
 end
 
-diary('off');
+%diary('off');

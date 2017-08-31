@@ -28,7 +28,7 @@ diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 %Setting up
 p = mfilename('fullpath')
 plot_stats_per_bin=1
-save_plot_spectrograms=0
+save_plot_spectrograms=1
 save_histogram_per_animal=0
 save_excel_file=1
 save_plot_3d_info=0
@@ -459,10 +459,12 @@ for Name=1:size(list,1)
             end
         end
         
-        
-        %Extra filtering by removing the points with intensity below 5% of the average
+  
         tabela = [];
         %         for jj = 207% 1:size(time_vocal,2)
+        if k==242
+            k
+        end
         for kk = 1:size(time_vocal{k},2)
             for ll = 1:size(freq_vocal{k}{kk},1)
                 tabela = [tabela; time_vocal{k}(kk) freq_vocal{k}{kk}(ll) intens_vocal{k}{kk}(ll)];
@@ -495,26 +497,10 @@ for Name=1:size(list,1)
                 if ~isempty(vocal_classified{k}.harmonic_size) && max(vocal_classified{k}.harmonic_size)>=15% && max(vocal_classified{k}.harmonic_size)/size(time_vocal{k},2)>0.5
                     %
                 else
-                    %                     %                     [pks,locs]=findpeaks(yy2);
-                    %                     %                     % evaluate relation to the peaks
-                    %                     %                     [max_peak1 max_peak1]=max(pks);
-                    %                     %                     max_peak.peak = max(pks); pks(max_peak1)=[];
-                    %                     %                     max_peak2.peak = max(pks);
-                    %                     try
-                    %                         if isempty(pks) || (mean(pks)/mean(valleys) <= 2.2 && max(proms)<0.55 ) || (max_below_50k>0.8 && max(proms)<0.55) %I'm setting this constant myself... find dynamic way to get it.
                     aux5 = 1; %'Noise';
                     vocal_classified{k}.noise = time_vocal{k}(1);
                     noise_count = [noise_count;k];
                     noise_detected_clustering(k) = 1;
-                    %                         end
-                    %
-                    %                     catch
-                    %                         if isempty(pks) ||  (max_below_50k>0.8 && max(proms)<0.55)  %I'm setting this constant myself... find dynamic way to get it.
-                    %                             aux5 = 1; %'Noise';
-                    %                             vocal_classified{k}.noise = time_vocal{k}(1);
-                    %                             noise_count = [noise_count;k];
-                    %                         end
-                    %                     end
                 end
             end
         elseif aux3(1)/aux3(2)<0.75 && aux3(1)/aux3(2)>0.5
@@ -542,18 +528,10 @@ for Name=1:size(list,1)
                     if ~isempty(vocal_classified{k}.harmonic_size) && max(vocal_classified{k}.harmonic_size)>=15 % && max(vocal_classified{k}.	)/size(time_vocal{k},2)>0.5
                         %
                     else
-                        %                         %                         [pks,locs]=findpeaks(yy2);
-                        %                         %                         % evaluate relation to the peaks
-                        %                         %                         [max_peak1 max_peak1]=max(pks);
-                        %                         %                         max_peak.peak = max(pks); pks(max_peak1)=[];
-                        %                         %                         max_peak2.peak = max(pks);
-                        %
-                        %                         if mean(pks)/mean(valleys) <= 2.2 %I'm setting this constant myself... find dynamic way to get it.
                         aux5 = 1; %'Noise';
                         vocal_classified{k}.noise = time_vocal{k}(1);
                         noise_count = [noise_count;k];
                         noise_detected_clustering(k) = 1;
-                        %                         end
                     end
                 end
             else
@@ -571,8 +549,6 @@ for Name=1:size(list,1)
         else
             aux5 = 0; %'';
         end
-        
-%         noise_detected_clustering(k)=
         
         % Noise-opinion #3: Median of distance between points
         distancia = [];

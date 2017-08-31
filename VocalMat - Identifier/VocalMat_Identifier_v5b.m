@@ -11,33 +11,35 @@
 %Aug 25th: This version of identifier works with image processing and is
 %being developed to be able to identify harmonics in vocalizations.
 % close all
+%clear all
+%clc
 
-clc
-clear all
+
 raiz = pwd;
-[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
+%[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
 cd(vpathname);
-diary(['Summary_' num2str(horzcat(fix(clock))) '.txt'])
-list = dir('*.wav');
+%diary(['Summary_' num2str(horzcat(fix(clock))) '.txt'])
+%list = dir('*.WAV');
 p = mfilename('fullpath')
 
 % min_db = -220;%-110;%-107; %selec points >min_db
-max_interval = 20 %0.005 %if the distance between two successive points in pixels is >max_interval, it is new vocalization. Ex: 20 pixels is the correspondent to 10ms
-minimum_size = 10%20; %A valid vocalization must present >minimum_size valid points to be considered a vocalization
+max_interval = 0.005 %if the distance between two successive points in time is >max_interval, it is new vocalization
+minimum_size = 6%10%20; %A valid vocalization must present >minimum_size valid points to be considered a vocalization
 median_dist = 600 %600; If the median of the euclidean distance between succesive pair of points in a vocalization is >median_dist, then it is noise.
 max_vocal_duration = 0.140 %If a vocalization is onger than max_vocal_duration, than it can be a noise that needs to be removed by denoising process.
 use_median = 1 %If =1, use the median method to detect the noise.
 save_spectogram_background = 1
 tic
-for Name = 31%1:size(list,1)
-    vfilename = list(Name).name;
-    vfilename = vfilename(1:end-4);
+%for Name = 1:size(list,1)
+%    vfilename = list(Name).name;
+%    vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
     disp('Cleaning variables: time_vocal freq_vocal intens_vocal output')
     clear time_vocal freq_vocal intens_vocal output time_vocal_nogaps freq_vocal_nogaps intens_vocal_nogaps
     fprintf('\n');
     disp(['Reading audio ' vfilename])
-    [y1,fs]=audioread([vfile '.wav']);
+%    cd (vpathname)
+    [y1,fs]=audioread(vfile);
     
     grain_total =[];
     T_orig =[];
@@ -45,13 +47,13 @@ for Name = 31%1:size(list,1)
     % cc_total = [];
     A_total = [];
     
-    for minute_frame = 1:4%1:size(y1,1)/(60*250000) %run through all the minute windows
+    for minute_frame = 1:size(y1,1)/(60*250000) %run through all the minute windows
         disp(['Current minute: ' num2str(minute_frame)])
         %     jump = 0;%3*5000000;
         clear A B y2 S F T P q vocal id F_orig grain
         y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
-%                 y2 = y1(1:250000); %Analyze first one second.
-%                 y2 = y1(187*250000+1:188*250000); %Window size in seconds
+        %         y2 = y1(1:250000); %Analyze first one second.
+        %         y2 = y1(0*250000+1:5*250000); %Window size in seconds
         nfft = 1024;
         nover = (128);
         window = hamming(256);
@@ -113,21 +115,21 @@ for Name = 31%1:size(list,1)
         
         disp('Connected components')
         cc = bwconncomp(B, 4);
-%         graindata = regionprops(cc,'all');
-%         min_area = find([graindata.Area]>20) ;
-%         grain = false(size(B));
-%         for k=1:size(min_area,2)
-%             grain(cc.PixelIdxList{min_area(k)}) = true;
-%         end
+        graindata = regionprops(cc,'all');
+        min_area = find([graindata.Area]>20) ;
+        grain = false(size(B));
+        for k=1:size(min_area,2)
+            grain(cc.PixelIdxList{min_area(k)}) = true;
+        end
         
         %         se1 = strel('disk', 2, 0);
         %         grain2 = imdilate(grain,se1);
         %         grain2 = imerode(grain2, se);
         % figure, imshow(grain2);
-%         grain2 = grain;
+        grain2 = grain;
         
-%         disp('Recalculating Connected components')
-%         cc = bwconncomp(grain2, 4);
+        disp('Recalculating Connected components')
+        cc = bwconncomp(grain2, 4);
         
         graindata = regionprops(cc,'all');
         
@@ -191,7 +193,7 @@ for Name = 31%1:size(list,1)
                 freq_vocal{id}{freq_per_time} = find(grain(:,time_vocal{id}(freq_per_time))==1); %Storing vector frequency for that vocalization
             end
         else
-            if min(graindata_2(k).PixelList(:,1)) - max(time_vocal{id}) > max_interval %If the blobs are close enough in X axis (not in time, yet), then they should be part of same vocalization
+            if min(graindata_2(k).PixelList(:,1)) - max(time_vocal{id}) > 20 %If the blobs are close enough in X axis (not in time, yet), then they should be part of same vocalization
                 id=id+1;
                 time_vocal{id} = [];
                 time_vocal{id}= unique(graindata_2(k).PixelList(:,1))';
@@ -212,7 +214,7 @@ for Name = 31%1:size(list,1)
     if size(time_vocal,2)>0
         disp(['Removing small vocalizations (< ' num2str(minimum_size) ' points)'])
         for k=1:size(time_vocal,2)
-            if  size(time_vocal{k},2) < minimum_size 
+            if  size(time_vocal{k},2) < minimum_size %|| max(freq_vocal{k})-min(freq_vocal{k}) > 45000
                 disp(['eliminating vocal starting in ' num2str(T_orig(time_vocal{k}(1)))]);
                 time_vocal{k}=[];
                 freq_vocal{k}=[];
@@ -223,12 +225,13 @@ for Name = 31%1:size(list,1)
         time_vocal = time_vocal(~cellfun('isempty',time_vocal));
         freq_vocal = freq_vocal(~cellfun('isempty',freq_vocal));
         
-%         output = [];
-%         freq_harmonic = {};
-%         time_harmonic = {};
+        output = [];
+        freq_harmonic = {};
+        time_harmonic = {};
         
-        % Convert stamps to seconds and hertz
+        % mask = false(size(B));
         for k=1:size(time_vocal,2)
+            %Detecting harmonics
             for col = 1:size(time_vocal{k},2)
                 list_vocal_freq = find(grain(:,time_vocal{k}(col))==1);
                 freq = F_orig(list_vocal_freq);
@@ -428,14 +431,14 @@ for Name = 31%1:size(list,1)
         for k=1:size(time_vocal,2)
             %            min_intensity = mean(cellfun(@mean, intens_vocal{k}))-sqrt(mean(cellfun(@std, intens_vocal{k})));
             
-            %Identify the peak with highest intensity 
+            %Identify the peak with highest intensity and calculate gaussian around this peak
             [dist_intens,xi,bw]=ksdensity(intens_vocal{k});
             dist_intens = sqrt(dist_intens.^2)/max(abs(dist_intens));
             %            bw
             %            [f,xi,bw]=ksdensity(intens_vocal{k},'width',1.5);
 %                         figure,plot(xi,dist_intens)
             [pks,locs]=findpeaks(dist_intens,'MinPeakProminence',0.1);
-            xi_orig = xi;
+            
             % evaluate relation to the peaks
             [max_peak1, max_peak1]=max(pks);
             max_peak.intensity = xi(locs(max_peak1)); xi(max_peak1)=[];
@@ -448,10 +451,10 @@ for Name = 31%1:size(list,1)
                 %            f = exp(-(sort(intens_vocal{k})-xi(max(locs))).^2./(2*sigma^2))./(sigma*sqrt(2*pi));
                 %            figure(k),plot(sort(intens_vocal{k}),f)
                 
-%                 min_intensity = xi(max(locs))- sigma;
+                min_intensity = xi(max(locs))- sigma;
                 
                     
-                xi = xi_orig;
+                
                 %            min_intensity = mean(intens_vocal{k})- sigma;
                 T_min_max = [time_vocal{k}(1) time_vocal{k}(end)];
                 [T_min T_min] = min(abs(T_orig - T_min_max(1)));
@@ -491,7 +494,6 @@ for Name = 31%1:size(list,1)
                 for kk=1:size(intens_vocal{k},2)
                     %               too_low = intens_vocal{k}{kk} < min_intensity;
                     too_low = probability_vector{k}{kk} < 0.25;
-%                     too_low = probability_vector{k}{kk} < median(probability_vector_dist{k})-1.5*std(probability_vector_dist{k});
                     intens_vocal{k}{kk}(too_low) = [];
                     freq_vocal{k}{kk}(too_low) = [];
                     if isempty(intens_vocal{k}{kk})
@@ -559,7 +561,7 @@ for Name = 31%1:size(list,1)
         %     'units','normalized','position',Newpos,...
         %     'callback',Stri,'min',0,'max',xmax-dx,'SliderStep',[0.0001 0.010]);
         
-        
+        vfilename = vfilename(1:end-4);
         % disp('Plotting names on spectrogram and organizing table')
         % for i=1:size(time_vocal,2)
         %     text(time_vocal{i}(round(end/2)),freq_vocal{i}{round(end/2)}(round(end/2))+5000,[num2str(i)],'HorizontalAlignment','left','FontSize',20,'Color','r');
@@ -605,5 +607,6 @@ for Name = 31%1:size(list,1)
     % % % close all
     
     
-end
-diary('off');
+%end
+%diary('off');
+

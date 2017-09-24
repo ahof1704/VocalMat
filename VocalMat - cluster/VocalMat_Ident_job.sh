@@ -12,4 +12,4 @@ export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 module load MATLAB/2016b
 
-matlab -nodisplay -nosplash -nodesktop -r "cd('/ysm-gpfs/project/ahf38/Antonio_VocalMat/VocalMat-Identifier'); vfilename = '"${1}"', vpathname = '"$FOLDER"', VocalMat_Identifier_v5b"
+matlab -nodisplay -nosplash -nodesktop -r "cd('/ysm-gpfs/project/ahf38/Antonio_VocalMat/VocalMat-Identifier'); vfilename = '"${1}"', vpathname = '"$FOLDER"', VocalMat_Identifier_v6"

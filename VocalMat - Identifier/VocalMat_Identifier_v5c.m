@@ -16,7 +16,7 @@
 
 
 raiz = pwd;
-%[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
+[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
 cd(vpathname);
 %diary(['Summary_' num2str(horzcat(fix(clock))) '.txt'])
 list = dir('*.WAV');
@@ -24,22 +24,22 @@ p = mfilename('fullpath')
 
 % min_db = -220;%-110;%-107; %selec points >min_db
 max_interval = 0.005 %if the distance between two successive points in time is >max_interval, it is new vocalization
-minimum_size = 10%20; %A valid vocalization must present >minimum_size valid points to be considered a vocalization
+minimum_size = 6%10%20; %A valid vocalization must present >minimum_size valid points to be considered a vocalization
 median_dist = 600 %600; If the median of the euclidean distance between succesive pair of points in a vocalization is >median_dist, then it is noise.
 max_vocal_duration = 0.140 %If a vocalization is onger than max_vocal_duration, than it can be a noise that needs to be removed by denoising process.
 use_median = 1 %If =1, use the median method to detect the noise.
 save_spectogram_background = 1
 tic
-%for Name = 1:size(list,1)
-%    vfilename = list(Name).name;
-    vfilename = vfilename(1:end-4);
+for Name = 1%:size(list,1)
+    vfilename = list(Name).name;
+%     vfilename = vfilename(1:end-4);
     vfile = fullfile(vpathname,vfilename);
     disp('Cleaning variables: time_vocal freq_vocal intens_vocal output')
     clear time_vocal freq_vocal intens_vocal output time_vocal_nogaps freq_vocal_nogaps intens_vocal_nogaps
     fprintf('\n');
     disp(['Reading audio ' vfilename])
 %    cd (vpathname)
-    [y1,fs]=audioread([vfile '.WAV']);
+    [y1,fs]=audioread(vfile);
     
     grain_total =[];
     T_orig =[];
@@ -47,11 +47,15 @@ tic
     % cc_total = [];
     A_total = [];
     
-    for minute_frame = 1:size(y1,1)/(60*250000) %run through all the minute windows
+    for minute_frame = 1:ceil(size(y1,1)/(60*250000)) %run through all the minute windows
         disp(['Current minute: ' num2str(minute_frame)])
         %     jump = 0;%3*5000000;
         clear A B y2 S F T P q vocal id F_orig grain
-        y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
+        try
+            y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
+        catch
+            y2 = y1(60*(minute_frame-1)*250000+1:end);
+        end
         %         y2 = y1(1:250000); %Analyze first one second.
         %         y2 = y1(0*250000+1:5*250000); %Window size in seconds
         nfft = 1024;
@@ -324,7 +328,8 @@ tic
             %         median_freq = abs(F_orig-median(freq_vocal{k}));
             %         [median_freq median_freq] = min(median_freq); %index of closest value
             try
-                median_db = median(median(A_total(find(min_local_freq(k)==F_orig)-5:find(max_local_freq(k)==F_orig)+5,find(T_orig==time_vocal{k}(ceil(end/2)))-200 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200))); %Calculating median in the freq range of identified vocalization
+                pos = ceil(size(time_vocal{k},2)/2);
+                median_db = median(median(A_total(find(min_local_freq(k)==F_orig)-5:find(max_local_freq(k)==F_orig)+5,find(T_orig==time_vocal{k}(pos))-200 : find(T_orig==time_vocal{k}(pos)) + 200))); %Calculating median in the freq range of identified vocalization
             catch
                 %             if find(T_orig==time_vocal{k}(ceil(end/2)))-200 <0
                 %                 median_db = median(median(A(find(min_local_freq(k)==F_orig)-5:find(max_local_freq(k)==F_orig)+5,1 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200)));
@@ -346,8 +351,9 @@ tic
                     if find(max_local_freq(k)==F_orig)+5 > size(A_total,1)
                         min_freq=1;
                         max_freq = size(A,1);
-                        max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;
-                        min_time = find(T_orig==time_vocal{k}(ceil(end/2)))-200;
+						pos = ceil(size(time_vocal{k},2)/2);
+                        max_time = find(T_orig==time_vocal{k}(pos))+200;
+                        min_time = find(T_orig==time_vocal{k}(pos))-200;
                         if min_time<1
                             min_time=1;
                         end
@@ -355,8 +361,9 @@ tic
                     else
                         min_freq=1;
                         max_freq = find(max_local_freq(k)==F_orig)+5;
-                        max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;
-                        min_time = find(T_orig==time_vocal{k}(ceil(end/2)))-200;
+						pos = ceil(size(time_vocal{k},2)/2);
+                        max_time = find(T_orig==time_vocal{k}(pos))+200;
+                        min_time = find(T_orig==time_vocal{k}(pos))-200;
                         if min_time<1
                             min_time=1;
                         end
@@ -365,15 +372,18 @@ tic
                 if find(max_local_freq(k)==F_orig)+5 > size(A_total,1) && skip_max_freq==0
                     max_freq = size(A,1);
                     min_freq = find(min_local_freq(k)==F_orig)-5;
-                    max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;
-                    min_time = find(T_orig==time_vocal{k}(ceil(end/2)))-200;
+					pos = ceil(size(time_vocal{k},2)/2);
+                    max_time = find(T_orig==time_vocal{k}(pos))+200;
+                    min_time = find(T_orig==time_vocal{k}(pos))-200;
                      if min_time < 1
                         min_time=1;
                     end
                 end
-                if find(T_orig==time_vocal{k}(ceil(end/2)))-200 <0
+                pos = ceil(size(time_vocal{k},2)/2);
+                if find(T_orig==time_vocal{k}(pos))-200 <0
                     min_time=1;
-                    max_time = find(T_orig==time_vocal{k}(ceil(end/2)))+200;
+					pos = ceil(size(time_vocal{k},2)/2);
+                    max_time = find(T_orig==time_vocal{k}(pos))+200;
                     max_freq = find(max_local_freq(k)==F_orig)+5;
                     if max_freq > size(A_total,1)
                         max_freq = size(A_total,1);
@@ -383,9 +393,11 @@ tic
                         min_freq=1;
                     end
                 end
-                if find(T_orig==time_vocal{k}(ceil(end/2))) + 200 > size(A_total,2)
+				pos = ceil(size(time_vocal{k},2)/2);
+                if find(T_orig==time_vocal{k}(pos)) + 200 > size(A_total,2)
                     max_time = size(A_total,2);
-                    min_time = find(T_orig==time_vocal{k}(ceil(end/2)))-200;
+					pos = ceil(size(time_vocal{k},2)/2);
+                    min_time = find(T_orig==time_vocal{k}(pos))-200;
                     max_freq = find(max_local_freq(k)==F_orig)+5;
                     if max_freq > size(A_total,1)
                         max_freq = size(A_total,1);
@@ -561,7 +573,7 @@ tic
         %     'units','normalized','position',Newpos,...
         %     'callback',Stri,'min',0,'max',xmax-dx,'SliderStep',[0.0001 0.010]);
         
-        
+        vfilename = vfilename(1:end-4);
         % disp('Plotting names on spectrogram and organizing table')
         % for i=1:size(time_vocal,2)
         %     text(time_vocal{i}(round(end/2)),freq_vocal{i}{round(end/2)}(round(end/2))+5000,[num2str(i)],'HorizontalAlignment','left','FontSize',20,'Color','r');
@@ -607,6 +619,6 @@ tic
     % % % close all
     
     
-%end
+end
 %diary('off');
 

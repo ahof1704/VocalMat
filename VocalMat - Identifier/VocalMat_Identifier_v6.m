@@ -52,7 +52,7 @@ tic
         %     jump = 0;%3*5000000;
         clear A B y2 S F T P q vocal id F_orig grain
 	
-	try
+		try
             y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
         catch
             y2 = y1(60*(minute_frame-1)*250000+1:end);
@@ -349,42 +349,38 @@ tic
                 %             else
                 %                 median_db = median(median(A(find(min_local_freq(k)==F_orig),find(T_orig==time_vocal{k}(ceil(end/2)))-200 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200)));
                 %             end
-                if find(min_local_freq(k)==F_orig)-5 <= 0
+				pos = ceil(size(time_vocal{k},2)/2);
+                if find(min_local_freq(k)==F_orig)-5 < 1
                     if find(max_local_freq(k)==F_orig)+5 > size(A_total,1)
                         min_freq=1;
                         max_freq = size(A,1);
-                        pos = ceil(size(time_vocal{k},2)/2);
                         max_time = find(T_orig==time_vocal{k}(pos))+200;
                         min_time = find(T_orig==time_vocal{k}(pos))-200;
                         if min_time<1
                             min_time=1;
                         end
-                        skip_max_freq = 1;
                     else
                         min_freq=1;
                         max_freq = find(max_local_freq(k)==F_orig)+5;
-                        pos = ceil(size(time_vocal{k},2)/2);
                         max_time = find(T_orig==time_vocal{k}(pos))+200;
                         min_time = find(T_orig==time_vocal{k}(pos))-200;
                         if min_time<1
                             min_time=1;
                         end
                     end
+					skip_max_freq = 1;
                 end
-                if find(max_local_freq(k)==F_orig)+5 > size(A_total,1) && skip_max_freq==0
+                if find(max_local_freq(k)==F_orig)+5 >= size(A_total,1) && skip_max_freq==0
                     max_freq = size(A,1);
                     min_freq = find(min_local_freq(k)==F_orig)-5;
-                    pos = ceil(size(time_vocal{k},2)/2);
                     max_time = find(T_orig==time_vocal{k}(pos))+200;
                     min_time = find(T_orig==time_vocal{k}(pos))-200;
                      if min_time < 1
                         min_time=1;
                     end
                 end
-		pos = ceil(size(time_vocal{k},2)/2);
-                if find(T_orig==time_vocal{k}(pos))-200 <0
+                if find(T_orig==time_vocal{k}(pos))-200 < 1
                     min_time=1;
-                    pos = ceil(size(time_vocal{k},2)/2);
                     max_time = find(T_orig==time_vocal{k}(pos))+200;
                     max_freq = find(max_local_freq(k)==F_orig)+5;
                     if max_freq > size(A_total,1)
@@ -395,10 +391,8 @@ tic
                         min_freq=1;
                     end
                 end
-                pos = ceil(size(time_vocal{k},2)/2);
-                if find(T_orig==time_vocal{k}(pos)) + 200 > size(A_total,2)
+                if find(T_orig==time_vocal{k}(pos)) + 200 >= size(A_total,2)
                     max_time = size(A_total,2);
-                    pos = ceil(size(time_vocal{k},2)/2);
                     min_time = find(T_orig==time_vocal{k}(pos))-200;
                     max_freq = find(max_local_freq(k)==F_orig)+5;
                     if max_freq > size(A_total,1)

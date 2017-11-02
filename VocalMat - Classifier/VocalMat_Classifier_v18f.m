@@ -1251,13 +1251,7 @@ mult_steps_count_bin_total  = 0;
     tabela = zeros(size(vocal_classified,2),size(names,1));
     tabela(:,1) = 1:size(vocal_classified,2);
     tabela = num2cell(tabela);
-%     tabela = array2table(tabela);
-%     tabela.Properties.VariableNames = names;
-    
-    %         for i=1:size(time_vocal,2)
-    %             time_start(i) = time_vocal{i}(1);
-    %         end
-    
+   
     
     for i = 1:size(names2,1)
         if eval(['~isempty(list_clusters.' names2{i} ')']) && ~strcmp(names2{i},'harmonic_size') && ~strcmp(names2{i},'noisy_vocal') && ~strcmp(names2{i},'harmonic')   
@@ -1265,16 +1259,13 @@ mult_steps_count_bin_total  = 0;
         end
     end
     
-    for i = 1:size(names2,1)
-        if strcmp(names2{i},'noisy_vocal')   
-            eval(['tabela(list_clusters.' names2{i} '(:,1),16)= {1};']);
-        end
+    if ~isempty(list_clusters.noisy_vocal)
+        tabela(list_clusters.noisy_vocal(:,1),16)= {1};
     end
     
-    for i = 1:size(names2,1)
-        if strcmp(names2{i},'harmonic')   
-            eval(['tabela(list_clusters.' names2{i} '(:,1),15)= {1};']);
-        end
+    
+    if ~isempty(list_clusters.harmonic)
+       tabela(list_clusters.harmonic(:,1),15)= {1};
     end
     
     for i=1:size(time_vocal,2)

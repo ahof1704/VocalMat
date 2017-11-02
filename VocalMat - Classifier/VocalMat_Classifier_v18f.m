@@ -18,7 +18,7 @@ raiz = pwd;
 % model_noise=load('model_noise.mat');
 model_noise=load('model_noise_randomTree3.mat')
 model_noise = model_noise.model_noise_randomTree3;
-[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
+%[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
 list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
@@ -285,9 +285,7 @@ for k=1:size(time_vocal,2)
     %             temp = (freq_vocal{k}{time_stamp} - circshift(freq_vocal{k}{time_stamp} ,[1,0]));
     %         end
     %    end
-    
     if ~isempty(current_freq)
-        
         aux = current_freq - circshift(current_freq ,[1,0]);
         
         % eliminate outlier
@@ -460,12 +458,12 @@ for k=1:size(time_vocal,2)
             end
         end
         current_freq_total{k}=current_freq;
+        
     else
         vocal_classified{k}.noise_dist = time_vocal{k}(1);
         noise_count_dist = [noise_count_dist;k];
         current_freq_total{k}=current_freq;
     end
-    
     %Extra filtering by removing the points with intensity below 5% of the average
     tabela = [];
     %         for jj = 207% 1:size(time_vocal,2)

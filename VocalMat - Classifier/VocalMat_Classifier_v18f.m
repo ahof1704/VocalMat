@@ -1259,7 +1259,7 @@ if save_excel_file==1
     
     
     for i = 1:size(names2,1)
-        if eval(['~isempty(list_clusters.' names2{i} ')']) && ~strcmp(names2{i},'harmonic_size') && ~strcmp(names2{i},'noisy_vocal') && ~strcmp(names2{i},'harmonic')
+        if eval(['~isempty(list_clusters.' names2{i} ')']) && ~strcmp(names2{i},'harmonic_size') && ~strcmp(names2{i},'noisy_vocal') && ~strcmp(names2{i},'harmonic') && ~strcmp(names2{i},'noise')
             eval(['tabela(list_clusters.' names2{i} '(:,1),14)= names2(i);']);
         end
     end

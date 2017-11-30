@@ -18,7 +18,7 @@ raiz = pwd;
 % model_noise=load('model_noise.mat');
 model_noise=load('model_noise_randomTree3.mat')
 model_noise = model_noise.model_noise_randomTree3;
-%[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
+% [vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
 list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
@@ -105,9 +105,9 @@ end
 disp('Running analysis!')
 
 for k=1:size(time_vocal,2)
-%                     if k==96
-%                         k
-%                     end
+%     if k==1168
+%         k
+%     end
     vocal_classified{k}.step_up = [];
     vocal_classified{k}.step_down = [];
     vocal_classified{k}.harmonic = [];
@@ -120,7 +120,7 @@ for k=1:size(time_vocal,2)
     vocal_classified{k}.noisy_vocal = [];
     vocal_classified{k}.non_linear = [];
     vocal_classified{k}.short =  [];
-%     vocal_classified{k}.noise = [];
+    %     vocal_classified{k}.noise = [];
     vocal_classified{k}.harmonic_size = [];
     vocal_classified{k}.noise_dist = [];
     
@@ -365,7 +365,7 @@ for k=1:size(time_vocal,2)
                 else
                     if (time_vocal{k}(2)-time_vocal{k}(1))*size(current_freq,1)<0.005 %6.5ms
                         %                         if ~isempty(vocal_classified{k}.harmonic) && max(vocal_classified{k}.harmonic_size)<15
-%                         vocal_classified{k}.noise = time_vocal{k}(1);
+                        %                         vocal_classified{k}.noise = time_vocal{k}(1);
                         noise_count = [noise_count;k];
                         %                         end
                     else
@@ -414,48 +414,48 @@ for k=1:size(time_vocal,2)
                     short_count = [short_count;k];
                 else
                     if (time_vocal{k}(2)-time_vocal{k}(1))*size(current_freq,1)<0.005 %6.5ms
-%                         if ~isempty(vocal_classified{k}.harmonic) && max(vocal_classified{k}.harmonic_size)<15
-                            vocal_classified{k}.noise = time_vocal{k}(1);
-                            noise_count = [noise_count;k];
-%                         end
+                        %                         if ~isempty(vocal_classified{k}.harmonic) && max(vocal_classified{k}.harmonic_size)<15
+                        vocal_classified{k}.noise = time_vocal{k}(1);
+                        noise_count = [noise_count;k];
+                        %                         end
                     else
                         vocal_classified{k}.flat =  time_vocal{k}(1);
                         flat_count = [flat_count;k];
                     end
                 end
             else
-            time_stamps = round(linspace(1,size(current_freq',2),10));
-            aux = current_freq;
-            aux = aux-circshift(aux ,[1,0]);
-            if (max(current_freq)-current_freq(1)> 5800 && max(current_freq)-current_freq(end)> 5800) %Chevron
-                [max_local max_local] = max(current_freq);
-                aux2 = aux(2:max_local);
-                aux3 = aux(max_local:end);
-                if sum(sign(aux2)>0)/size(aux2,1)>=0.7 && sum(sign(aux3)<0)/size(aux3,1)>=0.7 && mean(diff(current_freq(2:max_local)))/size(current_freq(2:max_local),1)>3 && mean(diff(current_freq(max_local:end)))/size(current_freq(max_local:end),1)<-3%The "U" shape is verified
-                    vocal_classified{k}.chevron = time_vocal{k}(1);
-                    chevron_count = [chevron_count;k];
+                time_stamps = round(linspace(1,size(current_freq',2),10));
+                aux = current_freq;
+                aux = aux-circshift(aux ,[1,0]);
+                if (max(current_freq)-current_freq(1)> 5800 && max(current_freq)-current_freq(end)> 5800) %Chevron
+                    [max_local max_local] = max(current_freq);
+                    aux2 = aux(2:max_local);
+                    aux3 = aux(max_local:end);
+                    if sum(sign(aux2)>0)/size(aux2,1)>=0.7 && sum(sign(aux3)<0)/size(aux3,1)>=0.7 && mean(diff(current_freq(2:max_local)))/size(current_freq(2:max_local),1)>3 && mean(diff(current_freq(max_local:end)))/size(current_freq(max_local:end),1)<-3%The "U" shape is verified
+                        vocal_classified{k}.chevron = time_vocal{k}(1);
+                        chevron_count = [chevron_count;k];
+                    end
+                elseif (current_freq(1) - min(current_freq)> 5800 && current_freq(end) - min(current_freq)> 5800)
+                    [min_local min_local] = min(current_freq);
+                    aux2 = aux(2:min_local);
+                    aux3 = aux(min_local:end);
+                    if sum(sign(aux2)<0)/size(aux2,1)>=0.7 && sum(sign(aux3)>0)/size(aux3,1)>=0.7 %The inverted "U" shape is verified
+                        vocal_classified{k}.rev_chevron = time_vocal{k}(1);
+                        revchevron_count = [revchevron_count;k];
+                    end
+                elseif (abs(current_freq(end) - current_freq(1))> 5800) && sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
+                    vocal_classified{k}.down_fm = time_vocal{k}(1);
+                    downfm_count = [downfm_count;k];
+                elseif (abs(current_freq(end) - current_freq(1))> 5800) && sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
+                    vocal_classified{k}.up_fm = time_vocal{k}(1);
+                    upfm_count = [upfm_count;k];
                 end
-            elseif (current_freq(1) - min(current_freq)> 5800 && current_freq(end) - min(current_freq)> 5800)
-                [min_local min_local] = min(current_freq);
-                aux2 = aux(2:min_local);
-                aux3 = aux(min_local:end);
-                if sum(sign(aux2)<0)/size(aux2,1)>=0.7 && sum(sign(aux3)>0)/size(aux3,1)>=0.7 %The inverted "U" shape is verified
-                    vocal_classified{k}.rev_chevron = time_vocal{k}(1);
-                    revchevron_count = [revchevron_count;k];
+                %             end
+                check_if_only_harmonic = struct2cell(vocal_classified{k}); check_if_only_harmonic([3 13])=[];
+                if isempty(cell2mat(check_if_only_harmonic))  %If it is still empty, has to be complex
+                    vocal_classified{k}.complex = time_vocal{k}(1);
+                    complex_count = [complex_count;k];
                 end
-            elseif (abs(current_freq(end) - current_freq(1))> 5800) && sum(sign(aux)<0)/size(current_freq,1)>0.7 %Down FM
-                vocal_classified{k}.down_fm = time_vocal{k}(1);
-                downfm_count = [downfm_count;k];
-            elseif (abs(current_freq(end) - current_freq(1))> 5800) && sum(sign(aux)>0)/size(current_freq,1)>0.7 %Up FM
-                vocal_classified{k}.up_fm = time_vocal{k}(1);
-                upfm_count = [upfm_count;k];
-            end
-            %             end
-            check_if_only_harmonic = struct2cell(vocal_classified{k}); check_if_only_harmonic([3 13])=[];
-            if isempty(cell2mat(check_if_only_harmonic))  %If it is still empty, has to be complex
-                vocal_classified{k}.complex = time_vocal{k}(1);
-                complex_count = [complex_count;k];
-            end
             end
         end
         current_freq_total{k}=current_freq;
@@ -510,7 +510,7 @@ for k=1:size(time_vocal,2)
                 %                     try
                 %                         if isempty(pks) || (mean(pks)/mean(valleys) <= 2.2 && max(proms)<0.55 ) || (max_below_50k>0.8 && max(proms)<0.55) %I'm setting this constant myself... find dynamic way to get it.
                 aux5 = 1; %'Noise';
-%                 vocal_classified{k}.noise = time_vocal{k}(1);
+                %                 vocal_classified{k}.noise = time_vocal{k}(1);
                 noise_count = [noise_count;k];
                 noise_detected_clustering(k) = 1;
                 %                         end
@@ -557,7 +557,7 @@ for k=1:size(time_vocal,2)
                     %
                     %                         if mean(pks)/mean(valleys) <= 2.2 %I'm setting this constant myself... find dynamic way to get it.
                     aux5 = 1; %'Noise';
-%                     vocal_classified{k}.noise = time_vocal{k}(1);
+                    %                     vocal_classified{k}.noise = time_vocal{k}(1);
                     noise_count = [noise_count;k];
                     noise_detected_clustering(k) = 1;
                     %                         end
@@ -569,7 +569,7 @@ for k=1:size(time_vocal,2)
             else
                 %                     if mean(pks)/mean(valleys) <= 2.2 %I'm setting this constant myself... find dynamic way to get it.
                 aux5 = 1; %'Noise';
-%                 vocal_classified{k}.noise = time_vocal{k}(1);
+                %                 vocal_classified{k}.noise = time_vocal{k}(1);
                 noise_count = [noise_count;k];
                 noise_detected_clustering(k) = 1;
                 %                     end
@@ -604,142 +604,147 @@ for k=1:size(time_vocal,2)
         hold on
     end
     
-    yy2 = smooth(F_orig,test3,0.1,'rloess');
-    [valleys,locs_valleys]=findpeaks(-yy2,'MinPeakProminence',0.3); valleys = valleys*(-1);
-    if save_plot_3d_info
-        subplot(2,2,3),findpeaks(yy2,F_orig ,'MinPeakProminence',0.3,'Annotate','extent')
-    end
-    [pks_orig,locs,~,proms]=findpeaks(yy2,'MinPeakProminence',0.3); %The peak has to present local height of at least 0.3 to be considered a peak
-    % evaluate relation to the peaks
-    pks = pks_orig;
-    [max_peak1 max_peak1]=max(pks);
-    max_peak.peak = max(pks); pks(max_peak1)=[];
-    max_peak2.peak = max(pks);
-    pos_max_below_50k = max(find(F_orig<50e3));
-    max_below_50k = max(yy2(1:pos_max_below_50k));
-    %         max_prom = max(proms);
-    
-    if save_plot_3d_info==1
-        try
-            title(['pk1/pk2= ' num2str(max_peak.peak/ max_peak2.peak) ' ;  mean(pks)/mean(valleys):'  num2str(mean(pks)/mean(valleys)) '; maxprom= ' num2str(max(proms)) '; mediandist= ' num2str(median_dist) '; meandist= ' num2str(mean_dist)])
-        catch
-            title(['pk1= ' num2str(max_peak.peak) ' ;  mean(pks)/mean(valleys):'  num2str(mean(pks)/mean(valleys)) '; maxprom= ' num2str(max(proms)) '; mediandist= ' num2str(median_dist) '; meandist= ' num2str(mean_dist)])
+    if max(test2)==0 %it is missing data in this windown (don't know what it happens, but happened once already...)
+        vocal_classified{k}.noise_dist = time_vocal{k}(1);
+        noise_count_dist = [noise_count_dist;k];
+    else
+        yy2 = smooth(F_orig,test3,0.1,'rloess');
+        [valleys,locs_valleys]=findpeaks(-yy2,'MinPeakProminence',0.3); valleys = valleys*(-1);
+        if save_plot_3d_info
+            subplot(2,2,3),findpeaks(yy2,F_orig ,'MinPeakProminence',0.3,'Annotate','extent')
         end
-        ylim([0 1])
-        xlim([min(F_orig) max(F_orig)])
-        hold off
-    end
-    
-    %         tabela = [tabela intens_vocal{k}];
-    
-    if save_plot_3d_info==1
+        [pks_orig,locs,~,proms]=findpeaks(yy2,'MinPeakProminence',0.3); %The peak has to present local height of at least 0.3 to be considered a peak
+        % evaluate relation to the peaks
+        pks = pks_orig;
+        [max_peak1 max_peak1]=max(pks);
+        max_peak.peak = max(pks); pks(max_peak1)=[];
+        max_peak2.peak = max(pks);
+        pos_max_below_50k = max(find(F_orig<50e3));
+        max_below_50k = max(yy2(1:pos_max_below_50k));
+        %         max_prom = max(proms);
+        
+        if save_plot_3d_info==1
+            try
+                title(['pk1/pk2= ' num2str(max_peak.peak/ max_peak2.peak) ' ;  mean(pks)/mean(valleys):'  num2str(mean(pks)/mean(valleys)) '; maxprom= ' num2str(max(proms)) '; mediandist= ' num2str(median_dist) '; meandist= ' num2str(mean_dist)])
+            catch
+                title(['pk1= ' num2str(max_peak.peak) ' ;  mean(pks)/mean(valleys):'  num2str(mean(pks)/mean(valleys)) '; maxprom= ' num2str(max(proms)) '; mediandist= ' num2str(median_dist) '; meandist= ' num2str(mean_dist)])
+            end
+            ylim([0 1])
+            xlim([min(F_orig) max(F_orig)])
+            hold off
+        end
+        
+        %         tabela = [tabela intens_vocal{k}];
+        
+        if save_plot_3d_info==1
+            %             yy5 = smooth(F_orig,tabela(:,2),0.1,'rloess');
+            subplot(2,2,4), plot(xi,f/max(f)), title(k)
+            %             subplot(2,2,4),plot(F_orig,test3/max(test3))
+            hold on
+        end
+        %             subplot(2,2,4),plot(F_orig,yy5,'--g')
+        yy3 = (f/max(f)).*yy2;
+        yy4 = (f/max(f));
         %             yy5 = smooth(F_orig,tabela(:,2),0.1,'rloess');
-        subplot(2,2,4), plot(xi,f/max(f)), title(k)
-        %             subplot(2,2,4),plot(F_orig,test3/max(test3))
-        hold on
-    end
-    %             subplot(2,2,4),plot(F_orig,yy5,'--g')
-    yy3 = (f/max(f)).*yy2;
-    yy4 = (f/max(f));
-    %             yy5 = smooth(F_orig,tabela(:,2),0.1,'rloess');
-    if save_plot_3d_info==1
-        subplot(2,2,4),plot(F_orig,yy3,'--r')
-        ylim([0 1])
-        xlim([min(F_orig) max(F_orig)])
-        legend('Vocal dist','Vocal detected * Intensity dist')
-    end
-    
-    [pks_orig2,locs2,~,proms2]=findpeaks(yy3,'MinPeakProminence',0.3); %The peak has to present local height of at least 0.3 to be considered a peak
-    % evaluate relation to the peaks
-    pks2 = pks_orig2;
-    [max_peak12 max_peak12]=max(pks2);
-    max_peak2.peak = max(pks2); pks2(max_peak12)=[];
-    max_peak22.peak = max(pks2);
-    corr23 = corrcoef(yy2,yy3); corr_yy2_yy3(k) = corr23(1,2);
-    corr24 = corrcoef(yy2,yy4); corr_yy2_yy4(k) = corr24(1,2);
-    %         if isempty(corr23),  corr23_total(k) = NaN; else corr23_total(k) = corr23; end
-    %         if isempty(corr24),  corr24_total(k) = NaN; else corr24_total(k) = corr24; end
-    if isempty(max(proms2)),  max_prom2(k) = NaN; else max_prom2(k) = max(proms2); end
-    if isempty(max(proms)),  max_prom(k) = NaN; else max_prom(k) = max(proms); end
-    if isempty(mean_dist), mean_dist_total(k) = NaN; else mean_dist_total(k) = mean_dist; end
-    if isempty(median_dist), median_dist_total(k) = NaN; else median_dist_total(k) = median_dist;end
-    if isempty(max_below_50k), max_below_50k_total(k) = NaN; else max_below_50k_total(k) = max_below_50k;end
-    if isempty(mean(pks)/mean(valleys)), mean_pks_valley(k) = NaN; else mean_pks_valley(k) = mean(pks)/mean(valleys);end
-    duration(k) = time_vocal{k}(end)-time_vocal{k}(1);
-    Xnew = [max_below_50k_total(k), max_prom(k), max_prom2(k), median_dist_total(k), mean_dist_total(k), mean_pks_valley(k), corr_yy2_yy3(k), corr_yy2_yy4(k), duration(k), noise_detected_clustering(k) ];
-    
-    %correlation with burst
-    %             burst_model = yy2;
-    if save_plot_3d_info==1
+        if save_plot_3d_info==1
+            subplot(2,2,4),plot(F_orig,yy3,'--r')
+            ylim([0 1])
+            xlim([min(F_orig) max(F_orig)])
+            legend('Vocal dist','Vocal detected * Intensity dist')
+        end
+        
+        [pks_orig2,locs2,~,proms2]=findpeaks(yy3,'MinPeakProminence',0.3); %The peak has to present local height of at least 0.3 to be considered a peak
+        % evaluate relation to the peaks
+        pks2 = pks_orig2;
+        [max_peak12 max_peak12]=max(pks2);
+        max_peak2.peak = max(pks2); pks2(max_peak12)=[];
+        max_peak22.peak = max(pks2);
+        corr23 = corrcoef(yy2,yy3); corr_yy2_yy3(k) = corr23(1,2);
+        corr24 = corrcoef(yy2,yy4); corr_yy2_yy4(k) = corr24(1,2);
+        %         if isempty(corr23),  corr23_total(k) = NaN; else corr23_total(k) = corr23; end
+        %         if isempty(corr24),  corr24_total(k) = NaN; else corr24_total(k) = corr24; end
+        if isempty(max(proms2)),  max_prom2(k) = NaN; else max_prom2(k) = max(proms2); end
+        if isempty(max(proms)),  max_prom(k) = NaN; else max_prom(k) = max(proms); end
+        if isempty(mean_dist), mean_dist_total(k) = NaN; else mean_dist_total(k) = mean_dist; end
+        if isempty(median_dist), median_dist_total(k) = NaN; else median_dist_total(k) = median_dist;end
+        if isempty(max_below_50k), max_below_50k_total(k) = NaN; else max_below_50k_total(k) = max_below_50k;end
+        if isempty(mean(pks)/mean(valleys)), mean_pks_valley(k) = NaN; else mean_pks_valley(k) = mean(pks)/mean(valleys);end
+        duration(k) = time_vocal{k}(end)-time_vocal{k}(1);
+        Xnew = [max_below_50k_total(k), max_prom(k), max_prom2(k), median_dist_total(k), mean_dist_total(k), mean_pks_valley(k), corr_yy2_yy3(k), corr_yy2_yy4(k), duration(k), noise_detected_clustering(k) ];
+        
+        %correlation with burst
+        %             burst_model = yy2;
+        if save_plot_3d_info==1
+            try
+                title(['pk1/pk2= ' num2str(max_peak2.peak/ max_peak22.peak) '; maxprom= ' num2str(max(proms2)) '; mediandist= ' num2str(median_dist) '; meandist= ' num2str(mean_dist) '; corry2y3= ' num2str(corr23(1,2)) '; corry2y4= ' num2str(corr24(1,2))])
+            catch
+                title(['pk1= ' num2str(max_peak2.peak)  '; maxprom= ' num2str(max(proms2)) '; mediandist= ' num2str(median_dist) '; meandist= ' num2str(mean_dist) '; corry2y3= ' num2str(corr23(1,2)) '; corry2y4= ' num2str(corr24(1,2)) ])
+            end
+            ylim([0 1])
+            xlim([min(F_orig) max(F_orig)])
+            hold off
+            
+            
+            cd(vpathname)
+            if ~exist(vfilename, 'dir')
+                mkdir(vfilename)
+            end
+            cd(vfilename)
+            if ~exist('Info', 'dir')
+                mkdir('Info')
+            end
+            set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
+            saveas(gcf,[vpathname '/' vfilename '/'  'Info' '/' num2str(k)  '.png'])
+        end
+        
+        %         [pks,locs]=findpeaks(f);
+        
+        % Noise-opinion #1: Intensity vs freq distribution
+        
+        %         try
+        %             if isempty(pks_orig) || (mean(pks)/mean(valleys) <= 2.2 && max(proms)<0.6 ) || (max_below_50k>0.75 && max(proms)<0.6) %I'm setting this constant myself... find dynamic way to get it.
+        %                 aux5 = 1; %'Noise';
+        %                 vocal_classified{k}.noise = time_vocal{k}(1);
+        %                 noise_count_dist = [noise_count_dist;k];
+        %             end
+        %
+        %         catch
+        %             if isempty(pks_orig) ||  (max_below_50k>0.75 && max(proms)<0.6)  %I'm setting this constant myself... find dynamic way to get it.
+        %                 aux5 = 1; %'Noise';
+        %                 vocal_classified{k}.noise = time_vocal{k}(1);
+        %                 noise_count_dist = [noise_count_dist;k];
+        %             end
+        %         end
+        %         Xnew = [max_below_50k max_prom median_dist];
         try
-            title(['pk1/pk2= ' num2str(max_peak2.peak/ max_peak22.peak) '; maxprom= ' num2str(max(proms2)) '; mediandist= ' num2str(median_dist) '; meandist= ' num2str(mean_dist) '; corry2y3= ' num2str(corr23(1,2)) '; corry2y4= ' num2str(corr24(1,2))])
+            [ynew,ynewci] = predict(model_noise,Xnew);
+            if ynew> 0.155 %value gotten from the average+std of all noise detected accross samples (95% of the normal are below 0.15, while 1% of the noise is >0.15)
+                aux5 = 1; %'Noise';
+                vocal_classified{k}.noise_dist = time_vocal{k}(1);
+                noise_count_dist = [noise_count_dist;k];
+            end
         catch
-            title(['pk1= ' num2str(max_peak2.peak)  '; maxprom= ' num2str(max(proms2)) '; mediandist= ' num2str(median_dist) '; meandist= ' num2str(mean_dist) '; corry2y3= ' num2str(corr23(1,2)) '; corry2y4= ' num2str(corr24(1,2)) ])
+            if isempty(max_prom)
+                aux5 = 1; %'Noise';
+                vocal_classified{k}.noise_dist = time_vocal{k}(1);
+                noise_count_dist = [noise_count_dist;k];
+            else
+                disp('Shit went wrong :( ');
+            end
         end
-        ylim([0 1])
-        xlim([min(F_orig) max(F_orig)])
-        hold off
         
         
-        cd(vpathname)
-        if ~exist(vfilename, 'dir')
-            mkdir(vfilename)
+        aux6 = sort(tabela(:,2));
+        aux6 = aux6 - circshift(aux6,[1,0]);
+        aux6 = find(aux6(2:end)>1000);
+        if isempty(aux6)
+            aux6=0;
         end
-        cd(vfilename)
-        if ~exist('Info', 'dir')
-            mkdir('Info')
-        end
-        set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
-        saveas(gcf,[vpathname '/' vfilename '/'  'Info' '/' num2str(k)  '.png'])
+        
+        %         aux6 = [size(aux6,1),size(current_freq,1)];
+        %         ZZ = VocalMat_heatmap(tabela);
+        %         output = [output; time_vocal{k}(1) aux3 aux4 aux5 size(aux6,1) size(pks,2)];
     end
-    %         [pks,locs]=findpeaks(f);
-    
-    % Noise-opinion #1: Intensity vs freq distribution
-    
-    %         try
-    %             if isempty(pks_orig) || (mean(pks)/mean(valleys) <= 2.2 && max(proms)<0.6 ) || (max_below_50k>0.75 && max(proms)<0.6) %I'm setting this constant myself... find dynamic way to get it.
-    %                 aux5 = 1; %'Noise';
-    %                 vocal_classified{k}.noise = time_vocal{k}(1);
-    %                 noise_count_dist = [noise_count_dist;k];
-    %             end
-    %
-    %         catch
-    %             if isempty(pks_orig) ||  (max_below_50k>0.75 && max(proms)<0.6)  %I'm setting this constant myself... find dynamic way to get it.
-    %                 aux5 = 1; %'Noise';
-    %                 vocal_classified{k}.noise = time_vocal{k}(1);
-    %                 noise_count_dist = [noise_count_dist;k];
-    %             end
-    %         end
-    %         Xnew = [max_below_50k max_prom median_dist];
-    try
-        [ynew,ynewci] = predict(model_noise,Xnew);
-        if ynew> 0.15 %value gotten from the average+std of all noise detected accross samples (95% of the normal are below 0.15, while 1% of the noise is >0.15)
-            aux5 = 1; %'Noise';
-            vocal_classified{k}.noise_dist = time_vocal{k}(1);
-            noise_count_dist = [noise_count_dist;k];
-        end
-    catch
-        if isempty(max_prom)
-            aux5 = 1; %'Noise';
-            vocal_classified{k}.noise_dist = time_vocal{k}(1);
-            noise_count_dist = [noise_count_dist;k];
-        else
-            disp('Shit went wrong :( ');
-        end
-    end
-    
-    
-    aux6 = sort(tabela(:,2));
-    aux6 = aux6 - circshift(aux6,[1,0]);
-    aux6 = find(aux6(2:end)>1000);
-    if isempty(aux6)
-        aux6=0;
-    end
-    
-    %         aux6 = [size(aux6,1),size(current_freq,1)];
-    %         ZZ = VocalMat_heatmap(tabela);
-    %         output = [output; time_vocal{k}(1) aux3 aux4 aux5 size(aux6,1) size(pks,2)];
-    
 end
 stepup_count=unique(stepup_count);
 stepdown_count=unique(stepdown_count);
@@ -890,8 +895,8 @@ for names = 1:size(categories,1)
                     eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
                 end
             end
-%         elseif strcmp(name, 'noise') && ~isempty(vocal_classified{k}.noise)
-%             eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
+            %         elseif strcmp(name, 'noise') && ~isempty(vocal_classified{k}.noise)
+            %             eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
         elseif strcmp(name, 'noise_dist') && ~isempty(vocal_classified{k}.noise_dist)
             eval(['list_clusters.' name '= [list_clusters.' name '; k ];']);
         end
@@ -948,7 +953,7 @@ if plot_stats_per_bin ==1
     noisy_vocal_count_bin  = [ sum(list_clusters.noisy_vocal <= bin_1(end)), sum(list_clusters.noisy_vocal >=bin_2(1) & list_clusters.noisy_vocal <=bin_2(end)), sum(list_clusters.noisy_vocal >=bin_3(1) & list_clusters.noisy_vocal <=bin_3(end)), sum(list_clusters.noisy_vocal >=bin_4(1) & list_clusters.noisy_vocal <=bin_4(end)),sum(list_clusters.noisy_vocal >=bin_5(1) & list_clusters.noisy_vocal <=bin_5(end)),sum(list_clusters.noisy_vocal >=bin_6(1) & list_clusters.noisy_vocal <=bin_6(end))];
     nonlinear_count_bin  = [ sum(list_clusters.non_linear <= bin_1(end)), sum(list_clusters.non_linear >=bin_2(1) & list_clusters.non_linear <=bin_2(end)), sum(list_clusters.non_linear >=bin_3(1) & list_clusters.non_linear <=bin_3(end)), sum(list_clusters.non_linear >=bin_4(1) & list_clusters.non_linear <=bin_4(end)),sum(list_clusters.non_linear >=bin_5(1) & list_clusters.non_linear <=bin_5(end)),sum(list_clusters.non_linear >=bin_6(1) & list_clusters.non_linear <=bin_6(end))];
     short_count_bin  = [ sum(list_clusters.short <= bin_1(end)), sum(list_clusters.short >=bin_2(1) & list_clusters.short <=bin_2(end)), sum(list_clusters.short >=bin_3(1) & list_clusters.short <=bin_3(end)), sum(list_clusters.short >=bin_4(1) & list_clusters.short <=bin_4(end)),sum(list_clusters.short >=bin_5(1) & list_clusters.short <=bin_5(end)),sum(list_clusters.short >=bin_6(1) & list_clusters.short <=bin_6(end))];
-%     noise_count_bin  = [ sum(list_clusters.noise <= bin_1(end)), sum(list_clusters.noise >=bin_2(1) & list_clusters.noise <=bin_2(end)), sum(list_clusters.noise >=bin_3(1) & list_clusters.noise <=bin_3(end)), sum(list_clusters.noise >=bin_4(1) & list_clusters.noise <=bin_4(end)),sum(list_clusters.noise >=bin_5(1) & list_clusters.noise <=bin_5(end)),sum(list_clusters.noise >=bin_6(1) & list_clusters.noise <=bin_6(end))];
+    %     noise_count_bin  = [ sum(list_clusters.noise <= bin_1(end)), sum(list_clusters.noise >=bin_2(1) & list_clusters.noise <=bin_2(end)), sum(list_clusters.noise >=bin_3(1) & list_clusters.noise <=bin_3(end)), sum(list_clusters.noise >=bin_4(1) & list_clusters.noise <=bin_4(end)),sum(list_clusters.noise >=bin_5(1) & list_clusters.noise <=bin_5(end)),sum(list_clusters.noise >=bin_6(1) & list_clusters.noise <=bin_6(end))];
     noise_dist_count_bin  = [ sum(list_clusters.noise_dist <= bin_1(end)), sum(list_clusters.noise_dist >=bin_2(1) & list_clusters.noise_dist <=bin_2(end)), sum(list_clusters.noise_dist >=bin_3(1) & list_clusters.noise_dist <=bin_3(end)), sum(list_clusters.noise_dist >=bin_4(1) & list_clusters.noise_dist <=bin_4(end)),sum(list_clusters.noise_dist >=bin_5(1) & list_clusters.noise_dist <=bin_5(end)),sum(list_clusters.noise_dist >=bin_6(1) & list_clusters.noise_dist <=bin_6(end))];
     two_steps_count_bin  = [ sum(list_clusters.two_steps <= bin_1(end)), sum(list_clusters.two_steps >=bin_2(1) & list_clusters.two_steps <=bin_2(end)), sum(list_clusters.two_steps >=bin_3(1) & list_clusters.two_steps <=bin_3(end)), sum(list_clusters.two_steps >=bin_4(1) & list_clusters.two_steps <=bin_4(end)),sum(list_clusters.two_steps >=bin_5(1) & list_clusters.two_steps <=bin_5(end)),sum(list_clusters.two_steps >=bin_6(1) & list_clusters.two_steps <=bin_6(end))];
     mult_steps_count_bin  = [ sum(list_clusters.mult_steps <= bin_1(end)), sum(list_clusters.mult_steps >=bin_2(1) & list_clusters.mult_steps <=bin_2(end)), sum(list_clusters.mult_steps >=bin_3(1) & list_clusters.mult_steps <=bin_3(end)), sum(list_clusters.mult_steps >=bin_4(1) & list_clusters.mult_steps <=bin_4(end)),sum(list_clusters.mult_steps >=bin_5(1) & list_clusters.mult_steps <=bin_5(end)),sum(list_clusters.mult_steps >=bin_6(1) & list_clusters.mult_steps <=bin_6(end))];
@@ -976,9 +981,9 @@ if save_plot_spectrograms==1
     for names = 1:size(categories,1)
         cd(raiz)
         name = categories{names};
-%         if strcmp(name, 'noise')
-%             name
-%         end
+        %         if strcmp(name, 'noise')
+        %             name
+        %         end
         disp(['Saving plots for ' name])
         if isfield(list_clusters, name) && ~strcmp(name, 'complex') && ~strcmp(name, 'harmonic_size') %&& ~strcmp(name, 'noise')
             %             eval(['corr_table = similarity_VocalMat(vpathname,vfilename,pre_corr_table.' name ');']);
@@ -1198,7 +1203,7 @@ if plot_stats_per_bin == 1
     noisy_vocal_count_bin_total  = noisy_vocal_count_bin_total + noisy_vocal_count_bin;
     nonlinear_count_bin_total  = nonlinear_count_bin_total + nonlinear_count_bin;
     short_count_bin_total  = short_count_bin_total + short_count_bin;
-%     noise_count_bin_total  = noise_count_bin_total + noise_count_bin;
+    %     noise_count_bin_total  = noise_count_bin_total + noise_count_bin;
     noise_dist_count_bin_total = noise_dist_count_bin_total+noise_dist_count_bin;
     two_steps_count_bin_total  = two_steps_count_bin_total + two_steps_count_bin;
     mult_steps_count_bin_total  = mult_steps_count_bin_total + mult_steps_count_bin;
@@ -1229,8 +1234,8 @@ if plot_stats_per_bin == 1
     disp(['Bin1: ' num2str(nonlinear_count_bin(1)) ', Bin2: ' num2str(nonlinear_count_bin(2)) ', Bin3: ' num2str(nonlinear_count_bin(3)) ', Bin4: ' num2str(nonlinear_count_bin(4)) ', Bin5: ' num2str(nonlinear_count_bin(5)) ', Bin6: ' num2str(nonlinear_count_bin(6))]);
     disp('Short:')
     disp(['Bin1: ' num2str(short_count_bin(1)) ', Bin2: ' num2str(short_count_bin(2)) ', Bin3: ' num2str(short_count_bin(3)) ', Bin4: ' num2str(short_count_bin(4)) ', Bin5: ' num2str(short_count_bin(5)) ', Bin6: ' num2str(short_count_bin(6))]);
-%     disp('Noise:')
-%     disp(['Bin1: ' num2str(noise_count_bin(1)) ', Bin2: ' num2str(noise_count_bin(2)) ', Bin3: ' num2str(noise_count_bin(3)) ', Bin4: ' num2str(noise_count_bin(4)) ', Bin5: ' num2str(noise_count_bin(5)) ', Bin6: ' num2str(noise_count_bin(6))]);
+    %     disp('Noise:')
+    %     disp(['Bin1: ' num2str(noise_count_bin(1)) ', Bin2: ' num2str(noise_count_bin(2)) ', Bin3: ' num2str(noise_count_bin(3)) ', Bin4: ' num2str(noise_count_bin(4)) ', Bin5: ' num2str(noise_count_bin(5)) ', Bin6: ' num2str(noise_count_bin(6))]);
     disp('Noise_dist:')
     disp(['Bin1: ' num2str(noise_dist_count_bin(1)) ', Bin2: ' num2str(noise_dist_count_bin(2)) ', Bin3: ' num2str(noise_dist_count_bin(3)) ', Bin4: ' num2str(noise_dist_count_bin(4)) ', Bin5: ' num2str(noise_dist_count_bin(5)) ', Bin6: ' num2str(noise_dist_count_bin(6))]);
     disp('Two steps:')
@@ -1344,7 +1349,7 @@ end
 %     lista = rdir([p, '/**/*.png']);
 %     cd(p)
 %     p = strcat(p, '/All');
-%     
+%
 %     for i=1:size(lista,1)
 %         copyfile(lista(i).name,p)
 %     end
@@ -1353,7 +1358,7 @@ end
 
 % if 1==0
 %     total = stepup_count_bin_total + stepdown_count_bin_total + harmonic_count_bin_total  + flat_count_bin_total + chevron_count_bin_total + revchevron_count_bin_total  + downfm_count_bin_total + upfm_count_bin_total + complex_count_bin_total  + noisy_vocal_count_bin_total + nonlinear_count_bin_total + short_count_bin_total + noise_count_bin_total + two_steps_count_bin_total + mult_steps_count_bin_total ;
-%     
+%
 %     all_class = [stepup_count_bin_total; stepdown_count_bin_total; harmonic_count_bin_total; flat_count_bin_total; chevron_count_bin_total; revchevron_count_bin_total; downfm_count_bin_total; upfm_count_bin_total; complex_count_bin_total; noisy_vocal_count_bin_total; nonlinear_count_bin_total; short_count_bin_total; noise_count_bin_total; mult_steps_count_bin_total; two_steps_count_bin_total];
 %     figure('Name',['vocal_classified_' vfilename],'NumberTitle','off')
 %     bar(all_class,'stacked')
@@ -1364,7 +1369,7 @@ end
 %     experiment_name = strsplit(vpathname,{'\','/'});
 %     experiment_name = experiment_name(end-2);
 %     saveas(gcf,[vpathname  experiment_name{1} '.jpg'])
-%     
+%
 %     disp(' ')
 %     disp('Number of vocalizations of each class per bin for all experiments:')
 %     disp('Step up:')
@@ -1399,8 +1404,8 @@ end
 %     disp(['Bin1: ' num2str(two_steps_count_bin_total(1)) ', Bin2: ' num2str(two_steps_count_bin_total(2)) ', Bin3: ' num2str(two_steps_count_bin_total(3)) ', Bin4: ' num2str(two_steps_count_bin_total(4)) ', Bin5: ' num2str(two_steps_count_bin_total(5)) ', Bin6: ' num2str(two_steps_count_bin_total(6))]);
 %     disp('Mult steps:')
 %     disp(['Bin1: ' num2str(mult_steps_count_bin_total(1)) ', Bin2: ' num2str(mult_steps_count_bin_total(2)) ', Bin3: ' num2str(mult_steps_count_bin_total(3)) ', Bin4: ' num2str(mult_steps_count_bin_total(4)) ', Bin5: ' num2str(mult_steps_count_bin_total(5)) ', Bin6: ' num2str(mult_steps_count_bin_total(6))]);
-%     
-%     
+%
+%
 %     all_class2 = all_class/sum(total);
 %     figure('Name',['vocal_classified_' vfilename '(%)'],'NumberTitle','off')
 %     bar(all_class2,'stacked')

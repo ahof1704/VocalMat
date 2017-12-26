@@ -68,7 +68,8 @@ function violins = violinplot(data, cats, varargin)
             end
         end
         for n=1:length(catnames)
-            thisData = cell2mat(data.(catnames{n}));
+%             thisData = cell2mat(data.(catnames{n}));
+            thisData = data.(catnames{n});
             thisData = thisData((~isnan(thisData)&~isinf(thisData)));
             violins(n) = Violin(thisData, n, varargin{:});
         end

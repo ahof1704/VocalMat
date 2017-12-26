@@ -1258,7 +1258,7 @@ end
 
 if save_excel_file==1
     names2 = fieldnames(list_clusters);
-    names = [{'Names_vocal'};{'Start_time'}; {'End_time'}; {'Inter_vocal_interval'}; {'Duration'}; {'min_freq_main'}; {'max_freq_main'};{'mean_freq_main'};{'min_freq_total'};...
+    names = [{'Names_vocal'};{'Start_time'}; {'End_time'}; {'Inter_vocal_interval'}; {'Inter_real_vocal_interval'}; {'Duration'}; {'min_freq_main'}; {'max_freq_main'};{'mean_freq_main'};{'min_freq_total'};...
         {'max_freq_total'};{'mean_freq_total'};{'min_intens_total'};{'max_intens_total'}; {'mean_intens_total'};{'Class'};{'Harmonic'};{'Noisy'}];
     tabela = zeros(size(vocal_classified,2),size(names,1));
     tabela(:,1) = 1:size(vocal_classified,2);
@@ -1267,28 +1267,32 @@ if save_excel_file==1
     
     for i = 1:size(names2,1)
         if eval(['~isempty(list_clusters.' names2{i} ')']) && ~strcmp(names2{i},'harmonic_size') && ~strcmp(names2{i},'noisy_vocal') && ~strcmp(names2{i},'harmonic') %&& ~strcmp(names2{i},'noise')
-            eval(['tabela(list_clusters.' names2{i} '(:,1),15)= names2(i);']);
+            eval(['tabela(list_clusters.' names2{i} '(:,1),16)= names2(i);']);
         end
     end
     
     if ~isempty(list_clusters.noisy_vocal)
-        tabela(list_clusters.noisy_vocal(:,1),17)= {1};
+        tabela(list_clusters.noisy_vocal(:,1),18)= {1};
         for i=1:size(tabela(list_clusters.noisy_vocal(:,1)),1)
-            if cell2mat(tabela(list_clusters.noisy_vocal(i,1),15))==0
-                tabela(list_clusters.noisy_vocal(i,1),15) = {'noisy_vocal'};
+            if cell2mat(tabela(list_clusters.noisy_vocal(i,1),16))==0
+                tabela(list_clusters.noisy_vocal(i,1),16) = {'noisy_vocal'};
             end
         end
     end
     
     
     if ~isempty(list_clusters.harmonic)
-        tabela(list_clusters.harmonic(:,1),16)= {1};
+        tabela(list_clusters.harmonic(:,1),17)= {1};
     end
     
     for i=1:size(time_vocal,2)
         time_start(i) = time_vocal{i}(1);
         time_end(i) = time_vocal{i}(end);
-        if i>1, time_interval(i) = time_start(i)-time_end(i-1); else time_interval(i) = NaN; end
+        if i>1
+            time_interval(i) = time_start(i)-time_end(i-1); 
+        else
+            time_interval(i) = NaN;
+        end
         duration(i) = time_end(i)-time_start(i);
         if ~isempty(current_freq_total{i}), min_freq_main(i) = min(current_freq_total{i}); else min_freq_main(i) = NaN; end
         if ~isempty(current_freq_total{i}), max_freq_main(i) = max(current_freq_total{i}); else max_freq_main(i) = NaN; end
@@ -1301,19 +1305,34 @@ if save_excel_file==1
         mean_intens_total(i) = mean(tabela_all_points{i}(:,3));
     end
     
+    noise_idx = strcmp(tabela(:,16),'noise_dist');
+    time_start_real = time_start; time_start_real(noise_idx) = NaN;
+    time_end_real = time_end; time_end_real(noise_idx) = NaN;
+    curr_time = NaN;
+    for i=1:size(time_start_real,2)
+        if ~isnan(time_start_real(i))
+            time_interval_real(i) = time_start_real(i) - curr_time;
+            curr_time = time_end_real(i);
+        else
+            time_interval_real(i) = NaN;
+        end
+    end
+    
     tabela(:,2) = num2cell(time_start');
     tabela(:,3) = num2cell(time_end');
     tabela(:,4) = num2cell(time_interval');
-    tabela(:,5) = num2cell(duration');
-    tabela(:,6) = num2cell(min_freq_main');
-    tabela(:,7) = num2cell(max_freq_main');
-    tabela(:,8) = num2cell(mean_freq_main');
-    tabela(:,9) = num2cell(min_freq_total');
-    tabela(:,10) = num2cell(max_freq_total');
-    tabela(:,11) = num2cell(mean_freq_total');
-    tabela(:,12) = num2cell(min_intens_total');
-    tabela(:,13) = num2cell(max_intens_total');
-    tabela(:,14) = num2cell(mean_intens_total');
+    tabela(:,5) = num2cell(time_interval_real');
+    tabela(:,6) = num2cell(duration');
+    tabela(:,7) = num2cell(min_freq_main');
+    tabela(:,8) = num2cell(max_freq_main');
+    tabela(:,9) = num2cell(mean_freq_main');
+    tabela(:,10) = num2cell(min_freq_total');
+    tabela(:,11) = num2cell(max_freq_total');
+    tabela(:,12) = num2cell(mean_freq_total');
+    tabela(:,13) = num2cell(min_intens_total');
+    tabela(:,14) = num2cell(max_intens_total');
+    tabela(:,15) = num2cell(mean_intens_total');
+    
     
     names = transpose(names);
     T = array2table(tabela);

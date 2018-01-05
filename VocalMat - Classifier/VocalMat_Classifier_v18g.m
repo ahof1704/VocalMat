@@ -1360,20 +1360,20 @@ if save_excel_file==1
 end
 
 
-%Move all the pics to 'All' folder
-% if save_plot_spectrograms==1
-%     mkdir('All')
-%     p = pwd;
-%     cd(raiz)
-%     lista = rdir([p, '/**/*.png']);
-%     cd(p)
-%     p = strcat(p, '/All');
-%
-%     for i=1:size(lista,1)
-%         copyfile(lista(i).name,p)
-%     end
-% end
-%end
+% Move all the pics to 'All' folder
+if save_plot_spectrograms==1
+    mkdir('All')
+    p = pwd;
+    cd(raiz)
+    lista = rdir([p, '/**/*.png']);
+    cd(p)
+    p = strcat(p, '/All');
+
+    for i=1:size(lista,1)
+        copyfile(lista(i).name,p)
+    end
+end
+
 
 % if 1==0
 %     total = stepup_count_bin_total + stepdown_count_bin_total + harmonic_count_bin_total  + flat_count_bin_total + chevron_count_bin_total + revchevron_count_bin_total  + downfm_count_bin_total + upfm_count_bin_total + complex_count_bin_total  + noisy_vocal_count_bin_total + nonlinear_count_bin_total + short_count_bin_total + noise_count_bin_total + two_steps_count_bin_total + mult_steps_count_bin_total ;

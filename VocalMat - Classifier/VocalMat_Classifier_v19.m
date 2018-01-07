@@ -20,7 +20,7 @@ model_noise=load('model_noise_randomTree3.mat')
 model_noise = model_noise.model_noise_randomTree3;
 model_class = load('Mdl_categorical_15&30_points_v16.mat')
 model_class = model_class.Mdl;
-[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
+% [vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
 list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])

@@ -18,7 +18,7 @@ raiz = pwd;
 % model_noise=load('model_noise.mat');
 model_noise=load('model_noise_randomTree3.mat')
 model_noise = model_noise.model_noise_randomTree3;
-%[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
+[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
 list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])

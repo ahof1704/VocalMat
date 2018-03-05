@@ -18,8 +18,13 @@ raiz = pwd;
 % model_noise=load('model_noise.mat');
 model_noise=load('model_noise_randomTree3.mat')
 model_noise = model_noise.model_noise_randomTree3;
-model_class = load('Mdl_categorical_15&30_points_v16.mat')
-model_class = model_class.Mdl;
+% model_class = load('Mdl_categorical_15&30_points_v16.mat')
+model_class_RF = load('Mdl_categorical_RF_Feb12.mat');
+model_class = model_class_RF.Mdl;
+model_class_DL = load('netTransfer_AlexNet_Dec9th.mat')
+model_class_DL = model_class_DL.netTransfer;
+model_DL_RL = load('Mdl_categorical_RF_DL.mat');
+model_DL_RL = model_DL_RL.Mdl;
 % [vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
 cd(vpathname);
 list = dir('*output*.mat');
@@ -32,8 +37,10 @@ save_plot_spectrograms=1
 save_histogram_per_animal=0
 save_excel_file=1
 save_plot_3d_info=0
-axes_dots=0
+axes_dots=1
 old_identifier=0
+size_spectrogram = [227 227]
+use_DL = 1
 
 stepup_count_bin_total  = 0;
 stepdown_count_bin_total = 0 ;
@@ -61,7 +68,8 @@ vfile = fullfile(vpathname,vfilename)
 clearvars -except   noise_count_bin_total two_steps_count_bin_total mult_steps_count_bin_total model_noise plot_stats_per_bin save_plot_spectrograms list...
     raiz vfile vfilename vpathname stepup_count_bin_total stepdown_count_bin_total harmonic_count_bin_total flat_count_bin_total chevron_count_bin_total...
     noise_dist_count_bin_total revchevron_count_bin_total downfm_count_bin_total upfm_count_bin_total complex_count_bin_total noisy_vocal_count_bin_total...
-    nonlinear_count_bin_total short_count_bin_total save_histogram_per_animal save_excel_file save_plot_3d_info axes_dots old_identifier model_class
+    nonlinear_count_bin_total short_count_bin_total save_histogram_per_animal save_excel_file save_plot_3d_info axes_dots old_identifier model_class...
+    model_class_DL size_spectrogram use_DL model_DL_RL
 
 fprintf('\n')
 disp(['Reading ' vfilename])
@@ -1011,6 +1019,10 @@ if save_plot_spectrograms==1
             if ~exist(name, 'dir')
                 mkdir(name)
             end
+            if ~exist('All_axes','dir')&&axes_dots
+                mkdir('All_axes')
+                mkdir('All')
+            end
             
             %                 for ww1 = 1:size(clustered,1)
             for ww = 1:eval(['size(list_clusters.' name ',1)'])
@@ -1035,12 +1047,14 @@ if save_plot_spectrograms==1
                     end
 %                     Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])'];
 %                     eval(Stri);
-                    saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
+                    saveas(gcf,[vpathname '/' vfilename '/All_axes/' num2str(id_vocal)  '.png'])
                     hold off
-                else
-                    img = flipud(mat2gray(A_total(:,T_min:T_max)));
-                    imwrite(img,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
                 end
+                    img = imresize(flipud(mat2gray(A_total(:,T_min:T_max))),size_spectrogram);
+                    img = cat(3, img, img, img);
+                    imwrite(img,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
+                    imwrite(img,[vpathname '/' vfilename '/All/' num2str(id_vocal)  '.png'])
+                
                 
 %                 x_pos = time_vocal{id_vocal}(ceil(end/2));
 %                 y_pos = freq_vocal{id_vocal}{ceil(end/2)}(ceil(end/2))+5000;
@@ -1067,6 +1081,10 @@ if save_plot_spectrograms==1
                 cd(vfilename)
                 if ~exist(name, 'dir')
                     mkdir(name)
+                end
+                if ~exist('All_axes','dir')&&axes_dots
+                    mkdir('All_axes')
+                    mkdir('All')
                 end
                 
                 %
@@ -1099,14 +1117,16 @@ if save_plot_spectrograms==1
                             for time_stamp = 1:size(time_vocal{id_vocal},2)
                                 scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],repmat(c,size(freq_vocal{id_vocal}{time_stamp}',2),1))
                             end
-                            Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])'];
-                            eval(Stri);
-                            saveas(gcf,[vpathname '/' vfilename '/'  name '/' 'Cluster_' num2str(cluster_number) '/' num2str(id_vocal)  '.png'])
+%                             Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])'];
+%                             eval(Stri);
+                            saveas(gcf,[vpathname '/' vfilename '/All_axes/' num2str(id_vocal)  '.png'])
                             hold off
-                        else
-                            img = flipud(mat2gray(A_total(:,T_min:T_max)));
-                            imwrite(img,[vpathname '/' vfilename '/'  name '/' 'Cluster_' num2str(cluster_number) '/' num2str(id_vocal)  '.png'])
                         end
+                            img = imresize(flipud(mat2gray(A_total(:,T_min:T_max))),size_spectrogram);
+                            img = cat(3, img, img, img);
+                            imwrite(img,[vpathname '/' vfilename '/'  name '/' 'Cluster_' num2str(cluster_number) '/' num2str(id_vocal)  '.png'])
+                            imwrite(img,[vpathname '/' vfilename '/All/' num2str(id_vocal)  '.png'])
+                        
                         
                     end
                 end
@@ -1119,6 +1139,10 @@ if save_plot_spectrograms==1
                 cd(vfilename)
                 if ~exist(name, 'dir')
                     mkdir(name)
+                end
+                if ~exist('All_axes','dir')
+                    mkdir('All_axes')
+                    mkdir('All')
                 end
                 c = [rand() rand() rand()];
                 id_vocal = list_clusters.complex(1,1);
@@ -1142,12 +1166,14 @@ if save_plot_spectrograms==1
                     end
 %                     Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])'];
 %                     eval(Stri);
-                    saveas(gcf,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
+                    saveas(gcf,[vpathname '/' vfilename '/All_axes/' num2str(id_vocal)  '.png'])
                     hold off
-                else
-                    img = flipud(mat2gray(A_total(:,T_min:T_max)));
-                    imwrite(img,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
                 end
+                    img = imresize(flipud(mat2gray(A_total(:,T_min:T_max))),size_spectrogram);
+                    img = cat(3, img, img, img);
+                    imwrite(img,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
+                    imwrite(img,[vpathname '/' vfilename '/All/' num2str(id_vocal)  '.png'])
+                
                 
             end
             
@@ -1356,6 +1382,8 @@ if save_excel_file==1
     names = transpose(names);
     T = array2table(tabela);
     T.Properties.VariableNames = names;
+    VM1_out = T(:,16);
+    VM1_out.Properties.VariableNames{1} = 'VM1_out';
     
     writetable(T,[vfilename '.xlsx'])
     
@@ -1380,18 +1408,38 @@ end
 
 
 % Move all the pics to 'All' folder
-if save_plot_spectrograms==1
-    mkdir('All')
-    p = pwd;
-    cd(raiz)
-    lista = rdir([p, '/**/*.png']);
-    cd(p)
-    p = strcat(p, '/All');
-
-    for i=1:size(lista,1)
-        copyfile(lista(i).name,p)
-    end
-end
+% if save_plot_spectrograms==1
+%     if ~exist('All', 'dir')
+%         mkdir('All')
+%     else
+%         rmdir('All','s')
+%         mkdir('All')
+%     end
+% %     if use_DL==0
+%         
+%         p = pwd;
+%         cd(raiz)
+%         lista = rdir([p, '/**/*.png']);
+%         cd(p)
+%         p = strcat(p, '/All');
+%         
+%         for i=1:size(lista,1)
+%              if ~strcmp(lista(i).folder(end-3:end),'axes') 
+%                 copyfile(lista(i).name,p)
+%              end
+%         end
+        
+%     else
+%         p = pwd;
+%         lista = imageDatastore([vpathname '/' vfilename,],'IncludeSubfolders',true,'LabelSource','foldernames');
+%         p = strcat(p, '/All');
+%         
+%         for i=1:size(lista.Files,1)
+%             
+%             copyfile(lista.Files{i},p)
+%         end
+%     end
+% end
 
 % load(['vocal_classified_' vfilename1(1:end-8) '.mat'])
 % raw(1,:) = [];
@@ -1548,7 +1596,7 @@ for k=1:size(freq_vocal,2)
 %        num2cell([max_below_50k_total(k), max_prom(k), max_prom2(k), median_dist_total(k), mean_dist_total(k), mean_pks_valley(k), corr_yy2_yy3(k), corr_yy2_yy4(k)]), rand(), raw(k,15)]; % New classifier results
 %    else
        table_out(k,:) = [num2cell(aux1), num2cell(dist_between_points{k}), num2cell(slopes{k}'), num2cell(all_jumps{k}'), num2cell(higher_jumps{k}), num2cell(lower_jumps{k}), num2cell(intens_freq_out{k}'), num2cell(freq_vocal_out{k}'), num2cell(euclidean_dist{k}'), ...
-       num2cell([max_below_50k_total(k), max_prom(k), max_prom2(k), median_dist_total(k), mean_dist_total(k), mean_pks_valley(k), corr_yy2_yy3(k), corr_yy2_yy4(k)]), rand()]; % New classifier results
+       num2cell([max_below_50k_total(k), max_prom(k), max_prom2(k), median_dist_total(k), mean_dist_total(k), mean_pks_valley(k), corr_yy2_yy3(k), corr_yy2_yy4(k)])]; % New classifier results
 %    end
    
 end
@@ -1573,7 +1621,7 @@ end
 
 % Labelling and saving
 names_out = ['name_vocal','start_time','dist_between_points','duration', 'bandwidth', slopes_label , jumps_label, 'higher_jumps', 'lower_jumps', intens_label, freq_label, euclidean_dist_label, 'dist_between_points2', slopes_label2 , jumps_label2, 'higher_jumps2', 'lower_jumps2', intens_label2,freq_label2,euclidean_dist_label2, ...
-    'max_below_50k_total', 'max_prom', 'max_prom2', 'median_dist_total', 'mean_dist_total', 'mean_pks_valley', 'corr_yy2_yy3', 'corr_yy2_yy4', 'rand'];
+    'max_below_50k_total', 'max_prom', 'max_prom2', 'median_dist_total', 'mean_dist_total', 'mean_pks_valley', 'corr_yy2_yy3', 'corr_yy2_yy4'];
 T = array2table(table_out,'VariableNames',names_out);
 % eval(['T_' vfilename1(1:end-8) ' = T;']);
 
@@ -1602,28 +1650,74 @@ T = array2table(table_out,'VariableNames',names_out);
 
 
 %Classifying
-table_total_output = [];
-output=[];
+% table_total_output = [];
+% output=[];
 % load('F:\VocalMat_MachineLearning\All tables_full_v3\Mdl_categorical_15&30_points_v16.mat');
 
 
 % for k = 1:size(list,1)
 %    nome =  list(k).name;
 %    load(nome);
-   clear table_aux output output2
+%    clear table_aux output output2
 %    eval(['table_aux = T_' vfilename1(1:end-8) ';']);
 table_aux = T;
 
-   for j=1:size(table_aux,1)
+%    for j=1:size(table_aux,1)
 %        disp(['Table ' nome ', vocal ' num2str(j)])
-       table_aux.file{j}=vfilename;
-
-       Xnew = cell2mat(table2array(table_aux(j,3:end-1)));[ynew,ynewci] = predict(model_class,Xnew);
-       output(j,:) = ynewci;
-       aux = [model_class.ClassNames'; num2cell(ynewci)]; aux = sortrows(aux',2); aux = aux'; aux = fliplr(aux); output2(j,:) = [aux(1:4) aux{2}/aux{4}];       
-   end
+%        table_aux.file{j}=vfilename;
+%        Xnew = cell2mat(table2array(table_aux(j,3:end-1)));
+       [ynew_RF,ynewci_RF] = predict(model_class,cell2mat(table2array(table_aux(:,2:end-1))));
+%        output(j,:) = ynewci;
+%        aux = [model_class.ClassNames'; num2cell(ynewci)]; aux = sortrows(aux',2); aux = aux'; aux = fliplr(aux); output2(j,:) = [aux(1:4) aux{2}/aux{4}];       
+%    end
 %    table_total = [table_total; table_aux];
-    table_total_output = [table_total_output; table_aux array2table(output,'VariableNames',model_class.ClassNames) array2table(output2,'VariableNames',{'class_1' , 'prob1', 'class_2', 'prob2','ratio'})];
+%     table_total_output = [table_total_output; table_aux array2table(output,'VariableNames',model_class.ClassNames) array2table(output2,'VariableNames',{'class_1' , 'prob1', 'class_2', 'prob2','ratio'}) ];
 % end
-temp = table_total_output(:,[1:2 239:end]);
-writetable(temp,[vfilename '_ML.xlsx'])
+table_total_output = [ table_aux(:,1:2) array2table(ynewci_RF,'VariableNames',model_class.ClassNames) array2table(ynew_RF,'VariableNames',{'RF_out'})];
+
+if use_DL==1
+    validationImages = imageDatastore([vpathname '/' vfilename '/All/']);
+    [predictedLabels, scores] = classify(model_class_DL,validationImages);
+    lista = [validationImages.Files, predictedLabels];
+    
+    AA2 = cellstr(lista);
+    AA = array2table(AA2);
+    ttt = model_class_DL.Layers(25).ClassNames;
+    ttt2 = cellstr(num2str(2*ones(12,1)));
+    s = strcat(ttt,ttt2);
+    T2 = array2table(scores,'VariableNames',s');
+    
+    % AA2 = strsplit(cell2mat(AA2(1,1)),'\');
+    for k=1:size(AA2,1)
+        AA1 = strsplit(cell2mat(AA2(k,1)),{'/','\'});
+        AA3 = str2double(AA1{end}(1:end-4));
+        %     AA4 = str2double(AA1{end}(1:end-20));
+        AA2(k,3) = num2cell(AA3);
+    end
+    
+    B = [T2, AA, array2table(cell2mat(AA2(:,3)))];
+    B.Properties.VariableNames{15} = 'NumVocal';
+    B.Properties.VariableNames{14} = 'DL_out';
+    B = sortrows(B,'NumVocal','ascend');
+end
+
+
+% temp = table_total_output(:,[1:2 239:end]);
+if use_DL==1
+    temp = [table_total_output, B, VM1_out];
+    writetable(temp,[vfilename '_ML&DL.xlsx'])
+else
+    temp = [table_total_output, VM1_out];;
+    writetable(temp,[vfilename '_ML.xlsx'])
+end
+    
+[ynew,ynewci] = predict(model_DL_RL,temp(:,[3:14,16:27]));
+
+ttt = model_DL_RL.ClassNames;
+ttt2 = cellstr(num2str(3*ones(12,1)));
+s = strcat(ttt,ttt2);
+
+T3 = [temp, array2table(ynewci,'VariableNames',s) array2table(ynew,'VariableNames',{'Final_Label'})];
+writetable(T3,[vfilename '_ML&DL_comb.xlsx'])
+% aux = strcmp(GT,T3.Final_Label);
+% correct = sum(aux)/size(aux,1)

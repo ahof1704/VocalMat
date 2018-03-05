@@ -34,12 +34,11 @@ list = dir('*output*.mat');
 %Setting up
 p = mfilename('fullpath')
 plot_stats_per_bin=1
-save_plot_spectrograms=1
+save_plot_spectrograms=0 % PLots the spectograms with axes
 save_histogram_per_animal=0
 save_excel_file=1
 save_plot_3d_info=0
-axes_dots=1
-old_identifier=0
+axes_dots=1 % Show the dots overlapping the vocalization (segmentation)
 size_spectrogram = [227 227]
 use_DL = 1
 bin_size = 300 %in seconds
@@ -70,7 +69,7 @@ vfile = fullfile(vpathname,vfilename)
 clearvars -except   noise_count_bin_total two_steps_count_bin_total mult_steps_count_bin_total model_noise plot_stats_per_bin save_plot_spectrograms list...
     raiz vfile vfilename vpathname stepup_count_bin_total stepdown_count_bin_total harmonic_count_bin_total flat_count_bin_total chevron_count_bin_total...
     noise_dist_count_bin_total revchevron_count_bin_total downfm_count_bin_total upfm_count_bin_total complex_count_bin_total noisy_vocal_count_bin_total...
-    nonlinear_count_bin_total short_count_bin_total save_histogram_per_animal save_excel_file save_plot_3d_info axes_dots old_identifier model_class_RF...
+    nonlinear_count_bin_total short_count_bin_total save_histogram_per_animal save_excel_file save_plot_3d_info axes_dots model_class_RF...
     model_class_DL size_spectrogram use_DL model_class_DL_RF bin_size
 
 fprintf('\n')
@@ -781,12 +780,14 @@ if use_DL==1
     end
     cd(vfilename)
     
-    if ~exist('All_axes','dir')
+    if (~exist('All_axes','dir') && save_plot_spectrograms==1)
         mkdir('All_axes')
-        if save_plot_spectrograms==1 
-            mkdir('All')
-        end
     end
+
+    if ~exist('All','dir')
+        mkdir('All')
+    end
+
     
     %     categories = [categories; 'two_steps'; 'mult_steps'];
     for id_vocal = 1:size(time_vocal,2)

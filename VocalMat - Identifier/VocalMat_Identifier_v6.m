@@ -16,7 +16,7 @@
 
 
 raiz = pwd;
-%[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
+[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
 cd(vpathname);
 %diary(['Summary_' num2str(horzcat(fix(clock))) '.txt'])
 %list = dir('*.WAV');

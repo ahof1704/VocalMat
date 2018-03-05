@@ -1090,7 +1090,7 @@ chevron_count = sum(strcmp(T3.Final_Label,'chevron'));
 complex_count = sum(strcmp(T3.Final_Label,'complex'));
 down_fm_count = sum(strcmp(T3.Final_Label,'down_fm'));
 flat_count = sum(strcmp(T3.Final_Label,'flat'));
-mult_count = sum(strcmp(T3.Final_Label,'mult_steps'));
+mult_steps_count = sum(strcmp(T3.Final_Label,'mult_steps'));
 noise_count = sum(strcmp(T3.Final_Label,'noise_dist'));
 rev_chevron_count = sum(strcmp(T3.Final_Label,'rev_chevron'));
 short_count = sum(strcmp(T3.Final_Label,'short'));
@@ -1098,11 +1098,16 @@ step_down_count = sum(strcmp(T3.Final_Label,'step_down'));
 step_up_count = sum(strcmp(T3.Final_Label,'step_up'));
 two_steps_count = sum(strcmp(T3.Final_Label,'two_steps'));
 up_fm_count = sum(strcmp(T3.Final_Label,'up_fm'));
+noise_dist_count = sum(strcmp(T3.Final_Label,'noise_dist'));
 harmonic_count = unique(harmonic_count);
 noisy_vocal_count = unique(noisy_vocal_count);
 
-disp(['Total number of vocalizations: ' num2str(size(time_vocal,2)-size(noise_count_dist,1)) ' vocalizations (' num2str(size(noise_count,1)) ' were noise)']);
+disp(['Total number of vocalizations: ' num2str(size(time_vocal,2)-noise_dist_count) ' vocalizations (' num2str(noise_dist_count) ' were noise)']);
 % disp(['The classifier identified ' num2str(size(noise_count_dist,1)) ' as noise'] );
+
+for j=1:size(model_class_RF.ClassNames)
+   eval(['disp([''' cell2mat(model_class_RF.ClassNames(j)) ': '' num2str('  cell2mat(model_class_RF.ClassNames(j)) '_count)])']) 
+end
 
 % Fixed up to here.
 if save_excel_file==1
@@ -1114,7 +1119,7 @@ if save_excel_file==1
     tabela = num2cell(tabela);
     
     %     for i = 1:size(names2,1)
-    %         if eval(['~isempty(list_clusters.' names2{i} ')']) && ~strcmp(names2{i},'harmonic_size') && ~strcmp(names2{i},'noisy_vocal') && ~strcmp(names2{i},'harmonic') %&& ~strcmp(names2{i},'noise')
+%             if eval(['~isempty(list_clusters.' names2{i} ')']) && ~strcmp(names2{i},'harmonic_size') && ~strcmp(names2{i},'noisy_vocal') && ~strcmp(names2{i},'harmonic') %&& ~strcmp(names2{i},'noise')
     %             eval(['tabela(list_clusters.' names2{i} '(:,1),16)= names2(i);']);
     %         end
     %     end
@@ -1196,9 +1201,7 @@ if save_excel_file==1
     writetable(T,[vfilename '.xlsx'])
 end
 
-if plot_stats_per_bin ==1
-    
-    % Estimate number of bins given the bin size
+ % Estimate number of bins given the bin size
     aux = ~strcmp(T.Class,'noise_dist');
     T_no_noise = T(aux,:);
     num_of_bins = ceil(max(cell2mat(T_no_noise.Start_time))/bin_size);
@@ -1208,6 +1211,8 @@ if plot_stats_per_bin ==1
     for k=1:num_of_bins
         disp(['Bin_' num2str(k) '(' num2str(edges(k)) '-' num2str(edges(k+1)) 's): ' num2str(num_vocals_in_bin(k))])
     end
+    
+if plot_stats_per_bin ==1
     
     %Show classes per bin
     for j=1:size(model_class_RF.ClassNames)

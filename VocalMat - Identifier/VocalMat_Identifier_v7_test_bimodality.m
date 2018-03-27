@@ -26,7 +26,8 @@ p = mfilename('fullpath')
 max_interval = 0.005 %if the distance between two successive points in time is >max_interval, it is new vocalization
 minimum_size = 6%10%20; %A valid vocalization must present >minimum_size valid points to be considered a vocalization
 save_spectogram_background = 1
-local_median = 0  %use the median method to detect the noise.
+local_median = 1  %use the median method to detect the noise.
+pdf_filter = 0
 tic
 %for Name = 1:size(list,1)
 %    vfilename = list(Name).name;
@@ -44,6 +45,7 @@ T_orig =[];
 % graindata_total = [];
 % cc_total = [];
 A_total = [];
+
 
 for minute_frame = 1:ceil(size(y1,1)/(60*250000)) %run through all the minute windows
     disp(['Current minute: ' num2str(minute_frame)])
@@ -189,6 +191,7 @@ A2 = A_total - median_db;
 % xlabel('Time (s)'); ylabel('Freq (Hz)')
 
 % hold on
+compare_bimodality =[];
 time_vocal = [];
 id = 1;
 for k=1:size(graindata_2,1)-1
@@ -430,156 +433,115 @@ if size(time_vocal,2)>0
         time_vocal_orig = time_vocal;
         
     end
-    %         time_vocal = time_vocal_orig;
-    %         intens_vocal = intens_vocal_orig;
-    %         freq_vocal = freq_vocal_orig;
+    intens_orig = intens_vocal;
     
-    
-    
-    disp('Eliinating points with low intensity ')
-    freq_vocal_distribution = {};
-    intens_vocal_distribution = {};
     for k=1:size(time_vocal,2)
-        %            min_intensity = mean(cellfun(@mean, intens_vocal{k}))-sqrt(mean(cellfun(@std, intens_vocal{k})));
-        
-        %Identify the peak with highest intensity and calculate gaussian around this peak
-        [dist_intens,xi,bw]=ksdensity(intens_vocal{k});
-        dist_intens = sqrt(dist_intens.^2)/max(abs(dist_intens));
-        %            bw
-        %            [f,xi,bw]=ksdensity(intens_vocal{k},'width',1.5);
-        %                         figure,plot(xi,dist_intens)
-        [pks,locs]=findpeaks(dist_intens,'MinPeakProminence',0.1);
-        
-        % evaluate relation to the peaks
-        [max_peak1, max_peak1]=max(pks);
-        max_peak.intensity = xi(locs(max_peak1)); xi(max_peak1)=[];
-        max_peak.peak = max(pks); pks(max_peak1)=[];
-        [max_peak1, max_peak1]=max(pks);
-        max_peak2.intensity = xi(locs(max_peak1)); xi(max_peak1)=[];
-        max_peak2.peak = max(pks); pks(max_peak1)=[];
-        sigma = std(intens_vocal{k});
-        
-        %            f = exp(-(sort(intens_vocal{k})-xi(max(locs))).^2./(2*sigma^2))./(sigma*sqrt(2*pi));
-        %            figure(k),plot(sort(intens_vocal{k}),f)
-        
-        %            min_intensity = mean(intens_vocal{k})- sigma;
-        T_min_max = [time_vocal{k}(1) time_vocal{k}(end)];
-        [T_min T_min] = min(abs(T_orig - T_min_max(1)));
-        [T_max T_max] = min(abs(T_orig - T_min_max(2)));
-        test2 = max(A_total(:,T_min:T_max),[],2);
-        test3 = sqrt(test2.^2)/max(abs(test2));
-        test3 = 1-test3;
-        dist_freq = test3*1/max(test3);
-        %                             figure, plot(F_orig,dist_freq)
-        
         temp={};
         for kk=1:size(freq_vocal{k},2) %organize the intens_vocal in the same way as freq_vocal
             temp = [ temp intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1))];
             intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1)) = [];
         end
         intens_vocal{k} = temp;
+    end
+    
+    if pdf_filter==1
+        cd(raiz)
+        disp('Eliinating points with low intensity ')
         
-        if ~isempty(max_peak2.peak) && max_peak.peak / max_peak2.peak < 3
-            probability_vector{k} = temp;
+        for k=1:size(time_vocal,2)
             
-            for kk=1:size(intens_vocal{k},2)
-                for kkk=1:size(intens_vocal{k}{kk},1)
-                    [intens intens] = min(abs(intens_vocal{k}{kk}(kkk)-xi));
-                    [freq freq] = min(abs(freq_vocal{k}{kk}(kkk)-F_orig));
-                    probability_vector{k}{kk}(kkk) = dist_intens(intens)*dist_freq(freq);
-                end
-            end
+            %Identify the peak with highest intensity and calculate gaussian around this peak
+            [dist_intens,xi,bw]=ksdensity(intens_vocal{k});
+            dist_intens = sqrt(dist_intens.^2)/max(abs(dist_intens));
             
-            temp=[];
-            for kk=1:size(probability_vector{k},2)
-                for kkk=1:size(probability_vector{k}{kk},1)
-                    temp = [temp; probability_vector{k}{kk}(kkk)];
-                end
-            end
-            probability_vector_dist{k} = temp;
+            [pks,locs]=findpeaks(dist_intens,'MinPeakProminence',0.1);
             
-            for kk=1:size(intens_vocal{k},2)
-                %               too_low = intens_vocal{k}{kk} < min_intensity;
-                too_low = probability_vector{k}{kk} < 0.25;
-                intens_vocal{k}{kk}(too_low) = [];
-                freq_vocal{k}{kk}(too_low) = [];
-                if isempty(intens_vocal{k}{kk})
-                    time_vocal{k}(kk) = -100;
+            % evaluate relation to the peaks
+            [max_peak1, max_peak1]=max(pks);
+            max_peak.intensity = xi(locs(max_peak1)); xi(max_peak1)=[];
+            max_peak.peak = max(pks); pks(max_peak1)=[];
+            [max_peak1, max_peak1]=max(pks);
+            max_peak2.intensity = xi(locs(max_peak1)); xi(max_peak1)=[];
+            max_peak2.peak = max(pks); pks(max_peak1)=[];
+            
+            T_min_max = [time_vocal{k}(1) time_vocal{k}(end)];
+            [T_min T_min] = min(abs(T_orig - T_min_max(1)));
+            [T_max T_max] = min(abs(T_orig - T_min_max(2)));
+            test2 = max(A_total(:,T_min:T_max),[],2);
+            test3 = sqrt(test2.^2)/max(abs(test2));
+            test3 = 1-test3;
+            dist_freq = test3*1/max(test3);
+            
+            % Testing bimodality
+            nboot = 500;
+            
+            % Bimodal
+            [xpdf, n, b] = compute_xpdf(intens_vocal{k}');
+            [dip, p_value, xlow, xup] = HartigansDipSignifTest(xpdf, nboot);
+            
+            
+            
+            if ~isempty(max_peak2.peak) && max_peak.peak/max_peak2.peak < 3
+                
+                compare_bimodality = [compare_bimodality; [time_vocal{k}(1), p_value, max_peak.peak / max_peak2.peak, ~isempty(max_peak2.peak) && max_peak.peak / max_peak2.peak ]];
+                
+                probability_vector{k} = temp;
+                
+                for kk=1:size(intens_vocal{k},2)
+                    for kkk=1:size(intens_vocal{k}{kk},1)
+                        [intens intens] = min(abs(intens_vocal{k}{kk}(kkk)-xi));
+                        [freq freq] = min(abs(freq_vocal{k}{kk}(kkk)-F_orig));
+                        probability_vector{k}{kk}(kkk) = dist_intens(intens)*dist_freq(freq);
+                    end
                 end
+                
+                temp=[];
+                for kk=1:size(probability_vector{k},2)
+                    for kkk=1:size(probability_vector{k}{kk},1)
+                        temp = [temp; probability_vector{k}{kk}(kkk)];
+                    end
+                end
+                probability_vector_dist{k} = temp;
+                
+                for kk=1:size(intens_vocal{k},2)
+                    %               too_low = intens_vocal{k}{kk} < min_intensity;
+                    too_low = probability_vector{k}{kk} < 0.25;
+                    intens_vocal{k}{kk}(too_low) = [];
+                    freq_vocal{k}{kk}(too_low) = [];
+                    if isempty(intens_vocal{k}{kk})
+                        time_vocal{k}(kk) = -100;
+                    end
+                end
+                freq_vocal{k} = freq_vocal{k}(~cellfun('isempty',freq_vocal{k}));
+                intens_vocal{k} = intens_vocal{k}(~cellfun('isempty',intens_vocal{k}));
+                time_vocal{k}(time_vocal{k}==-100) = [];
+                
+            else
+                compare_bimodality = [compare_bimodality; [time_vocal{k}(1), p_value, NaN, (~isempty(max_peak2.peak) && (max_peak.peak/max_peak2.peak)<3) ]];
             end
-            freq_vocal{k} = freq_vocal{k}(~cellfun('isempty',freq_vocal{k}));
-            intens_vocal{k} = intens_vocal{k}(~cellfun('isempty',intens_vocal{k}));
-            time_vocal{k}(time_vocal{k}==-100) = [];
             
         end
         
-        %apply attenuation band
-        %            T_min_max = [time_vocal{k}(1) time_vocal{k}(end)];
-        %            [T_min T_min] = min(abs(T_orig - T_min_max(1)));
-        %            [T_max T_max] = min(abs(T_orig - T_min_max(2)));
-        %            figure, surf(T_orig(T_min:T_max),F_orig,A_total(:,T_min:T_max),'edgecolor','none')
-        %            test2 = max(A_total(:,T_min:T_max),[],2);
-        %            test3 = sqrt(test2.^2)/max(abs(test2));
-        %            test3 = test3*1/max(test3);
-        %
-        %            copy_intensity = intens_vocal{k};
-        %            for kk=1:size(intens_vocal{k},2)
-        %                for kkk=1:size(intens_vocal{k}{kk},1)
-        %                 [min_aa min_aa] = min(abs(F_orig-freq_vocal{k}{kk}(kkk)));
-        %                 factor = test3(min_aa);
-        %                 copy_intensity{kk}(kkk) = factor * copy_intensity{kk}(kkk);
-        %                end
-        %            end
+        disp('Removing empty cells')
+        aux = ~cellfun('isempty',time_vocal);
+        time_vocal = time_vocal(aux);
+        freq_vocal = freq_vocal(aux);
+        intens_vocal = intens_vocal(aux);
+        compare_bimodality(~aux,:)=[];
         
-        %create a new vector for distribution
-        %            temp = [];
-        %            temp1 =[];
-        %            for kk=1:size(freq_vocal{k},2)
-        %             temp = [temp; freq_vocal{k}{kk}];
-        %             temp1 = [temp1; intens_vocal{k}{kk}];
-        %            end
-        %            freq_vocal_distribution{k} = temp;
-        %            intens_vocal_distribution{k} = temp1;
     end
-    
     %Plotting histograms to check intensity and frequency distribution
     
-    
-    % disp('Plotting vocalizations detected')
-    % % figure
-    % hold on
-    % % c = randi([0 256],1,1);
-    % for k=1:size(time_vocal,2)
-    %    c = [rand() rand() rand()]; %randi([0 256],1,1)
-    %    for time_stamp = 1:size(time_vocal{k},2)
-    %         scatter(time_vocal{k}(time_stamp)*ones(size(freq_vocal{k}{time_stamp}')),freq_vocal{k}{time_stamp}',[],repmat(c,size(freq_vocal{k}{time_stamp}',2),1))
-    %    end
-    % end
-    
-    % dx=0.4;
-    % % figure, imshow(flipud(grain))
-    % set(gca,'xlim',[0 dx]);
-    % set(gca,'ylim',[0 max(F)]);
-    % pos=get(gca,'position');
-    % Newpos=[pos(1) pos(2)-0.1 pos(3) 0.05];
-    % xmax=max(T_orig);
-    % Stri=['set(gca,''xlim'',get(gcbo,''value'')+[0 ' num2str(dx) '])'];
-    % h=uicontrol('style','slider',...
-    %     'units','normalized','position',Newpos,...
-    %     'callback',Stri,'min',0,'max',xmax-dx,'SliderStep',[0.0001 0.010]);
+    cd(vpathname)
     
     vfilename = vfilename(1:end-4);
-    % disp('Plotting names on spectrogram and organizing table')
-    % for i=1:size(time_vocal,2)
-    %     text(time_vocal{i}(round(end/2)),freq_vocal{i}{round(end/2)}(round(end/2))+5000,[num2str(i)],'HorizontalAlignment','left','FontSize',20,'Color','r');
-    % %     output = [output; i, size(time_vocal{i},2) , min(time_vocal{i}), max(time_vocal{i}), (max(time_vocal{i})-min(time_vocal{i})) , max(freq_vocal{i}), mean(freq_vocal{i}),(max(freq_vocal{i})-min(freq_vocal{i})) , min(freq_vocal{i}), min(intens_vocal{i}), max(intens_vocal{i}), mean(intens_vocal{i})];
-    % end
+    
     if save_spectogram_background==1
         save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal','A_total','-v7.3')
     else
         save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal')
     end
-    save(['output_shorter_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal')
+    save(['output_shorter_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal','compare_bimodality')
     warning('off', 'MATLAB:save:sizeTooBigForMATFile')
     disp('Cleaning variables: y y1 S F T P fs q nd vocal id' )
     clear y y1 S F T P fs q nd vocal id
@@ -590,31 +552,4 @@ end
 X = [vfilename,' has ',num2str(size(time_vocal,2)),' vocalizations.'];
 disp(X)
 toc
-% set(gca,'xlim',[0 dx]);
-% set(gca,'ylim',[0 max(F)]);
-% % Generate constants for use in uicontrol initialization
-% pos=get(gca,'position');
-% yourcell = 1:size(time_vocal,2);
-% hb = uicontrol('Style', 'listbox','Position',[pos(1)+10 pos(2)+100 100 pos(4)+700],...
-%      'string',yourcell,'Callback',...
-%      ['if get(hb, ''Value'')>0 ',...
-%      ' Stri=[''set(gca,''''xlim'''',[-dx/2 dx/2]+['' num2str(time_vocal{get(hb, ''Value'')}(1)) '' '' num2str(time_vocal{get(hb, ''Value'')}(1)) ''])'']; ',...
-%      ' eval(Stri); ', ...
-%      'end']);
-%  %      ' update_slide(get(hb, ''Value''), time_vocal,xmax, maxF), ',...
-%
-% % This avoids flickering when updating the axis
-% Newpos=[pos(1) pos(2)-0.1 pos(3) 0.05];
-% xmax=max(T_orig);
-% Stri=['set(gca,''xlim'',get(gcbo,''value'')+[0 ' num2str(dx) '])'];
-% h=uicontrol('style','slider',...
-%     'units','normalized','position',Newpos,...
-%     'callback',Stri,'min',0,'max',xmax-dx,'SliderStep',[0.0001 0.010]);
-% % set(gcf,'Renderer','OpenGL')
-% %
-% % % close all
-
-
-%end
-%diary('off');
 

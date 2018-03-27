@@ -8,39 +8,87 @@ tic
 clc
 clear all
 raiz = pwd;
-[vfilename,vpathname] = uigetfile({'*.mat'},'Select the Identifier output file');
-cd(vpathname);
-vfile = fullfile(vpathname,vfilename);
-% vfilename = vfilename(1:end-4);
+% [vfilename,vpathname] = uigetfile({'*.mat'},'Select the Identifier output file');
+% cd(vpathname);
 % vfile = fullfile(vpathname,vfilename);
-disp(['Reading ' vfilename])
-load([vfile]);
-% dx = 0.4;
-[vfilename,vpathname] = uigetfile({'*.mat'},'Select the Classifier output file');
-cd(vpathname);
-vfile = fullfile(vpathname,vfilename);
-% vfilename = vfilename(1:end-4);
+% % vfilename = vfilename(1:end-4);
+% % vfile = fullfile(vpathname,vfilename);
+% disp(['Reading ' vfilename])
+% load([vfile]);
+% % dx = 0.4;
+% [vfilename,vpathname] = uigetfile({'*.mat'},'Select the Classifier output file');
+% cd(vpathname);
 % vfile = fullfile(vpathname,vfilename);
-disp(['Reading ' vfilename])
-load([vfile]);
+% % vfilename = vfilename(1:end-4);
+% % vfile = fullfile(vpathname,vfilename);
+% disp(['Reading ' vfilename])
+% load([vfile]);
+list = dir;
+isdir = [list.isdir].';
+list_dir = list(isdir,:); list_dir(1:2)=[];
+
+list = dir('*comb.xlsx');
+combined_table = [];
+vfilename1 = list(1).name;
+[GT,txt,raw] = xlsread(vfilename1);
+
+raw_back_up = raw;
+raw(1,:)=[];
+table = raw(:,[2,end]);
+
+chevron_stats = table(strcmp(table(:,2),'chevron'),:);
+complex_stats = table(strcmp(table(:,2),'complex'),:);
+down_fm_stats = table(strcmp(table(:,2),'down_fm'),:);
+flat_stats = table(strcmp(table(:,2),'flat'),:);
+mult_steps_stats = table(strcmp(table(:,2),'mult_steps'),:);
+noise_dist_stats = table(strcmp(table(:,2),'noise_dist'),:);
+rev_chevron_stats = table(strcmp(table(:,2),'rev_chevron'),:);
+short_stats = table(strcmp(table(:,2),'short'),:);
+step_down_stats = table(strcmp(table(:,2),'step_down'),:);
+step_up_stats = table(strcmp(table(:,2),'step_up'),:);
+two_steps_stats = table(strcmp(table(:,2),'two_steps'),:);
+up_fm_stats = table(strcmp(table(:,2),'up_fm'),:);
+
+raster_list{1} = cell2mat(chevron_stats(:,1)')
+raster_list{2} = cell2mat(complex_stats(:,1)')
+raster_list{3} = cell2mat(down_fm_stats(:,1)')
+raster_list{4} = cell2mat(flat_stats(:,1)')
+raster_list{5} = cell2mat(mult_steps_stats(:,1)')
+raster_list{6} = cell2mat(noise_dist_stats(:,1)')
+raster_list{7} = cell2mat(rev_chevron_stats(:,1)')
+raster_list{8} = cell2mat(short_stats(:,1)')
+raster_list{9} = cell2mat(step_down_stats(:,1)')
+raster_list{10} = cell2mat(step_up_stats(:,1)')
+raster_list{11} = cell2mat(two_steps_stats(:,1)')
+raster_list{12} = cell2mat(up_fm_stats(:,1)')
+
+list_selected = {'chevron','complex','down_fm','flat','mult_steps','noise_dist','rev_chevron','short','step_down','step_up','two_steps','up_fm'};
+
+aux = cellfun('isempty',raster_list);
+disp('Removing empty cells')
+raster_list(aux) = num2cell(0);
+% list_selected = list_selected(aux);
+
+figure, plotSpikeRaster(raster_list,'PlotType','vertline');
+set(gca,'TickLabelInterpreter','none','YTick',[1:size(list_selected,2)], 'YTickLabel',list_selected,'YColor','black');
 
 % general_analysis.Animal.name = vfilename;
 % eval(['general_analysis.' num2str(k) '.interval = interval;'])
 
-if ~isempty(strfind(vfilename,'Control'))
-    eval(['general_analysis.Animal_' vfilename '.Categorie = ''Control'';'])
-else
-%     vfilename(6:15) = 'Agrp_Trpv1';
-    vfilename(strfind(vfilename,'-')) = '_';
-    eval(['general_analysis.Animal_' vfilename '.Categorie = ''Agrp-Trpv1'';'])
-end
-
-if ~isempty(strfind(vfilename,'1st'))
-    eval(['general_analysis.Animal_' vfilename '.Stage = ''1st'';'])
-else
-%     general_analysis.Animal.Stage = '2nd';
-    eval(['general_analysis.Animal_' vfilename '.Stage = ''2nd'';'])
-end
+% if ~isempty(strfind(vfilename,'Control'))
+%     eval(['general_analysis.Animal_' vfilename '.Categorie = ''Control'';'])
+% else
+% %     vfilename(6:15) = 'Agrp_Trpv1';
+%     vfilename(strfind(vfilename,'-')) = '_';
+%     eval(['general_analysis.Animal_' vfilename '.Categorie = ''Agrp-Trpv1'';'])
+% end
+% 
+% if ~isempty(strfind(vfilename,'1st'))
+%     eval(['general_analysis.Animal_' vfilename '.Stage = ''1st'';'])
+% else
+% %     general_analysis.Animal.Stage = '2nd';
+%     eval(['general_analysis.Animal_' vfilename '.Stage = ''2nd'';'])
+% end
 
 % figure('Name',vfilename,'NumberTitle','off')
 % hold on
@@ -161,9 +209,9 @@ toc
 
 % end
 
-general_analysis = orderfields(general_analysis);
+% general_analysis = orderfields(general_analysis);
 % disp('Plotting # calls Control vs Agrp_Trpv1')
-list_names = fieldnames(general_analysis);
+% list_names = fieldnames(general_analysis);
 % Convert to Struct
 % Asorted = cell2struct(Acell, list_names, 1);
 
@@ -205,50 +253,50 @@ list_names = fieldnames(general_analysis);
 % end
 
 
-control_bin1 = [];
-control_bin2 = [];
-control_bin3 = [];
-control_bin4 = [];
-agrp_bin1 = [];
-agrp_bin2 = [];
-agrp_bin3 = [];
-agrp_bin4 = [];
-
-for k=1:size(list_names,1)
-    for bin_num=1:4
-        if ~isempty(cell2mat(strfind(list_names(k),'Control')))
-           eval(['control_bin' num2str(bin_num) '= [control_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];']) 
-        else
-           eval(['agrp_bin' num2str(bin_num) '= [agrp_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];'])  
-        end
-    end
-end
-
-disp('Calculating total vocalizations through all the files')
-% figure
-agrp = [agrp_bin1, agrp_bin2, agrp_bin3, agrp_bin4];
-list_size = 1:size(agrp,1);
-% agrp1 = agrp(find(mod(list_size,2)>0),:);
-% agrp1 = sum(agrp1,1);
-% subplot(2,1,1), plot(agrp1,'--*');
-% title('1st stage')
-control = [control_bin1, control_bin2, control_bin3, control_bin4];
-% list_size2 = 1:size(control,1);
-% control1 = control(find(mod(list_size2,2)>0),:);
-% control1 = sum(control1,1);
+% control_bin1 = [];
+% control_bin2 = [];
+% control_bin3 = [];
+% control_bin4 = [];
+% agrp_bin1 = [];
+% agrp_bin2 = [];
+% agrp_bin3 = [];
+% agrp_bin4 = [];
+% 
+% for k=1:size(list_names,1)
+%     for bin_num=1:4
+%         if ~isempty(cell2mat(strfind(list_names(k),'Control')))
+%            eval(['control_bin' num2str(bin_num) '= [control_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];']) 
+%         else
+%            eval(['agrp_bin' num2str(bin_num) '= [agrp_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];'])  
+%         end
+%     end
+% end
+% 
+% disp('Calculating total vocalizations through all the files')
+% % figure
+% agrp = [agrp_bin1, agrp_bin2, agrp_bin3, agrp_bin4];
+% list_size = 1:size(agrp,1);
+% % agrp1 = agrp(find(mod(list_size,2)>0),:);
+% % agrp1 = sum(agrp1,1);
+% % subplot(2,1,1), plot(agrp1,'--*');
+% % title('1st stage')
+% control = [control_bin1, control_bin2, control_bin3, control_bin4];
+% % list_size2 = 1:size(control,1);
+% % control1 = control(find(mod(list_size2,2)>0),:);
+% % control1 = sum(control1,1);
+% % hold on
+% % plot(control1,'--*')
+% % legend('agrp1','control')
+% 
+% % agrp1 = agrp(find(mod(list_size,2)==0),:);
+% agrp1 = sum(agrp,1);
+% plot([1,2,3,4],agrp1,'--*' );
+% title('2nd stage')
+% % control1 = control(find(mod(list_size2,2)==0),:);
+% control1 = sum(control,1);
 % hold on
-% plot(control1,'--*')
+% plot(control1, '--*')
 % legend('agrp1','control')
-
-% agrp1 = agrp(find(mod(list_size,2)==0),:);
-agrp1 = sum(agrp,1);
-plot([1,2,3,4],agrp1,'--*' );
-title('2nd stage')
-% control1 = control(find(mod(list_size2,2)==0),:);
-control1 = sum(control,1);
-hold on
-plot(control1, '--*')
-legend('agrp1','control')
 % 
 % disp('Calculating interval distribution through all the files')
 % control_bin1 = [];
@@ -485,31 +533,32 @@ legend('agrp1','control')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-raster_list = {};
-list_selected = {};
-count = 0;
-disp('Raster plot for the pair in 1st and 2nd stage')
-categories = fieldnames(list_clusters);
-for names = 1:size(categories,1)
-    name = categories{names};
-    eval(['time_stamps.' name '= [];']);
-    size_class = eval(['size(list_clusters.' name ')']);
-    count = count+1;
-    all = [];
-    for k=1:size_class
-         eval(['time_stamps.' name '= [time_stamps.' name ', time_vocal{list_clusters.' name '(' num2str(k) ')}(1) ];']);
-%             name1 = char(list_names(k));
-%             name2 = char(list_names(k+1));
-%             list_selected{k} = strcat(name1(8:end-6), ' & ', name2(8:end-6));
-%             list_selected{count} = strcat(name1(8:end-6));
-%         end
-    end
-    eval(['raster_list{count} = time_stamps.' name ';']); 
-end
+% raster_list = {};
+% list_selected = {};
+% count = 0;
+% disp('Raster plot for the pair in 1st and 2nd stage')
+% categories = ;
+% for names = 1:size(categories,1)
+%     name = categories{names};
+%     eval(['time_stamps.' name '= [];']);
+%     size_class = eval(['size(list_clusters.' name ')']);
+%     count = count+1;
+%     all = [];
+%     for k=1:size_class
+%          eval(['time_stamps.' name '= [time_stamps.' name ', time_vocal{list_clusters.' name '(' num2str(k) ')}(1) ];']);
+% %             name1 = char(list_names(k));
+% %             name2 = char(list_names(k+1));
+% %             list_selected{k} = strcat(name1(8:end-6), ' & ', name2(8:end-6));
+% %             list_selected{count} = strcat(name1(8:end-6));
+% %         end
+%     end
+%     eval(['raster_list{count} = time_stamps.' name ';']); 
+% end
+
 
 disp('Removing empty cells')
-% raster_list = raster_list(~cellfun('isempty',raster_list));
-% list_selected = list_selected(~cellfun('isempty',list_selected));
+raster_list = raster_list(~cellfun('isempty',raster_list));
+list_selected = list_selected(~cellfun('isempty',list_selected));
 
 % disp('Also the moms coordinates');
 % mom_left = find(all_xy(:,6)==1);

@@ -432,7 +432,7 @@ tic
         
         
 
-        disp('Eliinating points with low intensity (based on STD)')
+        disp('Eliinating points with low intensity (based on PDF)')
         freq_vocal_distribution = {};
         intens_vocal_distribution = {};
         for k=1:size(time_vocal,2)

@@ -26,7 +26,7 @@ model_class_DL = model_class_DL.netTransfer;
 model_class_DL_RF = load('Mdl_categorical_DL_RF_Feb13b.mat')
 model_class_DL_RF = model_class_DL_RF.Mdl;
 
-[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
+%[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
 cd(vpathname);
 list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])

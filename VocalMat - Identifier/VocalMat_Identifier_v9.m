@@ -52,10 +52,16 @@ for minute_frame = 1:ceil(size(y1,1)/(60*250000)) %run through all the minute wi
     %     jump = 0;%3*5000000;
     clear A B y2 S F T P q vocal id F_orig grain
     
-    try
-        y2 = y1(60*(minute_frame-1)*250000+1:60*minute_frame*250000); %Window size in seconds
-    catch
-        y2 = y1(60*(minute_frame-1)*250000+1:end);
+    if minute_frame == 1 %this division only matters for the spectrogram calculation
+        y2 = y1(60*(minute_frame-1)*250000+1:(60*minute_frame+5)*250000); %Window size in seconds
+    elseif minute_frame == ceil(size(y1,1)/(60*250000))
+        y2 = y1((60*(minute_frame-1)-5)*250000+1:end);
+    else
+        if (60*minute_frame+5)*250000>size(y1,1)
+            y2 = y1((60*(minute_frame-1)-5)*250000+1:end);
+        else
+            y2 = y1((60*(minute_frame-1)-5)*250000+1:(60*minute_frame+5)*250000);
+        end
     end
     
     %         y2 = y1(1:250000); %Analyze first one second.
@@ -71,27 +77,41 @@ for minute_frame = 1:ceil(size(y1,1)/(60*250000)) %run through all the minute wi
     
     %cutoff frequency
     min_freq = find(F>45000);
+
     F = F(min_freq);
     S = S(min_freq,:);
     P = P(min_freq,:);
     P(P==0)=1;
     A = 10*log10(P);
-    %         if minute_frame==1
-    %             A = A(:,350:end); %Cut off the first 0.18s... usually there is a weird noise in the beggining
-    %             T = T(:,350:end);
-    %         end
+            if minute_frame==1
+                A = A(:,350:end); %Cut off the first 0.18s... usually there is a weird noise in the beggining
+                T = T(:,350:end);
+            end
     
     median_db = median(median(A));
     B = imadjust(imcomplement(abs(A)./max(abs(A(:)))));
     
-    if size(T_orig,2) %Use this information to make time correction later
-        prev_T_orig = size(T_orig,2);
+%     if size(T_orig,2) %Use this information to make time correction later
+%         prev_T_orig = size(T_orig,2);
+%     else
+%         prev_T_orig = 0;
+%     end
+    if minute_frame == 1
+        lim_inferior = 1;
+        lim_superior = find(T<=60*minute_frame,1,'last');
+    elseif minute_frame == ceil(size(y1,1)/(60*250000))
+        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
+        lim_superior = size(T,2); 
     else
-        prev_T_orig = 0;
+        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
+        lim_superior = find(T<=60*minute_frame,1,'last');   
     end
-    
-    T_orig = [T_orig T+60*(minute_frame-1)*ones(size(T,2),1)']; %Correcting according to the window
-    F_orig = F;
+    T = T(lim_inferior:lim_superior);
+    A = A(:,lim_inferior:lim_superior);
+    T_orig = [T_orig T]; %remove the extra 5s
+    F_orig = F; 
     A_total = [A_total A];
     
     % Threshold image - adaptive threshold
@@ -132,7 +152,9 @@ for minute_frame = 1:ceil(size(y1,1)/(60*250000)) %run through all the minute wi
     %         grain2 = imdilate(grain,se1);
     %         grain2 = imerode(grain2, se);
     % figure, imshow(grain2);
-    grain2 = grain;
+    
+    %Apply limits
+    grain2 = grain(:,lim_inferior:lim_superior);
     
     disp('Recalculating Connected components')
     cc = bwconncomp(grain2, 4);
@@ -143,7 +165,7 @@ for minute_frame = 1:ceil(size(y1,1)/(60*250000)) %run through all the minute wi
     clear grain
     
     min_area = find([graindata.Area]>60) ;
-    grain = false(size(B));
+    grain = false(size(A));
     for k=1:size(min_area,2)
         %             if ~any(graindata(min_area(k)).PixelList(:,2)>size(grain,1)-5) %5 pixels as tolerance
         grain(cc.PixelIdxList{min_area(k)}) = true;

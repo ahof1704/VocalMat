@@ -26,7 +26,7 @@ model_class_DL = model_class_DL.netTransfer;
 model_class_DL_RF = load('Mdl_categorical_DL_RF_Feb13b.mat')
 model_class_DL_RF = model_class_DL_RF.Mdl;
 
-% [vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
+[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
 cd(vpathname);
 list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
@@ -34,7 +34,7 @@ list = dir('*output*.mat');
 %Setting up
 p = mfilename('fullpath')
 plot_stats_per_bin=1
-save_plot_spectrograms=0 % PLots the spectograms with axes
+save_plot_spectrograms=1 % PLots the spectograms with axes
 save_histogram_per_animal=0
 save_excel_file=1
 save_plot_3d_info=0

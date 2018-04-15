@@ -16,7 +16,7 @@
 
 
 raiz = pwd;
-%[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
+[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
 cd(vpathname);
 %diary(['Summary_' num2str(horzcat(fix(clock))) '.txt'])
 %list = dir('*.WAV');
@@ -250,56 +250,7 @@ if size(time_vocal,2)>0
             time_vocal{k}(col) = T_orig(time_vocal{k}(col));
         end
     end
-    
-    % clear grain
-    
-    disp('Smoothing the lines')
-    
-    for k=1:size(time_vocal,2)
-        max_local_freq(k) = 0;
-        min_local_freq(k) = 200000;
-        for time_stamp = 1:size(time_vocal{k},2)
-            %         if k == 23 && time_stamp==27
-            %             k
-            %         end
-            temp = [];
-            if  any((freq_vocal{k}{time_stamp} - circshift(freq_vocal{k}{time_stamp} ,[1,0])) > 1000)        %Verify if there is a jump in frequency
-                idx_harmonic = find((freq_vocal{k}{time_stamp} - circshift(freq_vocal{k}{time_stamp} ,[1,0])) > 1000); % index of the first frequency stamp after the jump
-                for j=1:size(idx_harmonic,1)
-                    if size(idx_harmonic,1)==1 % There is no harmonic
-                        temp = [temp ; median((freq_vocal{k}{time_stamp}(1:idx_harmonic(j)-1)))];
-                        temp = [temp ; median((freq_vocal{k}{time_stamp}(idx_harmonic(j):end)))];
-                    else
-                        if j==1
-                            temp = [temp ; median((freq_vocal{k}{time_stamp}(1:idx_harmonic(j)-1)))];
-                        else
-                            try
-                                temp = [temp ; median((freq_vocal{k}{time_stamp}(idx_harmonic(j-1):idx_harmonic(j)-1)))];
-                            catch
-                                temp = [temp ; median((freq_vocal{k}{time_stamp}(idx_harmonic(j-1):end)))];
-                            end
-                        end
-                    end
-                end
-                freq_vocal{k}{time_stamp} = temp;
-                if max(temp)>max_local_freq(k)
-                    max_local_freq(k) = max(temp);
-                end
-                if min(temp)<min_local_freq(k)
-                    min_local_freq(k) = min(temp);
-                end
-            else %If there is no harmonic
-                if max((freq_vocal{k}{time_stamp}))>max_local_freq(k)
-                    max_local_freq(k) = max((freq_vocal{k}{time_stamp}));
-                end
-                if min((freq_vocal{k}{time_stamp}))<min_local_freq(k)
-                    min_local_freq(k) = min(min((freq_vocal{k}{time_stamp})));
-                end
-                freq_vocal{k}{time_stamp} = median((freq_vocal{k}{time_stamp}));
-            end
-        end
-    end
-    
+       
     %Getting intensity for the points we selected as being part of the vocalizations
     for k=1:size(time_vocal,2)
         intens_vocal{k}=[];
@@ -323,37 +274,24 @@ if size(time_vocal,2)>0
         min_local_freq(k) = F_orig(aux);
     end
     
+    
+    for k=1:size(time_vocal,2)
+        temp={};
+        for kk=1:size(freq_vocal{k},2) %organize the intens_vocal in the same way as freq_vocal
+            temp = [ temp intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1))];
+            intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1)) = [];
+        end
+        intens_vocal{k} = temp;
+    end
+    
     if local_median == 1
         disp('Removing noise by local median')
         for k=1:size(time_vocal,2)
             skip_max_freq = 0;
-            %             if k==247
-            %                 k
-            %             end
-            %     median_db = median(median(A(find(F_orig==min(freq_vocal{k})):find(F_orig==max(freq_vocal{k})),find(T_orig==time_vocal{k}(ceil(end/2)))-200 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200))); %Calculating median in the freq range of identified vocalization
-            %     median_freq = find(F_orig==median(freq_vocal{k}));
-            %         median_freq = abs(F_orig-median(freq_vocal{k}));
-            %         [median_freq median_freq] = min(median_freq); %index of closest value
             try
                 pos = ceil(size(time_vocal{k},2)/2);
                 median_db = median(median(A_total(find(min_local_freq(k)==F_orig)-5:find(max_local_freq(k)==F_orig)+5,find(T_orig==time_vocal{k}(pos))-200 : find(T_orig==time_vocal{k}(pos)) + 200))); %Calculating median in the freq range of identified vocalization
             catch
-                %             if find(T_orig==time_vocal{k}(ceil(end/2)))-200 <0
-                %                 median_db = median(median(A(find(min_local_freq(k)==F_orig)-5:find(max_local_freq(k)==F_orig)+5,1 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200)));
-                %             elseif find(T_orig==time_vocal{k}(ceil(end/2))) + 200 > size(A,2)
-                %                 if find(min_local_freq(k)==F_orig)-5 < 0
-                %                     median_db = median(median(A(1:find(max_local_freq(k)==F_orig)+5,find(T_orig==time_vocal{k}(ceil(end/2)))-200 : end)));
-                %                 elseif find(max_local_freq(k)==F_orig)+5 > size(A,1)
-                %
-                %                 else
-                %                     median_db = median(median(A(find(min_local_freq(k)==F_orig)-5:find(max_local_freq(k)==F_orig)+5,find(T_orig==time_vocal{k}(ceil(end/2)))-200 : end)));
-                %                 end
-                %
-                %             elseif find(max_local_freq(k)==F_orig)+5 > size(A,1)
-                %                 median_db = median(median(A(find(min_local_freq(k)==F_orig)-5:end,find(T_orig==time_vocal{k}(ceil(end/2)))-200 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200)));
-                %             else
-                %                 median_db = median(median(A(find(min_local_freq(k)==F_orig),find(T_orig==time_vocal{k}(ceil(end/2)))-200 : find(T_orig==time_vocal{k}(ceil(end/2))) + 200)));
-                %             end
                 pos = ceil(size(time_vocal{k},2)/2);
                 if find(min_local_freq(k)==F_orig)-5 < 1
                     if find(max_local_freq(k)==F_orig)+5 > size(A_total,1)
@@ -435,13 +373,51 @@ if size(time_vocal,2)>0
     end
     intens_orig = intens_vocal;
     
+    disp('Smoothing the lines')
+    
     for k=1:size(time_vocal,2)
-        temp={};
-        for kk=1:size(freq_vocal{k},2) %organize the intens_vocal in the same way as freq_vocal
-            temp = [ temp intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1))];
-            intens_vocal{k}(1:size(freq_vocal{1,k}{1,kk},1)) = [];
+        max_local_freq(k) = 0;
+        min_local_freq(k) = 200000;
+        for time_stamp = 1:size(time_vocal{k},2)
+            %         if k == 23 && time_stamp==27
+            %             k
+            %         end
+            temp = [];
+            if  any((freq_vocal{k}{time_stamp} - circshift(freq_vocal{k}{time_stamp} ,[1,0])) > 1000)        %Verify if there is a jump in frequency
+                idx_harmonic = find((freq_vocal{k}{time_stamp} - circshift(freq_vocal{k}{time_stamp} ,[1,0])) > 1000); % index of the first frequency stamp after the jump
+                for j=1:size(idx_harmonic,1)
+                    if size(idx_harmonic,1)==1 % There is no harmonic
+                        temp = [temp ; median((freq_vocal{k}{time_stamp}(1:idx_harmonic(j)-1)))];
+                        temp = [temp ; median((freq_vocal{k}{time_stamp}(idx_harmonic(j):end)))];
+                    else
+                        if j==1
+                            temp = [temp ; median((freq_vocal{k}{time_stamp}(1:idx_harmonic(j)-1)))];
+                        else
+                            try
+                                temp = [temp ; median((freq_vocal{k}{time_stamp}(idx_harmonic(j-1):idx_harmonic(j)-1)))];
+                            catch
+                                temp = [temp ; median((freq_vocal{k}{time_stamp}(idx_harmonic(j-1):end)))];
+                            end
+                        end
+                    end
+                end
+                freq_vocal{k}{time_stamp} = temp;
+                if max(temp)>max_local_freq(k)
+                    max_local_freq(k) = max(temp);
+                end
+                if min(temp)<min_local_freq(k)
+                    min_local_freq(k) = min(temp);
+                end
+            else %If there is no harmonic
+                if max((freq_vocal{k}{time_stamp}))>max_local_freq(k)
+                    max_local_freq(k) = max((freq_vocal{k}{time_stamp}));
+                end
+                if min((freq_vocal{k}{time_stamp}))<min_local_freq(k)
+                    min_local_freq(k) = min(min((freq_vocal{k}{time_stamp})));
+                end
+                freq_vocal{k}{time_stamp} = median((freq_vocal{k}{time_stamp}));
+            end
         end
-        intens_vocal{k} = temp;
     end
     
     if pdf_filter==1

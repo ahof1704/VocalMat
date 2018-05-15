@@ -4,6 +4,7 @@
 #SBATCH --job-name=classifier
 #SBATCH --ntasks=1 --nodes=1
 #SBATCH --cpus-per-task=6
+#SBATCH --requeue
 #SBATCH --mem-per-cpu=5000 
 #SBATCH --time=24:00:00
 
@@ -13,8 +14,8 @@ echo "$BASEDIR"
 
 #export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
-module load MATLAB/2016b
+module load MATLAB/2017b
 
-matlab -nodisplay -nosplash -nodesktop -r "cd('/ysm-gpfs/project/ahf38/Antonio_VocalMat/VocalMat-Classifier'); vpathname = '"$FOLDER"', vfilename = '"${1}"', VocalMat_Classifier_v18c"
+matlab -nodisplay -nosplash -nodesktop -r "cd('/ysm-gpfs/project/ahf38/Antonio_VocalMat/VocalMat-Classifier'); vpathname = '"$FOLDER"', vfilename = '"${1}"', VocalMat_Classifier_v20b"
 
 

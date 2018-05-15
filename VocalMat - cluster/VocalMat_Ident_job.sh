@@ -1,6 +1,7 @@
 #!/bin/bash
 #SBATCH --partition=scavenge
 #SBATCH -o identifier_%A_%a.out
+#SBATCH --requeue
 #SBATCH -e identifier_%A_%a.err
 #SBATCH --ntasks=1 --nodes=1
 #SBATCH --cpus-per-task=6
@@ -10,6 +11,6 @@
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
-module load MATLAB/2016b
+module load MATLAB/2017b
 
-matlab -nodisplay -nosplash -nodesktop -r "cd('/ysm-gpfs/project/ahf38/Antonio_VocalMat/VocalMat-Identifier'); vfilename = '"${1}"', vpathname = '"$FOLDER"', VocalMat_Identifier_v6"
+matlab -nodisplay -nosplash -nodesktop -r "cd('/ysm-gpfs/project/ahf38/Antonio_VocalMat/VocalMat-Identifier'); vfilename = '"${1}"', vpathname = '"$FOLDER"',VocalMat_Identifier_v9_medianTest"

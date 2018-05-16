@@ -21,12 +21,12 @@ model_noise = model_noise.model_noise_randomTree3;
 % model_class = load('Mdl_categorical_15&30_points_v16.mat')
 model_class_RF = load('Mdl_categorical_RF_Feb13b.mat')
 model_class_RF = model_class_RF.Mdl;
-model_class_DL = load('Mdl_categorical_DL_Feb13b.mat')
+model_class_DL = load('/gpfs/ysm/project/ahf38/Antonio_VocalMat/Reference_CNN/Mdl_categorical_DL.mat')
 model_class_DL = model_class_DL.netTransfer;
 model_class_DL_RF = load('Mdl_categorical_DL_RF_Feb13b.mat')
 model_class_DL_RF = model_class_DL_RF.Mdl;
 
-[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
+%[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
 cd(vpathname);
 list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])

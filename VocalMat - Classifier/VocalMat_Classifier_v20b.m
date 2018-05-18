@@ -825,7 +825,7 @@ if use_DL==1
     
 end
 
-save(['vocal_classified_' vfilename],'vocal_classified','vfilename','max_prom2','max_prom','mean_dist_total','max_below_50k_total','mean_pks_valley','median_dist_total','corr_yy2_yy3','corr_yy2_yy4','duration','noise_detected_clustering' )
+% save(['vocal_classified_' vfilename],'vocal_classified','vfilename','max_prom2','max_prom','mean_dist_total','max_below_50k_total','mean_pks_valley','median_dist_total','corr_yy2_yy3','corr_yy2_yy4','duration','noise_detected_clustering' )
 close all
 
 

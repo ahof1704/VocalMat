@@ -1,2 +1,0 @@
-/usr/local/matlab/bin/matlab -r "fnSetupFolders; Repository" 
-

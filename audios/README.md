@@ -27,5 +27,7 @@
     <br />
 </div>
 
-#### audios directory
-Place all audio files that you want to be processed in this folder.
+---
+
+### `audios` directory
+Place all audio files that you want to be processed in this directory.

@@ -5,7 +5,7 @@
 
 <div align="center">
     <br />
-    <a href="http://www.dietrich-lab.org"><img src="logo.png" title="Dietrich Lab - Yale School of Medicine" alt="Dietrich Lab - Yale School of Medicine"></a>
+    <a href="http://www.dietrich-lab.org"><img src="../logo.png" title="Dietrich Lab - Yale School of Medicine" alt="Dietrich Lab - Yale School of Medicine"></a>
 </div>
 
 <div align="center">
@@ -27,5 +27,7 @@
     <br />
 </div>
 
-#### outputs directory
-All outputs from VocalMat will be placed in this folder.
+---
+
+### `outputs` directory
+All outputs from VocalMat will be placed in this directory.

@@ -92,7 +92,7 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 - **[whatever license](#)**
 - Copyright 2018 © <a href="http://www.dietrich-lab.org" target="_blank">Dietrich Lab</a>.
 
-If you use this tool in your own work, please cite [Fonseca et al](#):
+If you use VocalMat or any part of it in your own work, please cite [Fonseca et al](#):
 ```
 (to appear)
 @article{vocalmat,

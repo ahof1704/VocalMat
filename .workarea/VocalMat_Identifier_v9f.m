@@ -483,9 +483,6 @@ if size(time_vocal,2)>0
         tic
         save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal','median_stats','A_total','-v7.3','-nocompression')
         toc
-        tic
-        save(['output_2_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal','median_stats','A_total','-v7.3')
-        toc
     else
         save(['output_' vfilename],'T_orig','F_orig','time_vocal','freq_vocal','vfilename','intens_vocal','median_stats')
     end

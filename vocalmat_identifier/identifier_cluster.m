@@ -61,7 +61,7 @@ cd(vpathname);
 p = mfilename('fullpath');
 
 % -- max_interval: maximum allowed interval between points to be considered part of one vocalization
-max_interval = 0.005;
+max_interval = 20;
 
 % -- minimum_size: minimum number of points to be considered a vocalization
 minimum_size = 6;
@@ -103,7 +103,7 @@ grain_total = cell(1, duration);
 % ----------------------------------------------------------------------------------------------
 % -- (2) IMAGE PROCESSING BEGIN ----------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
-disp(['[vocalmat]: audio file split into ' num2str(size(segments,2)) ' segments of up to ' num2str(segm_size) ' minute(s)'])
+disp(['[vocalmat]: audio file split into ' num2str(size(segments,2)) ' segments of up to ' num2str(segm_size) ' minute(s).'])
 for minute_frame = 1:size(segments,2)
 % -- run through each segment, compute the spectrogram, and process its outputs
 
@@ -265,7 +265,7 @@ for k = 1:cc_count
             freq_vocal{id}{freq_per_time} = find(grain(:,time_vocal{id}(freq_per_time))==1);
         end
     else
-        if min(graindata_2(k).PixelList(:,1)) - max(time_vocal{id}) > 20
+        if min(graindata_2(k).PixelList(:,1)) - max(time_vocal{id}) > max_interval
         % -- if two points are distant enough, identify as a new vocalization
             id = id + 1;
             time_vocal{id}    = [];

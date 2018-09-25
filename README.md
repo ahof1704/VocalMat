@@ -84,6 +84,10 @@ $ ./run_identifier_local [OPTIONS]
 $ ./run_identifier_cluster [OPTIONS]
 ```
 
+#### Output files from VocalMat
+
+<p align="justify"> VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there are two directories (<i>All</i>, <i>All_axes</i>), and one Microsoft Excel (.xlsx) file. Inside <i>All_axes</i> you will find one image for each segment identified as a vocalization (with plotted blue circles). The raw original images are available inside <i>All</i>. The Excel file contains information on each vocalization, such as start and end time, duration, vocal intensity, and classification.
+
 ## FAQ
 - Will `VocalMat` work with my MATLAB version?
 <p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a versions. We cannot guarantee that it will work in other versions of MATLAB.

@@ -43,9 +43,9 @@
 ## Description
 > **VocalMat is an automated tool that identifies and classifies mice vocalizations.**
 
-<p align="justify"> VocalMat is divided into two main components. The Vocal Identifier, and the Vocal Classifier.
+<p align="justify"> VocalMat is divided into two main components. The VocalMat Identifier, and the VocalMat Classifier.
 
-> IMAGE SHOWING VOCALMAT WORKFLOW
+![VocalMat Workflow](vocalmat.png)
 
 <p align="justify"> VocalMat Identifier is responsible for identifying possible vocalizations in the provided audio file. Candidates for vocalization are further analyzed and regions identenfied as noise are removed. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) that contains information about identified vocalizations (e.g., frequency, vocalization intensity, timestamp).
 
@@ -65,11 +65,12 @@
 ```bash
 $ git clone https://github.com/ahof1704/VocalMat.git
 ```
+
 #### Directory Structure
-- __vocalmat_identifier:__ everything related to the identifier
-- __vocalmat_classifier:__ everything related to the identifier
-- __audios:__ place the audio files you want to process here
-- __outputs:__ all outputs from VocalMat will be placed in this directory
+- __vocalmat_identifier:__ everything related to the VocalMat Identifier
+- __vocalmat_classifier:__ everything related to the VocalMat Classifier
+- __audios:__ place the audio files you want to process in the `audios` directory
+- __outputs:__ all output files from VocalMat will be placed in the `outputs` directory
 - __.workarea:__ files that are still under development, do not use
 
 ## Usage
@@ -88,7 +89,8 @@ $ ./run_identifier_cluster [OPTIONS]
 <p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a versions. We cannot guarantee that it will work in other versions of MATLAB.
 
 - What are the hardware requirements to run `VocalMat`?
-<p align="justify">The duration of the audio files that you use in VocalMat is limited to the amount of RAM that your computer has. We estimate around 1GB of RAM for every minute of recording. For a 10 minute recording, you should have at least 10GB of RAM available.
+<p align="justify">The duration of the audio files that can you use in VocalMat is limited to the amount of RAM that you have in your computer. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, you should have at least 10GB of RAM available.
+If you wish to use longer segments (for faster performance), RAM usage will be higher.
 
 ## Support
 ## License

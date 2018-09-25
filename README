@@ -43,22 +43,20 @@
 ## Description
 > **VocalMat is an automated tool that identifies and classifies mice vocalizations.**
 
-<p align="justify">
-The tool is divided into two main components. The Vocal Identifier, and the Vocal Classifier.
+<p align="justify"> VocalMat is divided into two main components. The Vocal Identifier, and the Vocal Classifier.
 
 > IMAGE SHOWING VOCALMAT WORKFLOW
 
-<p align="justify">
-Vocal Identifier is responsible for identifying possible vocalizations in the provided audio file. Candidates for vocalization are further analyzed and regions identenfied as noise are removed. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) that contains information about identified vocalizations (*e.g.* frequency, vocalization intensity, timestamp).
+<p align="justify"> VocalMat Identifier is responsible for identifying possible vocalizations in the provided audio file. Candidates for vocalization are further analyzed and regions identenfied as noise are removed. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) that contains information about identified vocalizations (e.g., frequency, vocalization intensity, timestamp).
 
-<p> Vocal Classifier ...
+<p> VocalMat Classifier uses a Convolutional Neural Network (CNN) to classify vocalization into 13 labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, and noise.
 
 
 ## Features
 - __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations
 - __Noise Detection:__ eliminate noisy sections that would otherwise be identified as vocalizations
-- __Harmonic Detection:__ detect when vocalizations have large steps in frequency
-- __Fast Performance:__ optimized versions for personal computers, high-performance computing in clusters, and GPUs
+- __Harmonic Detection:__ detect when vocalizations have steps in frequency
+- __Fast Performance:__ optimized versions for personal computers and high-performance computing (clusters)
 
 ## Getting Started
 ![Recordit GIF](clone.gif)
@@ -76,10 +74,22 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 
 ## Usage
 #### Personal Use
+```bash
+$ ./run_identifier_local [OPTIONS]
+```
+
 #### High-Performance Computing (Clusters with Slurm Support)
-#### GPU Acceleration
+```bash
+$ ./run_identifier_cluster [OPTIONS]
+```
 
 ## FAQ
+- Will `VocalMat` work with my MATLAB version?
+<p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a versions. We cannot guarantee that it will work in other versions of MATLAB.
+
+- What are the hardware requirements to run `VocalMat`?
+<p align="justify">The duration of the audio files that you use in VocalMat is limited to the amount of RAM that your computer has. We estimate around 1GB of RAM for every minute of recording. For a 10 minute recording, you should have at least 10GB of RAM available.
+
 ## Support
 ## License
 <div>

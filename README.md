@@ -33,7 +33,6 @@
 - [Getting Started](#getting-started)
 - [Usage](#usage)
 - [FAQ](#faq)
-- [Support](#support)
 - [License](#license)
 
 ---
@@ -49,7 +48,7 @@
 
 <p align="justify"> VocalMat Identifier is responsible for identifying possible vocalizations in the provided audio file. Candidates for vocalization are further analyzed and regions identenfied as noise are removed. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) that contains information about identified vocalizations (e.g., frequency, vocalization intensity, timestamp).
 
-<p> VocalMat Classifier uses a Convolutional Neural Network (CNN) to classify vocalization into 13 labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, and noise.
+<p> VocalMat Classifier uses a Convolutional Neural Network (CNN) to classify vocalization into 13 labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, complex, multi steps, two steps, step down, step up, and noise.
 
 
 ## Features
@@ -96,7 +95,6 @@ $ ./run_identifier_cluster [OPTIONS]
 <p align="justify">The duration of the audio files that can you use in VocalMat is limited to the amount of RAM that you have in your computer. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, you should have at least 10GB of RAM available.
 If you wish to use longer segments (for faster performance), RAM usage will be higher.
 
-## Support
 ## License
 <div>
     <a href="#">

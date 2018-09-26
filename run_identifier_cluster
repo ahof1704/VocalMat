@@ -12,8 +12,8 @@
 declare INPUT_FLAGS
 declare -r E_OPTERR=85
 declare -r ScriptName=${0##*/}
-declare -r ShortOpts="hM:e:c:m:t:p:d:x:C"
-declare -r LongOpts="help,matlab:,email:,cores:,mem:,time:,partition:,directory:,extension:,cluster"
+declare -r ShortOpts="hM:e:c:m:t:s:p:d:x:C"
+declare -r LongOpts="help,matlab:,email:,cores:,mem:,time:,segment:,partition:,directory:,extension:,cluster"
 
 ##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
 ## Script variables
@@ -28,6 +28,7 @@ export PARTITIONS_TO_USE="scavenge,general"
 export AUDIO_FILES_DIR="audios"
 export AUDIO_FILE_EXTENSION=".wav|.WAV"
 export USE_CLUSTER=false;
+export SEGMENT_SIZE=1
 
 ##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
 ## Help message function
@@ -45,6 +46,7 @@ usage() {
     echo -e "\t -t, --time             maximum time for task to run (in minutes)    default: 30"
     echo -e "\t -p, --partition        cluster partition to use                     default: scavenge,general"
     echo -e "\nAudio file options:"
+    echo -e "\t -s, --segment          specify segment size (in minutes)            default: 1"
     echo -e "\t -d, --directory        specify audio files directory name           default: audios"
     echo -e "\t -x, --extension        specify audio files extensions               default: .wav|.WAV"
 }
@@ -80,6 +82,9 @@ while true; do
             shift;;
         -t|--time)
             TIME_TO_USE=$2
+            shift;;
+        -s|--segment)
+            SEGMENT_SIZE=$2
             shift;;
         -p|--partition)
             PARTITIONS_TO_USE=$2

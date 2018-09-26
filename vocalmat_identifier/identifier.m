@@ -160,18 +160,18 @@ for minute_frame = 1:num_segments
     B = imadjust(imcomplement(abs(A)./max(abs(A(:)))));
     
     % -- adjust minute frame to remove extra padding
-    if minute_frame == 1
-        lim_inferior = 1;
-        lim_superior = find(T<=60*minute_frame,1,'last');
+    if segments(minute_frame) == segm_size
         F_orig = F;
-    elseif minute_frame == duration
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = size(T,2); 
+        lim_inferior = 1;
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
+    elseif minute_frame == size(segments,2)
+        T = T+(60*(segments(minute_frame-1))-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame-1))),1,'first');
+        lim_superior = size(T,2);
     else
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = find(T<=60*minute_frame,1,'last');   
+        T = T+(60*(segments(minute_frame)-segm_size)-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame)-segm_size)),1,'first');
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
     end
 
     T = T(lim_inferior:lim_superior);
@@ -237,6 +237,7 @@ for minute_frame = 1:num_segments
     grain  = imdilate(grain, se);
     grain_total{minute_frame} = grain;
 end
+
 % -- convert cell array to conventional array
 T_orig      = cell2mat(T_orig);
 A_total     = cell2mat(A_total);

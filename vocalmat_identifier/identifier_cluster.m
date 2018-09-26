@@ -89,7 +89,7 @@ disp(['[vocalmat]: ' vfilename ' has around ' num2str(duration-1) ' minutes.'])
 
 % -- segm_size: duration of each segment to be processed individually, in minutes
 % -- overlap: amount of overlap between segments, in seconds
-segm_size = 1;
+segm_size = str2num(getenv('SEGMENT_SIZE'));
 overlap   = 5;
 segments  = segm_size:segm_size:duration;
 if segments(end) < duration
@@ -97,16 +97,17 @@ if segments(end) < duration
 end
 
 % -- pre-allocate known-size variables for faster performance
-F_orig      = [];
-T_orig      = cell(1, duration);
-A_total     = cell(1, duration);
-grain_total = cell(1, duration);
+num_segments = size(segments,2);
+F_orig       = [];
+T_orig       = cell(1, num_segments);
+A_total      = cell(1, num_segments);
+grain_total  = cell(1, num_segments);
 
 % ----------------------------------------------------------------------------------------------
 % -- (2) IMAGE PROCESSING BEGIN ----------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
 disp(['[vocalmat]: audio file split into ' num2str(size(segments,2)) ' segments of up to ' num2str(segm_size) ' minute(s).'])
-for minute_frame = 1:size(segments,2)
+for minute_frame = 1:num_segments
 % -- run through each segment, compute the spectrogram, and process its outputs
 
     clear A B y2 S F T P q vocal id grain
@@ -159,18 +160,18 @@ for minute_frame = 1:size(segments,2)
     B = imadjust(imcomplement(abs(A)./max(abs(A(:)))));
     
     % -- adjust minute frame to remove extra padding
-    if minute_frame == 1
-        lim_inferior = 1;
-        lim_superior = find(T<=60*minute_frame,1,'last');
+    if segments(minute_frame) == segm_size
         F_orig = F;
-    elseif minute_frame == duration
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = size(T,2); 
+        lim_inferior = 1;
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
+    elseif minute_frame == size(segments,2)
+        T = T+(60*(segments(minute_frame-1))-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame-1))),1,'first');
+        lim_superior = size(T,2);
     else
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = find(T<=60*minute_frame,1,'last');   
+        T = T+(60*(segments(minute_frame)-segm_size)-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame)-segm_size)),1,'first');
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
     end
 
     T = T(lim_inferior:lim_superior);

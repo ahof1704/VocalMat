@@ -97,16 +97,17 @@ if segments(end) < duration
 end
 
 % -- pre-allocate known-size variables for faster performance
-F_orig      = [];
-T_orig      = cell(1, duration);
-A_total     = cell(1, duration);
-grain_total = cell(1, duration);
+num_segments = size(segments,2);
+F_orig       = [];
+T_orig       = cell(1, num_segments);
+A_total      = cell(1, num_segments);
+grain_total  = cell(1, num_segments);
 
 % ----------------------------------------------------------------------------------------------
 % -- (2) IMAGE PROCESSING BEGIN ----------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
 disp(['[vocalmat]: audio file split into ' num2str(size(segments,2)) ' segments of up to ' num2str(segm_size) ' minute(s).'])
-for minute_frame = 1:size(segments,2)
+for minute_frame = 1:num_segments
 % -- run through each segment, compute the spectrogram, and process its outputs
 
     clear A B y2 S F T P q vocal id grain

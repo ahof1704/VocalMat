@@ -46,15 +46,15 @@
 
 ![VocalMat Workflow](vocalmat.png)
 
-<p align="justify"> VocalMat Identifier is responsible for identifying possible vocalizations in the provided audio file. Candidates for vocalization are further analyzed and regions identenfied as noise are removed. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) that contains information about identified vocalizations (e.g., frequency, vocalization intensity, timestamp).
+<p align="justify"> VocalMat Identifier is responsible for identifying possible vocalizations in the provided audio file. Candidates for vocalization are further analyzed and regions identenfied as noise are removed. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) with information about identified vocalizations (e.g., frequency, vocalization intensity, timestamp), that is later used by the VocalMat Classifier.
 
 <p> VocalMat Classifier uses a Convolutional Neural Network (CNN) to classify vocalization into 13 labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, complex, multi steps, two steps, step down, step up, and noise.
 
 
 ## Features
 - __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations
-- __Noise Detection:__ eliminate noisy sections that would otherwise be identified as vocalizations
-- __Harmonic Detection:__ detect when vocalizations have steps in frequency
+- __Noise Detection:__ eliminates noisy sections that would otherwise be identified as vocalizations
+- __Harmonic Detection:__ detects when vocalizations have steps in frequency
 - __Fast Performance:__ optimized versions for personal computers and high-performance computing (clusters)
 
 ## Getting Started
@@ -77,10 +77,24 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 ```bash
 $ ./run_identifier_local [OPTIONS]
 ```
+##### Examples
+Running VocalMat using 4 threads:
+```bash
+$ ./run_identifier_local -c 4
+or
+$ ./run_identifier_local --cores 4
+```
 
 #### High-Performance Computing (Clusters with Slurm Support)
 ```bash
 $ ./run_identifier_cluster [OPTIONS]
+```
+##### Examples
+Running VocalMat using 4 cores, 128GB of RAM, walltime of 600 minutes, and getting notifications to your email:
+```bash
+$ ./run_identifier_cluster -e your@email.com -c 4 -m 128 -t 600
+or
+$ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 ```
 
 #### Output files from VocalMat
@@ -92,8 +106,7 @@ $ ./run_identifier_cluster [OPTIONS]
 <p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a versions. We cannot guarantee that it will work in other versions of MATLAB.
 
 - What are the hardware requirements to run `VocalMat`?
-<p align="justify">The duration of the audio files that can you use in VocalMat is limited to the amount of RAM that you have in your computer. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, you should have at least 10GB of RAM available.
-If you wish to use longer segments (for faster performance), RAM usage will be higher.
+<p align="justify">The duration of the audio files that can you use in VocalMat is limited to the amount of RAM that you have in your computer. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, you should have at least 10GB of RAM available. RAM usage will vary depending on your MATLAB version and computer, these numbers are just estimates.
 
 ## License
 <div>

@@ -539,6 +539,7 @@ if size(time_vocal,2)>0
     cd([vpathname '../outputs/' ])
     vfilename  = vfilename(1:end-4);
     
+    % save([datestr(now,'yyyy-mm-dd_HH-MM-SS-FFF') 
     save(['output_short_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats')
     
     if save_spectrogram_background == 1

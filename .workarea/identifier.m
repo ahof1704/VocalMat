@@ -21,7 +21,7 @@
 % -- (1) setup;
 % -- (2) image processing;
 % -- (3) post-processing.
-% -- Bellow is a quick description of each section. Further explanation is provided alongside
+% -- Bellow is a small description of each section. Further explanation is provided alongside
 % -- the code.
 % ----------------------------------------------------------------------------------------------
 
@@ -33,8 +33,9 @@
 
 % -- (2) IMAGE PROCESSING ----------------------------------------------------------------------
 % -- The audio file is divided into one minute frames, and each frame is processed independently.
-% -- First, the spectrogram of the current minute frame is computed. Next, several morphological
-% -- image processing techniques - such as erosion and dilation - are applied. 
+% -- First, the spectrogram and the power spectral density of the current segment is computed. 
+% -- Next, several morphological image processing techniques - such as contrast enhancement, 
+% -- erosion, and dilation - are applied. 
 % -- Search for 'IMAGE PROCESSING BEGIN' to jump to this section.
 % ----------------------------------------------------------------------------------------------
 
@@ -62,7 +63,7 @@ cd(vpathname);
 p = mfilename('fullpath');
 
 % -- max_interval: maximum allowed interval between points to be considered part of one vocalization
-max_interval = 0.005;
+max_interval = 20;
 
 % -- minimum_size: minimum number of points to be considered a vocalization
 minimum_size = 6;
@@ -77,34 +78,37 @@ local_median = 1;
 tic
 
 vfile = fullfile(vpathname, vfilename);
-clear time_vocal freq_vocal intens_vocal output time_vocal_nogaps freq_vocal_nogaps intens_vocal_nogaps
+clear time_vocal freq_vocal intens_vocal time_vocal_nogaps freq_vocal_nogaps intens_vocal_nogaps
 
 % -- y1: sampled data; fs: sample rate
 [y1,fs] = audioread(vfile);
 
 % -- duration: number of one minute segments in the audio file
 duration = ceil(size(y1,1)/(60*fs));
-disp([vfilename,' has ',num2str(duration-1),' minutes.'])
+disp(['[vocalmat]: ' vfilename ' has around ' num2str(duration-1) ' minutes.'])
 
 % -- segm_size: duration of each segment to be processed individually, in minutes
-segm_size = 1
-segments = segm_size:segm_size:ceil(size(y1,1)/(60*fs));
+% -- overlap: amount of overlap between segments, in seconds
+segm_size = 1;
+overlap   = 5;
+segments  = segm_size:segm_size:duration;
 if segments(end) < duration
     segments = [segments, duration];
 end
 
 % -- pre-allocate known-size variables for faster performance
-F_orig      = [];
-T_orig      = cell(1, duration);
-A_total     = cell(1, duration);
-grain_total = cell(1, duration);
+num_segments = size(segments,2);
+F_orig       = [];
+T_orig       = cell(1, num_segments);
+A_total      = cell(1, num_segments);
+grain_total  = cell(1, num_segments);
 
 % ----------------------------------------------------------------------------------------------
 % -- (2) IMAGE PROCESSING BEGIN ----------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
-disp('processing audio file.')
-for minute_frame = 1:size(segments,2)
-disp(['current minute: ' num2str(minute_frame)])
+disp(['[vocalmat]: audio file split into ' num2str(size(segments,2)) ' segments of up to ' num2str(segm_size) ' minute(s).'])
+tic
+for minute_frame = 1:num_segments
 % -- run through each segment, compute the spectrogram, and process its outputs
 
     clear A B y2 S F T P q vocal id grain
@@ -127,7 +131,7 @@ disp(['current minute: ' num2str(minute_frame)])
         end
     end
 
-    disp('computing the spectrogram.')
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: computing the spectrogram.'])
     % -- compute the spectrogram
     % -- nfft: number of points for the Discrete Fourier Transform
     % -- window: windowing function
@@ -144,7 +148,7 @@ disp(['current minute: ' num2str(minute_frame)])
     S = S(min_freq,:);
     P = P(min_freq,:);
 
-    % -- convert power espectral density to dB
+    % -- convert power spectral density to dB
     P(P==0)=1;
     A = 10*log10(P);
             if minute_frame == 1
@@ -157,18 +161,18 @@ disp(['current minute: ' num2str(minute_frame)])
     B = imadjust(imcomplement(abs(A)./max(abs(A(:)))));
     
     % -- adjust minute frame to remove extra padding
-    if minute_frame == 1
-        lim_inferior = 1;
-        lim_superior = find(T<=60*minute_frame,1,'last');
+    if segments(minute_frame) == segm_size
         F_orig = F;
-    elseif minute_frame == duration
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = size(T,2); 
+        lim_inferior = 1;
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
+    elseif minute_frame == size(segments,2)
+        T = T+(60*(segments(minute_frame-1))-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame-1))),1,'first');
+        lim_superior = size(T,2);
     else
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = find(T<=60*minute_frame,1,'last');   
+        T = T+(60*(segments(minute_frame)-segm_size)-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame)-segm_size)),1,'first');
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
     end
 
     T = T(lim_inferior:lim_superior);
@@ -197,7 +201,7 @@ disp(['current minute: ' num2str(minute_frame)])
     maskedImage(~BW) = 0;
     B = maskedImage;
     
-    disp('finding connected components.')
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: computing connected components.'])
     % -- calculate connected components using 4-connected neighborhood policy
     cc = bwconncomp(B, 4);
 
@@ -211,7 +215,7 @@ disp(['current minute: ' num2str(minute_frame)])
     end
     grain2 = grain(:,lim_inferior:lim_superior);
     
-    disp('refining connected components.')
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: refining connected components.'])
     % -- recalculate connected components
     % -- if area is lower than 60, remove
     cc        = bwconncomp(grain2, 4);
@@ -234,7 +238,7 @@ disp(['current minute: ' num2str(minute_frame)])
     grain  = imdilate(grain, se);
     grain_total{minute_frame} = grain;
 end
-
+toc
 % -- convert cell array to conventional array
 T_orig      = cell2mat(T_orig);
 A_total     = cell2mat(A_total);
@@ -249,10 +253,9 @@ graindata_2 = regionprops(cc_2,'Area','PixelList');
 % -- (3) POST-PROCESSING BEGIN -----------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
 % -- initialize variables
-compare_bimodality = [];
 time_vocal         = [];
 id                 = 1;
-cc_count           = size(graindata_2,1)-1; % -- disregarding last cc?
+cc_count           = size(graindata_2,1)-1;
 centroid_to_id     = cell(cc_count, 1);
 
 for k = 1:cc_count
@@ -265,7 +268,7 @@ for k = 1:cc_count
             freq_vocal{id}{freq_per_time} = find(grain(:,time_vocal{id}(freq_per_time))==1);
         end
     else
-        if min(graindata_2(k).PixelList(:,1)) - max(time_vocal{id}) > 20
+        if min(graindata_2(k).PixelList(:,1)) - max(time_vocal{id}) > max_interval
         % -- if two points are distant enough, identify as a new vocalization
             id = id + 1;
             time_vocal{id}    = [];
@@ -297,7 +300,7 @@ centroid_to_id = temp;
 
 if size(time_vocal,2)>0
 % -- if there are vocalizations, remove the ones that have less than 6 points
-    disp(['removing small vocalizations (less than ' num2str(minimum_size) ' points).'])
+    disp(['[vocalmat]: removing small vocalizations (less than ' num2str(minimum_size) ' points).'])
     for k=1:size(time_vocal,2)
         if  size(time_vocal{k},2) < minimum_size
             time_vocal{k} = [];
@@ -309,7 +312,6 @@ if size(time_vocal,2)>0
     time_vocal = time_vocal(~cellfun('isempty',time_vocal));
     freq_vocal = freq_vocal(~cellfun('isempty',freq_vocal));
     
-    output        = [];
     freq_harmonic = {};
     time_harmonic = {};
 
@@ -402,7 +404,7 @@ if size(time_vocal,2)>0
     
     if local_median == 1
     % -- remove noise using local median
-    disp('removing noise by local median.')
+    disp(['[vocalmat]: removing noise by local median.'])
         for k=1:size(time_vocal,2)
         % -- for each vocalization, save timestamp where vocalization begins, connected component area, number of elements, ...
             aux_median_stats = [];
@@ -482,17 +484,34 @@ if size(time_vocal,2)>0
 
             temp             = sort(intens_vocal{k});
             aux_median_stats = [aux_median_stats, size(temp,1)];
-            aux_median_stats = [aux_median_stats, [median(temp(end-5:end))  median_db-0.1*median_db]];
+            aux_median_stats = [aux_median_stats, [median(temp(end-5:end))  median_db]];
             elim_by_median   = 0;
-            if median(temp(end-5:end)) < 0.9*median_db
-            % -- if median is under threshold of 0.9, eliminate
-                time_vocal{k}   = [];
-                freq_vocal{k}   = [];
-                intens_vocal{k} = [];
-                elim_by_median  = 1;
-            end
-            aux_median_stats  = [aux_median_stats, elim_by_median]; 
+            aux_median_stats = [aux_median_stats, elim_by_median];
             median_stats(k,:) = aux_median_stats;
+        end
+
+        ratio = median_stats(:,5)./median_stats(:,6);
+        [y,t]=ecdf(ratio);
+        aux = round(linspace(1,size(t,1),35)); % Downsample to 50 points only
+        t = t(aux);
+        y = y(aux);
+        K=LineCurvature2D([t,y]);
+        K = K*10^-3;
+        [maxx maxx] = max(K);
+        th_ratio = t(maxx);
+
+        if th_ratio<0.9
+            th_ratio=0.92;
+        end
+        disp(['[vocalmat]: minimal ratio = ' num2str(th_ratio) '.'])
+        
+        for k=1:size(time_vocal,2)
+            if median_stats(k,5) < th_ratio*median_stats(k,6)
+                time_vocal{k}=[];
+                freq_vocal{k}=[];
+                intens_vocal{k}=[];
+                median_stats(k,7) = 1;
+            end
         end
         
         % -- do some cleaning, remove empty cells
@@ -516,15 +535,15 @@ if size(time_vocal,2)>0
         intens_vocal{k} = temp;
     end
 
-    disp('saving output files.')
+    disp(['[vocalmat]: saving output files.'])
     % -- output identified vocalizations
-    cd(vpathname)
+    cd([vpathname '../outputs/' ])
     vfilename  = vfilename(1:end-4);
     
-    save(['../outputs/' datestr(now,'yyyy-mm-dd_HH-MM-SS-FFF') '_output_shorter_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'compare_bimodality', 'median_stats')
+    save(['output_short_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats')
     
     if save_spectrogram_background == 1
-        save(['../outputs/' datestr(now,'yyyy-mm-dd_HH-MM-SS-FFF') '_output_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats', 'A_total', '-v7.3', '-nocompression')
+        save(['output_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats', 'A_total', '-v7.3', '-nocompression')
     end
     
     warning('off', 'MATLAB:save:sizeTooBigForMATFile')
@@ -532,7 +551,7 @@ if size(time_vocal,2)>0
     
     toc
 end
-disp([vfilename,' has ', num2str(size(time_vocal,2)), ' vocalizations.'])
+disp(['[vocalmat]: ' vfilename ' has ' num2str(size(time_vocal,2)) ' vocalizations.'])
 
 function k=LineCurvature2D(Vertices,Lines)
 % This function calculates the curvature of a 2D line. It first fits 
@@ -620,6 +639,7 @@ b(:,3)=invM(:,1,3).*y(:,1)+invM(:,2,3).*y(:,2)+invM(:,3,3).*y(:,3);
 
 % Calculate the curvature from the fitted polygon
 k = 2*(a(:,2).*b(:,3)-a(:,3).*b(:,2)) ./ ((a(:,2).^2+b(:,2).^2).^(3/2));
+end
 
 function  Minv = inverse3(M)
 % This function does inv(M) , but then for an array of 3x3 matrices
@@ -634,3 +654,4 @@ adjM(:,3,2)=  -(M(:,1).*M(:,6)-M(:,4).*M(:,3));
 adjM(:,3,3)=  M(:,1).*M(:,5)-M(:,4).*M(:,2);
 detM=M(:,1).*M(:,5).*M(:,9)-M(:,1).*M(:,8).*M(:,6)-M(:,4).*M(:,2).*M(:,9)+M(:,4).*M(:,8).*M(:,3)+M(:,7).*M(:,2).*M(:,6)-M(:,7).*M(:,5).*M(:,3);
 Minv=bsxfun(@rdivide,adjM,detM);
+end

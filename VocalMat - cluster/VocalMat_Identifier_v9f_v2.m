@@ -21,7 +21,7 @@
 % -- (1) setup;
 % -- (2) image processing;
 % -- (3) post-processing.
-% -- Bellow is a quick description of each section. Further explanation is provided alongside
+% -- Bellow is a small description of each section. Further explanation is provided alongside
 % -- the code.
 % ----------------------------------------------------------------------------------------------
 
@@ -33,8 +33,9 @@
 
 % -- (2) IMAGE PROCESSING ----------------------------------------------------------------------
 % -- The audio file is divided into one minute frames, and each frame is processed independently.
-% -- First, the spectrogram of the current minute frame is computed. Next, several morphological
-% -- image processing techniques - such as erosion and dilation - are applied. 
+% -- First, the spectrogram and the power spectral density of the current segment is computed. 
+% -- Next, several morphological image processing techniques - such as contrast enhancement, 
+% -- erosion, and dilation - are applied. 
 % -- Search for 'IMAGE PROCESSING BEGIN' to jump to this section.
 % ----------------------------------------------------------------------------------------------
 
@@ -90,22 +91,23 @@ disp(['[vocalmat]: ' vfilename ' has around ' num2str(duration-1) ' minutes.'])
 % -- overlap: amount of overlap between segments, in seconds
 segm_size = 1;
 overlap   = 5;
-segments  = segm_size:segm_size:ceil(size(y1,1)/(60*fs));
+segments  = segm_size:segm_size:duration;
 if segments(end) < duration
     segments = [segments, duration];
 end
 
 % -- pre-allocate known-size variables for faster performance
-F_orig      = [];
-T_orig      = cell(1, duration);
-A_total     = cell(1, duration);
-grain_total = cell(1, duration);
+num_segments = size(segments,2);
+F_orig       = [];
+T_orig       = cell(1, num_segments);
+A_total      = cell(1, num_segments);
+grain_total  = cell(1, num_segments);
 
 % ----------------------------------------------------------------------------------------------
 % -- (2) IMAGE PROCESSING BEGIN ----------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
-disp(['[vocalmat]: audio file split into ' num2str(size(segments,2)) ' segments of up to ' num2str(segm_size) ' minute(s)'])
-for minute_frame = 1:size(segments,2)
+disp(['[vocalmat]: audio file split into ' num2str(size(segments,2)) ' segments of up to ' num2str(segm_size) ' minute(s).'])
+for minute_frame = 1:num_segments
 % -- run through each segment, compute the spectrogram, and process its outputs
 
     clear A B y2 S F T P q vocal id grain
@@ -128,7 +130,7 @@ for minute_frame = 1:size(segments,2)
         end
     end
 
-    disp(['[vocalmat - segment (' num2str(minute_frame) ')]: computing the spectrogram.'])
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: computing the spectrogram.'])
     % -- compute the spectrogram
     % -- nfft: number of points for the Discrete Fourier Transform
     % -- window: windowing function
@@ -149,7 +151,7 @@ for minute_frame = 1:size(segments,2)
     P(P==0)=1;
     A = 10*log10(P);
             if minute_frame == 1
-            % -- remove first 0.3s of recording (recordings might have abnormal behavior in this range)
+            % -- remove first 0.3s of recording (recordings might have abnormal behaviour in this range)
                 A = A(:,600:end);
                 T = T(:,600:end);
             end
@@ -158,18 +160,18 @@ for minute_frame = 1:size(segments,2)
     B = imadjust(imcomplement(abs(A)./max(abs(A(:)))));
     
     % -- adjust minute frame to remove extra padding
-    if minute_frame == 1
-        lim_inferior = 1;
-        lim_superior = find(T<=60*minute_frame,1,'last');
+    if segments(minute_frame) == segm_size
         F_orig = F;
-    elseif minute_frame == duration
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = size(T,2); 
+        lim_inferior = 1;
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
+    elseif minute_frame == size(segments,2)
+        T = T+(60*(segments(minute_frame-1))-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame-1))),1,'first');
+        lim_superior = size(T,2);
     else
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = find(T<=60*minute_frame,1,'last');   
+        T = T+(60*(segments(minute_frame)-segm_size)-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame)-segm_size)),1,'first');
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
     end
 
     T = T(lim_inferior:lim_superior);
@@ -198,7 +200,7 @@ for minute_frame = 1:size(segments,2)
     maskedImage(~BW) = 0;
     B = maskedImage;
     
-    disp(['[vocalmat - segment (' num2str(minute_frame) ')]: computing connected components.'])
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: computing connected components.'])
     % -- calculate connected components using 4-connected neighborhood policy
     cc = bwconncomp(B, 4);
 
@@ -212,7 +214,7 @@ for minute_frame = 1:size(segments,2)
     end
     grain2 = grain(:,lim_inferior:lim_superior);
     
-    disp(['[vocalmat - segment (' num2str(minute_frame) ')]: refining connected components.'])
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: refining connected components.'])
     % -- recalculate connected components
     % -- if area is lower than 60, remove
     cc        = bwconncomp(grain2, 4);
@@ -252,7 +254,7 @@ graindata_2 = regionprops(cc_2,'Area','PixelList');
 % -- initialize variables
 time_vocal         = [];
 id                 = 1;
-cc_count           = size(graindata_2,1)-1; 
+cc_count           = size(graindata_2,1)-1;
 centroid_to_id     = cell(cc_count, 1);
 
 for k = 1:cc_count
@@ -541,7 +543,7 @@ if size(time_vocal,2)>0
     
     if save_spectrogram_background == 1
         save(['output_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats', 'A_total', '-v7.3', '-nocompression')
-	end
+    end
     
     warning('off', 'MATLAB:save:sizeTooBigForMATFile')
     clear y y1 S F T P fs q nd vocal id

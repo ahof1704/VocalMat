@@ -76,10 +76,10 @@ two_steps_stats = sum(validationImages.Labels(aux)=='two_steps')/sum(validationI
 up_fm_stats = sum(validationImages.Labels(aux)=='up_fm')/sum(validationImages.Labels=='up_fm')
 
 % T_out2 = [table_total2(:,[1 2]), table_total2(:,239), array2table(ynewci_RF,'VariableNames',Mdl.ClassNames), array2table(scores,'VariableNames',s'),  array2table(ynew_RF,'VariableNames',{'RF'}),  array2table(predictedLabels,'VariableNames',{'DL'}), table_total2(:,[238])];             
-
+%%
 %testing the trained net
 disp('Testing the trained network on all the samples used for training...')
-images = imageDatastore('/gpfs/ysm/project/ahf38/Antonio_VocalMat/Reference_CNN','IncludeSubfolders',true);
+images = imageDatastore([pwd '/.dataset/'],'IncludeSubfolders',true);
 [predictedLabels, scores] = classify(netTransfer,images);
 
 T = [cell2table(images_training.Files,'VariableNames',{'Training_file'}) cell2table(cellstr(images_training.Labels),'VariableNames',{'Training_label'})...

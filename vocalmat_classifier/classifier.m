@@ -35,7 +35,8 @@ list = dir('*output*.mat');
 %Setting up
 p = mfilename('fullpath')
 plot_stats_per_bin=1
-save_plot_spectrograms=0 % PLots the spectograms with axes
+save_plot_spectrograms=1 % PLots the spectograms with axes
+scatter_step=1 % scatter plot spectrogram step (1 = every point; 2 = every two points)
 save_histogram_per_animal=0
 save_excel_file=1
 save_plot_3d_info=0
@@ -772,7 +773,7 @@ cd(raiz)
 
 if use_DL==1
     if save_plot_spectrograms==1
-        figure('Name',vfilename,'NumberTitle','off')
+        fig = figure('Name',vfilename,'NumberTitle','off','visible', 'off');
         %         set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
     end
     
@@ -801,22 +802,31 @@ if use_DL==1
         [T_max T_max] = min(abs(T_orig - T_min_max(2)));
         
         if save_plot_spectrograms==1
-            clf('reset')
-            hold on
-            surf(T_orig(T_min:T_max),F_orig,A_total(:,T_min:T_max),'edgecolor','none')
+            clf('reset');
+%             close all
+%             figure('Name',vfilename,'NumberTitle','off','visible', 'off')
+            hold on;
+            surf(T_orig(T_min:T_max),F_orig,A_total(:,T_min:T_max),'edgecolor','none');
             axis tight; view(0,90);
             colormap(gray);
-            xlabel('Time (s)'); ylabel('Freq (Hz)')
+            xlabel('Time (s)'); ylabel('Freq (Hz)');
             
             if axes_dots==1
-                for time_stamp = 1:size(time_vocal{id_vocal},2)
-                    scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],'b')
+                for time_stamp = 1:scatter_step:size(time_vocal{id_vocal},2)
+                    try
+                        scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],'b');
+                    catch
+                        scatter(time_vocal{id_vocal}(time_stamp-1)*ones(size(freq_vocal{id_vocal}{time_stamp-1}')),freq_vocal{id_vocal}{time_stamp}',[],'b');
+                    end
                 end
             end
             %                     Stri=['set(gca,''xlim'',[-dx/2 dx/2]+[' num2str(time_vocal{id_vocal}(1)) ' '  num2str(time_vocal{id_vocal}(1)) '])'];
             %                     eval(Stri);
-            saveas(gcf,[vpathname '/' vfilename '/All_axes/' num2str(id_vocal)  '.png'])
-            hold off
+            % saveas(gcf,[vpathname '/' vfilename '/All_axes/' num2str(id_vocal)  '.png'])
+            frame = getframe(fig);
+            % im    = frame2im(frame);
+            imwrite(frame.cdata, [vpathname '/' vfilename '/All_axes/' num2str(id_vocal)  '.png'], 'png');
+            hold off;
         end
         img = imresize(flipud(mat2gray(A_total(:,T_min:T_max))),size_spectrogram);
         img = cat(3, img, img, img);
@@ -1002,7 +1012,7 @@ if use_DL==1
     % AA2 = strsplit(cell2mat(AA2(1,1)),'\');
     for k=1:size(AA2,1)
         AA1 = strsplit(cell2mat(AA2(k,1)),{'/','\'});
-        AA3 = str2double((1:end-4));
+        AA3 = str2double(AA1{end}(1:end-4));
         %     AA4 = str2double(AA1{end}(1:end-20));
         AA2(k,3) = num2cell(AA3);
     end

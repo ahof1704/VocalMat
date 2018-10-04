@@ -60,6 +60,11 @@
 ## Getting Started
 ![Recordit GIF](clone.gif)
 
+#### Latest Stable Release
+```bash
+$ git clone https://github.com/ahof1704/VocalMat.git
+```
+
 #### Requirements
 - __MATLAB:__ version 2017a, 2017b, or 2018b. For other versions refer to the [FAQ](#faq).
 - __MATLAB Add-Ons:__
@@ -80,11 +85,6 @@
     - Statistics and Machine Learning Toolbox
     - Symbolic Math Toolbox
 
-#### Latest Stable Release
-```bash
-$ git clone https://github.com/ahof1704/VocalMat.git
-```
-
 #### Directory Structure
 - __vocalmat_identifier:__ everything related to the VocalMat Identifier
 - __vocalmat_classifier:__ everything related to the VocalMat Classifier
@@ -94,7 +94,7 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 
 ## Usage
 
-#### Manual Execution
+#### `VocalMat` Manual Execution
 <p align="justify">Navigate to the <i>vocalmat_identifier</i> directory and open <i>identifier.m</i> in MATLAB. Run and choose the audio file you want to analyze. Once finished, that <i>Identifier</i> will output two .MAT files in the same directory that the audio file is in, <i>output_*.mat</i> and <i>output_sorter_*.mat</i>. Next, navigate to <i>vocalmat_classifier</i> and open <i>classifier.m</i> in MATLAB. Run and choose the <i>output_*.mat</i> that the <i>Identifier</i> outputed. The <i>Classifier</i> will create a directory with its outputs (vocalizations and classifications) in that same directory that the audio file is in.
 
 #### `VocalMat` Output Files

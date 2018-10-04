@@ -60,6 +60,26 @@
 ## Getting Started
 ![Recordit GIF](clone.gif)
 
+#### Requirements
+- __MATLAB:__ version 2017a, 2017b, or 2018b. For other versions refer to the [FAQ](#faq).
+- __MATLAB Add-Ons:__
+    - Computer Vision System Toolbox
+    - Control System Toolbox
+    - Curve Fitting Toolbox
+    - Deep Neural Network
+    - DSP System Toolbox
+    - Fuzzy Logic Toolbox
+    - Image Processing Toolbox
+    - Instrument Control Toolbox
+    - Neural Network Toolbox
+    - Optimization Toolbox
+    - Parallel Computing Toolbox
+    - Simulink
+    - Simulink Control Design
+    - Signal Processing Toolbox
+    - Statistics and Machine Learning Toolbox
+    - Symbolic Math Toolbox
+
 #### Latest Stable Release
 ```bash
 $ git clone https://github.com/ahof1704/VocalMat.git
@@ -73,7 +93,15 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 - __.workarea:__ files that are still under development, do not use
 
 ## Usage
-#### Personal Use
+
+#### Manual Execution
+<p align="justify">Navigate to the <i>vocalmat_identifier</i> directory and open <i>identifier.m</i> in MATLAB. Run and choose the audio file you want to analyze. Once finished, that <i>Identifier</i> will output two .MAT files in the same directory that the audio file is in, <i>output_*.mat</i> and <i>output_sorter_*.mat</i>. Next, navigate to <i>vocalmat_classifier</i> and open <i>classifier.m</i> in MATLAB. Run and choose the <i>output_*.mat</i> that the <i>Identifier</i> outputed. The <i>Classifier</i> will create a directory with its outputs (vocalizations and classifications) in that same directory that the audio file is in.
+
+#### `VocalMat` Output Files
+
+<p align="justify">VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there are two directories (<i>All</i>, <i>All_axes</i>), and one Microsoft Excel (.xlsx) file. Inside <i>All_axes</i> you will find one image for each segment identified as a vocalization (with plotted blue circles). The raw original images are available inside <i>All</i>. The Excel file contains information on each vocalization, such as start and end time, duration, vocal intensity, and classification.
+
+#### Personal Use (bash script)
 ```bash
 $ ./run_identifier_local [OPTIONS]
 ```
@@ -91,7 +119,7 @@ or
 $ ./run_identifier_local --cores 4
 ```
 
-#### High-Performance Computing (Clusters with Slurm Support)
+#### High-Performance Computing (Clusters with Slurm Support, bash script)
 ```bash
 $ ./run_identifier_cluster [OPTIONS]
 ```
@@ -110,16 +138,9 @@ or
 $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 ```
 
-#### Manual Execution
-<p align="justify">Navigate to the <i>vocalmat_identifier</i> directory and open <i>identifier.m</i> in MATLAB. Run and choose the audio file you want to analyze. Once finished, that <i>Identifier</i> will output two .MAT files in the same directory that the audio file is in, <i>output_*.mat</i> and <i>output_sorter_*.mat</i>. Next, navigate to <i>vocalmat_classifier</i> and open <i>classifier.m</i> in MATLAB. Run and choose the <i>output_*.mat</i> that the <i>Identifier</i> outputed. The <i>Classifier</i> will create a directory with its outputs (vocalizations and classifications) in that same directory that the audio file is in.
-
-#### `VocalMat` Output Files
-
-<p align="justify">VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there are two directories (<i>All</i>, <i>All_axes</i>), and one Microsoft Excel (.xlsx) file. Inside <i>All_axes</i> you will find one image for each segment identified as a vocalization (with plotted blue circles). The raw original images are available inside <i>All</i>. The Excel file contains information on each vocalization, such as start and end time, duration, vocal intensity, and classification.
-
 ## FAQ
 - Will `VocalMat` work with my MATLAB version?
-<p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a versions. We cannot guarantee that it will work in other versions of MATLAB.
+<p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a versions. We cannot guarantee that it will work in other versions of MATLAB. If your MATLAB versions supports all the required Add-Ons, VocalMat should work.
 
 - What are the hardware requirements to run `VocalMat`?
 <p align="justify">The duration of the audio files that can you use in VocalMat is limited to the amount of RAM that you have in your computer. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, you should have at least 10GB of RAM available. RAM usage will vary depending on your MATLAB version and computer, these numbers are just estimates.

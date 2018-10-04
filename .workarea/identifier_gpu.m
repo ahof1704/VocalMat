@@ -21,7 +21,7 @@
 % -- (1) setup;
 % -- (2) image processing;
 % -- (3) post-processing.
-% -- Bellow is a quick description of each section. Further explanation is provided alongside
+% -- Bellow is a small description of each section. Further explanation is provided alongside
 % -- the code.
 % ----------------------------------------------------------------------------------------------
 
@@ -33,8 +33,9 @@
 
 % -- (2) IMAGE PROCESSING ----------------------------------------------------------------------
 % -- The audio file is divided into one minute frames, and each frame is processed independently.
-% -- First, the spectrogram of the current minute frame is computed. Next, several morphological
-% -- image processing techniques - such as erosion and dilation - are applied. 
+% -- First, the spectrogram and the power spectral density of the current segment is computed. 
+% -- Next, several morphological image processing techniques - such as contrast enhancement, 
+% -- erosion, and dilation - are applied. 
 % -- Search for 'IMAGE PROCESSING BEGIN' to jump to this section.
 % ----------------------------------------------------------------------------------------------
 
@@ -57,6 +58,7 @@
 % -- (1) SETUP BEGIN ---------------------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
 raiz = pwd;
+% [vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
 cd(vpathname);
 p = mfilename('fullpath');
 
@@ -76,7 +78,7 @@ local_median = 1;
 tic
 
 vfile = fullfile(vpathname, vfilename);
-clear time_vocal freq_vocal intens_vocal output time_vocal_nogaps freq_vocal_nogaps intens_vocal_nogaps
+clear time_vocal freq_vocal intens_vocal time_vocal_nogaps freq_vocal_nogaps intens_vocal_nogaps
 
 % -- y1: sampled data; fs: sample rate
 [y1,fs] = audioread(vfile);
@@ -87,24 +89,26 @@ disp(['[vocalmat]: ' vfilename ' has around ' num2str(duration-1) ' minutes.'])
 
 % -- segm_size: duration of each segment to be processed individually, in minutes
 % -- overlap: amount of overlap between segments, in seconds
-segm_size = 1;
+segm_size = str2num(getenv('SEGMENT_SIZE'));
 overlap   = 5;
-segments  = segm_size:segm_size:ceil(size(y1,1)/(60*fs));
+segments  = segm_size:segm_size:duration;
 if segments(end) < duration
     segments = [segments, duration];
 end
 
 % -- pre-allocate known-size variables for faster performance
-F_orig      = [];
-T_orig      = cell(1, duration);
-A_total     = cell(1, duration);
-grain_total = cell(1, duration);
+num_segments = size(segments,2);
+F_orig       = [];
+T_orig       = cell(1, num_segments);
+A_total      = cell(1, num_segments);
+grain_total  = cell(1, num_segments);
 
 % ----------------------------------------------------------------------------------------------
 % -- (2) IMAGE PROCESSING BEGIN ----------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
 disp(['[vocalmat]: audio file split into ' num2str(size(segments,2)) ' segments of up to ' num2str(segm_size) ' minute(s).'])
-for minute_frame = 1:size(segments,2)
+tic
+for minute_frame = 1:num_segments
 % -- run through each segment, compute the spectrogram, and process its outputs
 
     clear A B y2 S F T P q vocal id grain
@@ -127,7 +131,7 @@ for minute_frame = 1:size(segments,2)
         end
     end
 
-    disp(['[vocalmat - segment (' num2str(minute_frame) ')]: computing the spectrogram.'])
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: computing the spectrogram.'])
     % -- compute the spectrogram
     % -- nfft: number of points for the Discrete Fourier Transform
     % -- window: windowing function
@@ -135,6 +139,8 @@ for minute_frame = 1:size(segments,2)
     nfft      = 1024;
     window    = hamming(256);
     nover     = (128);
+
+    y2 = gpuArray(y2);
     [S,F,T,P] = spectrogram(y2, window, nover, nfft, fs, 'yaxis');
     
     % -- remove frequencies bellow 45kHz
@@ -144,7 +150,7 @@ for minute_frame = 1:size(segments,2)
     S = S(min_freq,:);
     P = P(min_freq,:);
 
-    % -- convert power espectral density to dB
+    % -- convert power spectral density to dB
     P(P==0)=1;
     A = 10*log10(P);
             if minute_frame == 1
@@ -157,27 +163,31 @@ for minute_frame = 1:size(segments,2)
     B = imadjust(imcomplement(abs(A)./max(abs(A(:)))));
     
     % -- adjust minute frame to remove extra padding
-    if minute_frame == 1
+    if segments(minute_frame) == segm_size
         lim_inferior = 1;
-        lim_superior = find(T<=60*minute_frame,1,'last');
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
+        F      = gather(F);
         F_orig = F;
-    elseif minute_frame == duration
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = size(T,2); 
+    elseif minute_frame == size(segments,2)
+        T = T+(60*(segments(minute_frame-1))-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame-1))),1,'first');
+        lim_superior = size(T,2);
     else
-        T = T+(60*(minute_frame-1)-5)*ones(size(T,2),1)';
-        lim_inferior = find(T>=(60*(minute_frame-1)),1,'first');
-        lim_superior = find(T<=60*minute_frame,1,'last');   
+        T = T+(60*(segments(minute_frame)-segm_size)-overlap)*ones(size(T,2),1)';
+        lim_inferior = find(T>=(60*(segments(minute_frame)-segm_size)),1,'first');
+        lim_superior = find(T<=60*segments(minute_frame),1,'last');
     end
 
     T = T(lim_inferior:lim_superior);
+    T = gather(T);
     T_orig{minute_frame} = T;
     
     A = A(:,lim_inferior:lim_superior);
+    A = gather(A);
     A_total{minute_frame} = A;
 
     % -- binarize image using an adaptive threshold
+    B = gather(B);
     BW = imbinarize(B, 'adaptive', 'Sensitivity', 0.200000, 'ForegroundPolarity', 'bright');
     
     % -- morphological image operations
@@ -197,7 +207,7 @@ for minute_frame = 1:size(segments,2)
     maskedImage(~BW) = 0;
     B = maskedImage;
     
-    disp(['[vocalmat - segment (' num2str(minute_frame) ')]: computing connected components.'])
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: computing connected components.'])
     % -- calculate connected components using 4-connected neighborhood policy
     cc = bwconncomp(B, 4);
 
@@ -211,7 +221,7 @@ for minute_frame = 1:size(segments,2)
     end
     grain2 = grain(:,lim_inferior:lim_superior);
     
-    disp(['[vocalmat - segment (' num2str(minute_frame) ')]: refining connected components.'])
+    disp(['[vocalmat][segment (' num2str(minute_frame) ')]: refining connected components.'])
     % -- recalculate connected components
     % -- if area is lower than 60, remove
     cc        = bwconncomp(grain2, 4);
@@ -234,7 +244,7 @@ for minute_frame = 1:size(segments,2)
     grain  = imdilate(grain, se);
     grain_total{minute_frame} = grain;
 end
-
+toc
 % -- convert cell array to conventional array
 T_orig      = cell2mat(T_orig);
 A_total     = cell2mat(A_total);
@@ -249,10 +259,9 @@ graindata_2 = regionprops(cc_2,'Area','PixelList');
 % -- (3) POST-PROCESSING BEGIN -----------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
 % -- initialize variables
-compare_bimodality = [];
 time_vocal         = [];
 id                 = 1;
-cc_count           = size(graindata_2,1)-1; % -- disregarding last cc?
+cc_count           = size(graindata_2,1)-1;
 centroid_to_id     = cell(cc_count, 1);
 
 for k = 1:cc_count
@@ -309,7 +318,6 @@ if size(time_vocal,2)>0
     time_vocal = time_vocal(~cellfun('isempty',time_vocal));
     freq_vocal = freq_vocal(~cellfun('isempty',freq_vocal));
     
-    output        = [];
     freq_harmonic = {};
     time_harmonic = {};
 
@@ -535,18 +543,22 @@ if size(time_vocal,2)>0
 
     disp(['[vocalmat]: saving output files.'])
     % -- output identified vocalizations
-    cd([vpathname '../outputs/' ])
+    cd([vpathname])
     vfilename  = vfilename(1:end-4);
     
-    save([datestr(now,'yyyy-mm-dd_HH-MM-SS-FFF') '_output_shorter_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'compare_bimodality', 'median_stats')
-    
+    tic
+    % save([datestr(now,'yyyy-mm-dd_HH-MM-SS-FFF') 
+    save(['output_short_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats')
+    toc
+    tic
     if save_spectrogram_background == 1
-        save([datestr(now,'yyyy-mm-dd_HH-MM-SS-FFF') '_output_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats', 'A_total', '-v7.3', '-nocompression')
+        save(['output_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats', 'A_total', '-v7.3', '-nocompression')
     end
-    
+    toc
     warning('off', 'MATLAB:save:sizeTooBigForMATFile')
+    tic
     clear y y1 S F T P fs q nd vocal id
-    
+    toc
     toc
 end
 disp(['[vocalmat]: ' vfilename ' has ' num2str(size(time_vocal,2)) ' vocalizations.'])

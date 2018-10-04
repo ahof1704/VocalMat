@@ -53,3 +53,5 @@ Temporary Items
 *.reports
 *.mat
 *.ai
+*.dataset
+outputs/*/

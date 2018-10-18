@@ -14,7 +14,6 @@
 %clear all
 %clc
 
-
 raiz = pwd;
 [vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
 cd(vpathname);

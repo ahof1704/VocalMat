@@ -14,16 +14,16 @@
 
 %clc
 %clear all
-raiz = pwd;
-% model_noise=load('model_noise.mat');
-model_noise=load('model_noise_randomTree3.mat')
-model_noise = model_noise.model_noise_randomTree3;
-% model_class = load('Mdl_categorical_15&30_points_v16.mat')
-model_class_RF = load('Mdl_categorical_RF_Feb13b.mat')
-model_class_RF = model_class_RF.Mdl;
-model_class_DL = load('Mdl_categorical_DL.mat')
-% model_class_DL = load('Mdl_categorical_DL_Feb13b.mat')
-model_class_DL = model_class_DL.netTransfer;
+raiz              = pwd;
+% model_noise     = load('model_noise.mat');
+model_noise       = load('model_noise_randomTree3.mat')
+model_noise       = model_noise.model_noise_randomTree3;
+% model_class     = load('Mdl_categorical_15&30_points_v16.mat')
+model_class_RF    = load('Mdl_categorical_RF_Feb13b.mat')
+model_class_RF    = model_class_RF.Mdl;
+model_class_DL    = load('Mdl_categorical_DL.mat')
+% model_class_DL  = load('Mdl_categorical_DL_Feb13b.mat')
+model_class_DL    = model_class_DL.netTransfer;
 model_class_DL_RF = load('Mdl_categorical_DL_RF_Feb13b.mat')
 model_class_DL_RF = model_class_DL_RF.Mdl;
 
@@ -33,17 +33,17 @@ list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
 %Setting up
-p = mfilename('fullpath')
-plot_stats_per_bin=1
-save_plot_spectrograms=1 % PLots the spectograms with axes
-scatter_step=1 % scatter plot spectrogram step (1 = every point; 2 = every two points)
-save_histogram_per_animal=0
-save_excel_file=1
-save_plot_3d_info=0
-axes_dots=1 % Show the dots overlapping the vocalization (segmentation)
-size_spectrogram = [227 227]
-use_DL = 1
-bin_size = 300 %in seconds
+p                         = mfilename('fullpath')
+plot_stats_per_bin        = 1
+save_plot_spectrograms    = 1 % PLots the spectograms with axes
+scatter_step              = 1 % scatter plot spectrogram step (1                          = every point; 2 = every two points)
+save_histogram_per_animal = 0
+save_excel_file           = 1
+save_plot_3d_info         = 0
+axes_dots                 = 1 % Show the dots overlapping the vocalization (segmentation)
+size_spectrogram          = [227 227]
+use_DL                    = 1
+bin_size                  = 300 %in seconds
 tic
 % stepup_count_bin_total  = 0;
 % stepdown_count_bin_total = 0 ;
@@ -84,25 +84,26 @@ fprintf('\n')
 %Grimsley, Jasmine, Marie Gadziola, and Jeff James Wenstrup. "Automated classification of mouse pup isolation syllables: from cluster analysis to an Excel-based �mouse pup syllable classification calculator�."
 %Frontiers in behavioral neuroscience 6 (2013): 89.
 %     disp('Verify vocalizations for steps')
-stepup_count=[];
-stepdown_count=[];
-harmonic_count=[];
-flat_count=[];
-chevron_count=[];
-revchevron_count=[];
-downfm_count=[];
-upfm_count=[];
-complex_count=[];
-noisy_vocal_count=[];
-nonlinear_count = [];
-short_count = [];
-noise_count = [];
-noise_count_dist = [];
-corr_yy2_yy3 = [];
-corr_yy2_yy4 = [];
-max_prom = [];
-max_prom2 = [];
-duration = [];
+stepup_count      = [];
+stepdown_count    = [];
+harmonic_count    = [];
+flat_count        = [];
+chevron_count     = [];
+revchevron_count  = [];
+downfm_count      = [];
+upfm_count        = [];
+complex_count     = [];
+noisy_vocal_count = [];
+nonlinear_count   = [];
+short_count       = [];
+noise_count       = [];
+noise_count_dist  = [];
+corr_yy2_yy3      = [];
+corr_yy2_yy4      = [];
+max_prom          = [];
+max_prom2         = [];
+duration          = [];
+
 load(vfilename);
 noise_detected_clustering = zeros(size(time_vocal,2),1);
 
@@ -111,7 +112,7 @@ time_vocal = time_vocal(~cellfun('isempty',time_vocal));
 freq_vocal = freq_vocal(~cellfun('isempty',freq_vocal));
 intens_vocal = intens_vocal(~cellfun('isempty',intens_vocal));
 
-output=[];
+output = [];
 cd(vpathname)
 if ~exist(vfilename, 'dir')
 %     mkdir(['classifier' vfilename])
@@ -771,8 +772,8 @@ disp('Running analysis!')
 
 cd(raiz)
 
-if use_DL==1
-    if save_plot_spectrograms==1
+if use_DL == 1
+    if save_plot_spectrograms == 1
         fig = figure('Name',vfilename,'NumberTitle','off','visible', 'off');
         %         set (gcf, 'Units', 'normalized', 'Position', [0,0,1,1]);
     end
@@ -797,7 +798,7 @@ if use_DL==1
         %         cd(raiz)
         dx = 0.22;
         
-        T_min_max = [-dx/2 dx/2]+[time_vocal{id_vocal}(ceil(size(time_vocal{id_vocal},2)/2)) time_vocal{id_vocal}(ceil(size(time_vocal{id_vocal},2)/2))];
+        T_min_max     = [-dx/2 dx/2]+[time_vocal{id_vocal}(ceil(size(time_vocal{id_vocal},2)/2)) time_vocal{id_vocal}(ceil(size(time_vocal{id_vocal},2)/2))];
         [T_min T_min] = min(abs(T_orig - T_min_max(1)));
         [T_max T_max] = min(abs(T_orig - T_min_max(2)));
         
@@ -811,7 +812,7 @@ if use_DL==1
             colormap(gray);
             xlabel('Time (s)'); ylabel('Freq (Hz)');
             
-            if axes_dots==1
+            if axes_dots == 1
                 for time_stamp = 1:scatter_step:size(time_vocal{id_vocal},2)
                     try
                         scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],'b');
@@ -844,95 +845,96 @@ close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Rebuild curr_freq
-dist_between_points=[];
-slopes =[];
-all_jumps =[];
-higher_jumps=[];
-lower_jumps=[];
-table_out={};
-duration=[];
-num_points = 15;
+dist_between_points = [];
+slopes              = [];
+all_jumps           = [];
+higher_jumps        = [];
+lower_jumps         = [];
+table_out           = {};
+duration            = [];
+num_points          = 15;
 for k=1:size(freq_vocal,2)
-    curr_freq = [];
-    intens_freq =[];
+    curr_freq   = [];
+    intens_freq = [];
     for kk=1:size(freq_vocal{k},2)
         if size(freq_vocal{k}{kk},1)>1
             if isempty(curr_freq)
-                j=2;
+                j = 2;
                 try
                     while size(freq_vocal{k}{j},1)>1 %find the first element without "harmonic"
-                        j=j+1;
+                        j = j + 1;
                     end
                     [min_idx, min_idx] = min(abs((freq_vocal{k}{j}*ones(size(freq_vocal{k}{kk},1),1)) - freq_vocal{k}{kk}));
-                    curr_freq = [curr_freq; freq_vocal{k}{kk}(min_idx)];
-                    intens_freq = [intens_freq; intens_vocal{k}{kk}(min_idx)];
+                    curr_freq          = [curr_freq; freq_vocal{k}{kk}(min_idx)];
+                    intens_freq        = [intens_freq; intens_vocal{k}{kk}(min_idx)];
                 catch
-                    curr_freq = [curr_freq; freq_vocal{k}{kk}(1)]; %Just get any element if there is no time stamp with only one
+                    curr_freq   = [curr_freq; freq_vocal{k}{kk}(1)]; %Just get any element if there is no time stamp with only one
                     intens_freq = [intens_freq; intens_vocal{k}{kk}(1)];
                 end
                 
             else
                 [min_idx, min_idx] = min(abs((curr_freq(end)*ones(size(freq_vocal{k}{kk},1),1)) - freq_vocal{k}{kk}));
-                curr_freq = [curr_freq; freq_vocal{k}{kk}(min_idx)];
-                intens_freq = [intens_freq; intens_vocal{k}{kk}(min_idx)];
+                curr_freq          = [curr_freq; freq_vocal{k}{kk}(min_idx)];
+                intens_freq        = [intens_freq; intens_vocal{k}{kk}(min_idx)];
             end
         else
-            curr_freq = [curr_freq; freq_vocal{k}{kk}];
+            curr_freq   = [curr_freq; freq_vocal{k}{kk}];
             intens_freq = [intens_freq; intens_vocal{k}{kk}];
         end
     end
-    curr_freq_total{k} = curr_freq;
+    curr_freq_total{k}   = curr_freq;
     intens_freq_total{k} = intens_freq;
     
     pos = round(linspace(1,size(curr_freq_total{k},1),num_points)); % get 15 points of frequency
+    
     dist_between_points{k} = time_vocal{k}(pos(2))-time_vocal{k}(pos(1)); %in time perspective
+    intens_freq_out{k}     = intens_freq_total{k}(pos);
+    freq_vocal_out{k}      = curr_freq_total{k}(pos);
     
-    intens_freq_out{k} = intens_freq_total{k}(pos);
-    freq_vocal_out{k} = curr_freq_total{k}(pos);
-    
-    x2 = time_vocal{k}(pos);
-    x1 = circshift(x2',1); %get slope between points selected
-    y2 = curr_freq_total{k}(pos);
-    y1 =  circshift(y2,1);
-    pairs = [x2' y2];
-    pairs_shift = [circshift(x2',1) circshift(y2,1)];
+    x2                = time_vocal{k}(pos);
+    x1                = circshift(x2',1); %get slope between points selected
+    y2                = curr_freq_total{k}(pos);
+    y1                = circshift(y2,1);
+    pairs             = [x2' y2];
+    pairs_shift       = [circshift(x2',1) circshift(y2,1)];
     euclidean_dist{k} = sqrt((pairs(2:end,1) - pairs_shift(2:end,1)).^2 + (pairs(2:end,2) - pairs_shift(2:end,2)).^2);
-    slopes{k} = (y2(2:end) - y1(2:end)) ./ (x2(2:end)' - x1(2:end));
+    slopes{k}         = (y2(2:end) - y1(2:end)) ./ (x2(2:end)' - x1(2:end));
     
-    all_jumps{k}=(y2(2:end) - y1(2:end)); %get all jumps in frequency
+    all_jumps{k}      = (y2(2:end) - y1(2:end)); %get all jumps in frequency
     
-    aux =  circshift(curr_freq_total{k},1); %jumps to higher frequency >8kHz
-    aux = curr_freq_total{k}(2:end) - aux(2:end);
-    aux_high = find(aux>8e3); aux_low = find(aux<-8e3);
+    aux               = circshift(curr_freq_total{k},1); %jumps to higher frequency >8kHz
+    aux               = curr_freq_total{k}(2:end) - aux(2:end);
+    aux_high          = find(aux>8e3); aux_low = find(aux<-8e3);
     if size(aux_high,1)>1 && size(aux_low,1)>1
-        for l=1:size(aux_high,1)
-            for ll=1:size(aux_low,1)
+        for l = 1:size(aux_high,1)
+            for ll = 1:size(aux_low,1)
                 if aux_high(l)>0 && aux_low(ll)>0 && abs(time_vocal{k}(aux_high(l))-time_vocal{k}(aux_low(ll)))<0.004 %only consider steps greater than 5ms
-                    aux_high(l)=-100;
-                    aux_low(ll)=-100;
+                    aux_high(l) = -100;
+                    aux_low(ll) = -100;
                 end
             end
         end
-        aux_high(aux_high==-100)=[];
-        aux_low(aux_low==-100)=[];
+        aux_high(aux_high == -100) =[];
+        aux_low(aux_low == -100)   =[];
     end
     
     higher_jumps{k} = size(aux_high,1);
-    lower_jumps{k} = size(aux_low,1);
+    lower_jumps{k}  = size(aux_low,1);
     
     for l=1:(num_points-1)
-        slopes_label{l} = ['slope' num2str(l)];
-        jumps_label{l} = ['jump' num2str(l)];
+        slopes_label{l}         = ['slope' num2str(l)];
+        jumps_label{l}          = ['jump' num2str(l)];
         euclidean_dist_label{l} = ['euclidean_dist' num2str(l)];
     end
     for l=1:(num_points)
         intens_label{l} = ['intens' num2str(l)];
-        freq_label{l} = ['freq' num2str(l)];
+        freq_label{l}   = ['freq' num2str(l)];
         %       intens_label_delta{l} = ['intens_delta' num2str(l)];
     end
-    duration(k) = time_vocal{k}(end)-time_vocal{k}(1);
+    duration(k)  = time_vocal{k}(end)-time_vocal{k}(1);
     bandwidth(k) = max(curr_freq_total{k})- min(curr_freq_total{k});
     clear aux1
+    
     aux1 = [k, time_vocal{k}(1), dist_between_points{k}, duration(k), bandwidth(k), slopes{k}',all_jumps{k}', higher_jumps{k}, lower_jumps{k}, intens_freq_out{k}', freq_vocal_out{k}', euclidean_dist{k}']; %putting everything togeteher
     
     %Get the double of points now...
@@ -944,42 +946,42 @@ for k=1:size(freq_vocal,2)
     %    intens_freq_out_delta{k} = mean(intens_freq)-intens_freq_total{k}(pos);
     x2 = time_vocal{k}(pos);
     x1 = circshift(x2',1); %get slope between points selected
-    y2 = curr_freq_total{k}(pos);
-    y1 =  circshift(y2,1);
-    pairs = [x2' y2];
-    pairs_shift = [circshift(x2',1) circshift(y2,1)];
+    y2                = curr_freq_total{k}(pos);
+    y1                = circshift(y2,1);
+    pairs             = [x2' y2];
+    pairs_shift       = [circshift(x2',1) circshift(y2,1)];
     euclidean_dist{k} = sqrt((pairs(2:end,1) - pairs_shift(2:end,1)).^2 + (pairs(2:end,2) - pairs_shift(2:end,2)).^2);
-    slopes{k} = (y2(2:end) - y1(2:end)) ./ (pos(2:end)' - x1(2:end));
+    slopes{k}         = (y2(2:end) - y1(2:end)) ./ (pos(2:end)' - x1(2:end));
     
-    all_jumps{k}=(y2(2:end) - y1(2:end)); %get all jumps in frequency
+    all_jumps{k}      = (y2(2:end) - y1(2:end)); %get all jumps in frequency
     
-    aux =  circshift(curr_freq_total{k},1); %jumps to higher frequency >8kHz
-    aux = curr_freq_total{k}(2:end) - aux(2:end);
-    aux_high = find(aux>8e3); aux_low = find(aux<-8e3);
+    aux               = circshift(curr_freq_total{k},1); %jumps to higher frequency >8kHz
+    aux               = curr_freq_total{k}(2:end) - aux(2:end);
+    aux_high          = find(aux>8e3); aux_low = find(aux<-8e3);
     if size(aux_high,1)>1 && size(aux_low,1)>1
         for l=1:size(aux_high,1)
             for ll=1:size(aux_low,1)
                 if aux_high(l)>0 && aux_low(ll)>0 && abs(time_vocal{k}(aux_high(l))-time_vocal{k}(aux_low(ll)))<0.004 %only consider steps greater than 4ms
-                    aux_high(l)=-100;
-                    aux_low(ll)=-100;
+                    aux_high(l) = -100;
+                    aux_low(ll) = -100;
                 end
             end
         end
-        aux_high(aux_high==-100)=[];
-        aux_low(aux_low==-100)=[];
+        aux_high(aux_high == -100) = [];
+        aux_low(aux_low   == -100) = [];
     end
     
-    higher_jumps{k} = size(aux_high,1);
-    lower_jumps{k} = size(aux_low,1);
+    higher_jumps{k} = size(aux_high, 1);
+    lower_jumps{k}  = size(aux_low, 1);
     
     for l=1:(2*num_points-1)
-        slopes_label2{l} = ['slope' num2str(l) '_2'];
-        jumps_label2{l} = ['jump' num2str(l) '_2'];
+        slopes_label2{l}         = ['slope' num2str(l) '_2'];
+        jumps_label2{l}          = ['jump' num2str(l) '_2'];
         euclidean_dist_label2{l} = ['euclidean_dist' num2str(l) '_2'];
     end
     for l=1:(2*num_points)
         intens_label2{l} = ['intens' num2str(l) '_2'];
-        freq_label2{l} = ['freq' num2str(l) '_2'];
+        freq_label2{l}   = ['freq' num2str(l) '_2'];
     end
     
     table_out(k,:) = [num2cell(aux1), num2cell(dist_between_points{k}), num2cell(slopes{k}'), num2cell(all_jumps{k}'), num2cell(higher_jumps{k}), num2cell(lower_jumps{k}), num2cell(intens_freq_out{k}'), num2cell(freq_vocal_out{k}'), num2cell(euclidean_dist{k}'), ...
@@ -991,29 +993,29 @@ end
 % Labelling and saving
 names_out = ['name_vocal','start_time','dist_between_points','duration', 'bandwidth', slopes_label , jumps_label, 'higher_jumps', 'lower_jumps', intens_label, freq_label, euclidean_dist_label, 'dist_between_points2', slopes_label2 , jumps_label2, 'higher_jumps2', 'lower_jumps2', intens_label2,freq_label2,euclidean_dist_label2, ...
     'max_below_50k_total', 'max_prom', 'max_prom2', 'median_dist_total', 'mean_dist_total', 'mean_pks_valley', 'corr_yy2_yy3', 'corr_yy2_yy4'];
-T = array2table(table_out,'VariableNames',names_out);
+T                   = array2table(table_out,'VariableNames',names_out);
 
-table_aux = T;
+table_aux           = T;
 [ynew_RF,ynewci_RF] = predict(model_class_RF,cell2mat(table2array(table_aux(:,2:end-1))));
-table_total_output = [ table_aux(:,1:2) array2table(ynewci_RF,'VariableNames',model_class_RF.ClassNames) array2table(ynew_RF,'VariableNames',{'RF_out'})];
+table_total_output  = [ table_aux(:,1:2) array2table(ynewci_RF,'VariableNames',model_class_RF.ClassNames) array2table(ynew_RF,'VariableNames',{'RF_out'})];
 
 if use_DL==1
-    validationImages = imageDatastore([vpathname '/' vfilename '/All/']);
+    validationImages          = imageDatastore([vpathname '/' vfilename '/All/']);
     [predictedLabels, scores] = classify(model_class_DL,validationImages);
-    lista = [validationImages.Files, predictedLabels];
+    lista                     = [validationImages.Files, predictedLabels];
     
-    AA2 = cellstr(lista);
-    AA = array2table(AA2);
-    ttt = model_class_DL.Layers(25).ClassNames;
+    AA2  = cellstr(lista);
+    AA   = array2table(AA2);
+    ttt  = model_class_DL.Layers(25).ClassNames;
     ttt2 = cellstr(num2str(2*ones(12,1)));
-    s = strcat(ttt,ttt2);
-    T2 = array2table(scores,'VariableNames',s');
+    s    = strcat(ttt,ttt2);
+    T2   = array2table(scores,'VariableNames',s');
     
     % AA2 = strsplit(cell2mat(AA2(1,1)),'\');
     for k=1:size(AA2,1)
-        AA1 = strsplit(cell2mat(AA2(k,1)),{'/','\'});
-        AA3 = str2double(AA1{end}(1:end-4));
-        %     AA4 = str2double(AA1{end}(1:end-20));
+        AA1      = strsplit(cell2mat(AA2(k,1)),{'/','\'});
+        AA3      = str2double(AA1{end}(1:end-4));
+        %    AA4 = str2double(AA1{end}(1:end-20));
         AA2(k,3) = num2cell(AA3);
     end
     
@@ -1025,7 +1027,7 @@ end
 
 
 % temp = table_total_output(:,[1:2 239:end]);
-if use_DL==1
+if use_DL == 1
     temp = [table_total_output, B];
     writetable(temp,[vfilename '_ML&DL.xlsx'])
 else
@@ -1035,11 +1037,11 @@ end
 
 [ynew,ynewci] = predict(model_class_DL_RF,table2array(temp(:,[3:14,16:27])));
 
-ttt = model_class_DL_RF.ClassNames;
+ttt  = model_class_DL_RF.ClassNames;
 ttt2 = cellstr(num2str(3*ones(12,1)));
-s = strcat(ttt,ttt2);
+s    = strcat(ttt,ttt2);
 
-T3 = [temp, array2table(ynewci,'VariableNames',s) array2table(B.DL_out,'VariableNames',{'Final_Label'})];
+T3   = [temp, array2table(ynewci,'VariableNames',s) array2table(B.DL_out,'VariableNames',{'Final_Label'})];
 writetable(T3,[vfilename '_ML&DL_comb.xlsx'])
 
 
@@ -1098,37 +1100,37 @@ writetable(T3,[vfilename '_ML&DL_comb.xlsx'])
 % end
 
 
-chevron_count = sum(strcmp(T3.Final_Label,'chevron'));
-complex_count = sum(strcmp(T3.Final_Label,'complex'));
-down_fm_count = sum(strcmp(T3.Final_Label,'down_fm'));
-flat_count = sum(strcmp(T3.Final_Label,'flat'));
-mult_steps_count = sum(strcmp(T3.Final_Label,'mult_steps'));
-noise_count = sum(strcmp(T3.Final_Label,'noise_dist'));
+chevron_count     = sum(strcmp(T3.Final_Label,'chevron'));
+complex_count     = sum(strcmp(T3.Final_Label,'complex'));
+down_fm_count     = sum(strcmp(T3.Final_Label,'down_fm'));
+flat_count        = sum(strcmp(T3.Final_Label,'flat'));
+mult_steps_count  = sum(strcmp(T3.Final_Label,'mult_steps'));
+noise_count       = sum(strcmp(T3.Final_Label,'noise_dist'));
 rev_chevron_count = sum(strcmp(T3.Final_Label,'rev_chevron'));
-short_count = sum(strcmp(T3.Final_Label,'short'));
-step_down_count = sum(strcmp(T3.Final_Label,'step_down'));
-step_up_count = sum(strcmp(T3.Final_Label,'step_up'));
-two_steps_count = sum(strcmp(T3.Final_Label,'two_steps'));
-up_fm_count = sum(strcmp(T3.Final_Label,'up_fm'));
-noise_dist_count = sum(strcmp(T3.Final_Label,'noise_dist'));
-harmonic_count = unique(harmonic_count);
+short_count       = sum(strcmp(T3.Final_Label,'short'));
+step_down_count   = sum(strcmp(T3.Final_Label,'step_down'));
+step_up_count     = sum(strcmp(T3.Final_Label,'step_up'));
+two_steps_count   = sum(strcmp(T3.Final_Label,'two_steps'));
+up_fm_count       = sum(strcmp(T3.Final_Label,'up_fm'));
+noise_dist_count  = sum(strcmp(T3.Final_Label,'noise_dist'));
+harmonic_count    = unique(harmonic_count);
 noisy_vocal_count = unique(noisy_vocal_count);
 
 disp(['Total number of vocalizations: ' num2str(size(time_vocal,2)-noise_dist_count) ' vocalizations (' num2str(noise_dist_count) ' were noise)']);
 % disp(['The classifier identified ' num2str(size(noise_count_dist,1)) ' as noise'] );
 
-for j=1:size(model_class_RF.ClassNames)
+for j = 1:size(model_class_RF.ClassNames)
     eval(['disp([''' cell2mat(model_class_RF.ClassNames(j)) ': '' num2str('  cell2mat(model_class_RF.ClassNames(j)) '_count)])'])
 end
 
 % Fixed up to here.
-if save_excel_file==1
+if save_excel_file == 1
     %     names2 = model_class_DL_RF.ClassNames;
-    names = [{'Names_vocal'};{'Start_time'}; {'End_time'}; {'Inter_vocal_interval'}; {'Inter_real_vocal_interval'}; {'Duration'}; {'min_freq_main'}; {'max_freq_main'};{'mean_freq_main'};{'Bandwidth'};{'min_freq_total'};...
-        {'max_freq_total'};{'mean_freq_total'};{'min_intens_total'};{'max_intens_total'}; {'corrected_max_intens_total'};{'Background_intens'};{'mean_intens_total'};{'Class'};{'Harmonic'};{'Noisy'}];
-    tabela = zeros(size(T3,1),size(names,1));
+    names       = [{'Names_vocal'};{'Start_time'}; {'End_time'}; {'Inter_vocal_interval'}; {'Inter_real_vocal_interval'}; {'Duration'}; {'min_freq_main'}; {'max_freq_main'};{'mean_freq_main'};{'Bandwidth'};{'min_freq_total'};...
+                   {'max_freq_total'};{'mean_freq_total'};{'min_intens_total'};{'max_intens_total'}; {'corrected_max_intens_total'};{'Background_intens'};{'mean_intens_total'};{'Class'};{'Harmonic'};{'Noisy'}];
+    tabela      = zeros(size(T3,1),size(names,1));
     tabela(:,1) = 1:size(T3,1);
-    tabela = num2cell(tabela);
+    tabela      = num2cell(tabela);
     
     %     for i = 1:size(names2,1)
     %             if eval(['~isempty(list_clusters.' names2{i} ')']) && ~strcmp(names2{i},'harmonic_size') && ~strcmp(names2{i},'noisy_vocal') && ~strcmp(names2{i},'harmonic') %&& ~strcmp(names2{i},'noise')
@@ -1164,25 +1166,25 @@ if save_excel_file==1
         duration(i) = time_end(i)-time_start(i);
         if ~isempty(current_freq_total{i}), min_freq_main(i) = min(current_freq_total{i}); else min_freq_main(i) = NaN; end
         if ~isempty(current_freq_total{i}), max_freq_main(i) = max(current_freq_total{i}); else max_freq_main(i) = NaN; end
-        mean_freq_main(i) = mean(current_freq_total{i});
-        min_freq_total(i) = min(tabela_all_points{i}(:,2));
-        max_freq_total(i) = max(tabela_all_points{i}(:,2));
-        mean_freq_total(i) = mean(tabela_all_points{i}(:,2));
-        min_intens_total(i) = min(tabela_all_points{i}(:,3));
-        max_intens_total(i) = max(tabela_all_points{i}(:,3));
+        mean_freq_main(i)    = mean(current_freq_total{i});
+        min_freq_total(i)    = min(tabela_all_points{i}(:,2));
+        max_freq_total(i)    = max(tabela_all_points{i}(:,2));
+        mean_freq_total(i)   = mean(tabela_all_points{i}(:,2));
+        min_intens_total(i)  = min(tabela_all_points{i}(:,3));
+        max_intens_total(i)  = max(tabela_all_points{i}(:,3));
         mean_intens_total(i) = mean(tabela_all_points{i}(:,3));
     end
     
-    tabela(:,19) = T3.Final_Label;
+    tabela(:,19)    = T3.Final_Label;
     
-    noise_idx = strcmp(tabela(:,18),'noise_dist');
+    noise_idx       = strcmp(tabela(:,18),'noise_dist');
     time_start_real = time_start; time_start_real(noise_idx) = NaN;
-    time_end_real = time_end; time_end_real(noise_idx) = NaN;
-    curr_time = NaN;
+    time_end_real   = time_end; time_end_real(noise_idx)     = NaN;
+    curr_time       = NaN;
     for i=1:size(time_start_real,2)
         if ~isnan(time_start_real(i))
             time_interval_real(i) = time_start_real(i) - curr_time;
-            curr_time = time_end_real(i);
+            curr_time             = time_end_real(i);
         else
             time_interval_real(i) = NaN;
         end
@@ -1190,22 +1192,22 @@ if save_excel_file==1
     
     median_stats = [ zeros(size(median_stats,1),1) median_stats, zeros(size(median_stats,1),1)];
     for k=1:size(time_start,2)
-        median_stats(find(median_stats(:,2)==time_start(k)),end) = 1;
-        median_stats(find(median_stats(:,2)==time_start(k)),1) = k;
+        median_stats(find(median_stats(:,2) == time_start(k)),end) = 1;
+        median_stats(find(median_stats(:,2) == time_start(k)),1)   = k;
     end
     
     median_stats(:,7) = median_stats(:,7)/0.9;
     median_stats = median_stats(median_stats(:,1)>0,:);
     
     
-    tabela(:,2) = num2cell(time_start');
-    tabela(:,3) = num2cell(time_end');
-    tabela(:,4) = num2cell(time_interval');
-    tabela(:,5) = num2cell(time_interval_real');
-    tabela(:,6) = num2cell(duration');
-    tabela(:,7) = num2cell(min_freq_main');
-    tabela(:,8) = num2cell(max_freq_main');
-    tabela(:,9) = num2cell(mean_freq_main');
+    tabela(:,2)  = num2cell(time_start');
+    tabela(:,3)  = num2cell(time_end');
+    tabela(:,4)  = num2cell(time_interval');
+    tabela(:,5)  = num2cell(time_interval_real');
+    tabela(:,6)  = num2cell(duration');
+    tabela(:,7)  = num2cell(min_freq_main');
+    tabela(:,8)  = num2cell(max_freq_main');
+    tabela(:,9)  = num2cell(mean_freq_main');
     tabela(:,10) = num2cell(max_freq_main'-min_freq_main');
     tabela(:,11) = num2cell(min_freq_total');
     tabela(:,12) = num2cell(max_freq_total');
@@ -1218,7 +1220,7 @@ if save_excel_file==1
     tabela(:,18) = num2cell(mean_intens_total');
 
     names = transpose(names);
-    T = array2table(tabela);
+    T     = array2table(tabela);
     T.Properties.VariableNames = names;
     %     VM1_out.Properties.VariableNames{1} = 'VM1_out';
     
@@ -1229,26 +1231,26 @@ end
 aux = ~strcmp(T.Class,'noise_dist');
 T_no_noise = T(aux,:);
 if size(T_no_noise,1)>0
-    num_of_bins = ceil(max(cell2mat(T_no_noise.Start_time))/bin_size);
-    edges = 0:bin_size:num_of_bins*bin_size;
+    num_of_bins         = ceil(max(cell2mat(T_no_noise.Start_time))/bin_size);
+    edges               = 0:bin_size:num_of_bins*bin_size;
     [num_vocals_in_bin] = histcounts(cell2mat(T_no_noise.Start_time),edges);
     
     
     
     disp(['Vocalizations per bin (not considering noise):'])
-    for k=1:num_of_bins
+    for k = 1:num_of_bins
         disp(['Bin_' num2str(k) '(' num2str(edges(k)) '-' num2str(edges(k+1)) 's): ' num2str(num_vocals_in_bin(k))])
     end
     
-    if plot_stats_per_bin ==1
+    if plot_stats_per_bin == 1
         
         %Show classes per bin
-        for j=1:size(model_class_RF.ClassNames)
-            aux = strcmp(T.Class,model_class_RF.ClassNames(j));
-            T_class = T(aux,:);
+        for j = 1:size(model_class_RF.ClassNames)
+            aux                   = strcmp(T.Class,model_class_RF.ClassNames(j));
+            T_class               = T(aux,:);
             [num_vocals_in_bin,~] = histcounts(cell2mat(T_class.Start_time),edges);
             disp(['Vocalizations per bin for class ' cell2mat(model_class_RF.ClassNames(j)) ' :'])
-            for k=1:num_of_bins
+            for k = 1:num_of_bins
                 disp(['Bin_' num2str(k) '(' num2str(edges(k)) '-' num2str(edges(k+1)) 's): ' num2str(num_vocals_in_bin(k))])
             end
         end

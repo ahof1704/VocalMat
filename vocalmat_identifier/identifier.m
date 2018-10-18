@@ -4,7 +4,7 @@
 % ----------------------------------------------------------------------------------------------
 % -- File        : identifier.m
 % -- Author      : vocalmat <vocalmat@yale.edu>
-% -- Group       : Dietrich Lab - Comparative Medicine @ Yale University
+% -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
 % -- Standard    : <MATLAB 2018a>
 % ----------------------------------------------------------------------------------------------
 % -- Copyright (c) 2018 Dietrich Lab - Yale University

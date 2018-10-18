@@ -16,7 +16,7 @@
     <br />
     <!-- MATLAB version -->
     <a href="https://www.mathworks.com/products/matlab.html">
-    <img src="https://img.shields.io/badge/MATLAB-2017a%7C2017b%7C2018a-blue.svg?style=flat-square"
+    <img src="https://img.shields.io/badge/MATLAB-2017a%7C2017b%7C2018a%7C2018b-blue.svg?style=flat-square"
       alt="MATLAB tested versions" />
     </a>
     <!-- LICENSE -->
@@ -66,7 +66,7 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 ```
 
 #### Requirements
-- __MATLAB:__ version 2017a, 2017b, or 2018b. For other versions refer to the [FAQ](#faq).
+- __MATLAB:__ version 2017a, 2017b, 2018a, or 2018b. For other versions refer to the [FAQ](#faq).
 - __MATLAB Add-Ons:__
     - Computer Vision System Toolbox
     - Control System Toolbox
@@ -140,7 +140,7 @@ $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 
 ## FAQ
 - Will `VocalMat` work with my MATLAB version?
-<p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a versions. We cannot guarantee that it will work in other versions of MATLAB. If your MATLAB versions supports all the required Add-Ons, VocalMat should work.
+<p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a, and 2018b versions. We cannot guarantee that it will work in other versions of MATLAB. If your MATLAB versions supports all the required Add-Ons, VocalMat should work.
 
 - What are the hardware requirements to run `VocalMat`?
 <p align="justify">The duration of the audio files that can you use in VocalMat is limited to the amount of RAM that you have in your computer. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, you should have at least 10GB of RAM available. RAM usage will vary depending on your MATLAB version and computer, these numbers are just estimates.

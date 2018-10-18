@@ -55,3 +55,4 @@ Temporary Items
 *.ai
 *.dataset
 outputs/*/
+vocalmat_classifier/training/.rawdata/*

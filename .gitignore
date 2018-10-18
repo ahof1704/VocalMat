@@ -56,3 +56,4 @@ Temporary Items
 *.dataset
 outputs/*/
 vocalmat_classifier/training/.rawdata/*
+vocalmat_classifier/training/.testset/*

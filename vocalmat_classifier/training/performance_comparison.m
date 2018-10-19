@@ -3,10 +3,11 @@
 % -- [raw_data]/[model_name]/[dataset_name]/[model_name|model_name_records|matlab_environment].mat
 % -- [testset_path]: path to dataset used for the test classification
 
+whereami     = pwd;
 raw_data     = '/Users/gustavo/git/ahof_vocalmat/vocalmat_classifier/training/.rawdata';
-testset_path = '/Users/gustavo/git/ahof_vocalmat/vocalmat_classifier/training/.testset';
-imds         = imageDatastore([testset_path], 'IncludeSubfolders', true);
-imds_resnet  = augmentedImageDatastore([224 224], imds);
+% testset_path = '/Users/gustavo/git/ahof_vocalmat/vocalmat_classifier/training/.testset';
+% imds         = imageDatastore([testset_path], 'IncludeSubfolders', true);
+% imds_resnet  = augmentedImageDatastore([224 224], imds);
 
 
 % --
@@ -58,26 +59,158 @@ for current_model=1:models_found
     datasets_found = size(datasets,2);
     for current_dataset=1:datasets_found
         % -- save dataset names for each model
-        models{current_model,1}(1,current_dataset+1) = datasets{1, current_dataset};
+        models{current_model,1}(current_dataset+1,1) = datasets{1, current_dataset};
     end
 end
-
-% -- show path for found models and models found for each model
-models
-
 
 % --
 % -- section III : get statistics on each model for each dataset
 % --
 
-% for current_dataset=1:datasets_found
-%     disp(current_dataset);
-%     % -- open each trained model
-%     % -- save from each model:
-%     % -- dataset size, images per label, training options, training time, validation accuracy
-%     % -- classify test dataset using each model and save:
-%     % -- predictions, scores, classification time
+% -- TODO
+% -- training options, training time
+% -- predictions, scores, classification time
+% -- Plot the ratio of probability between most likely and second most likely to see how confident is the machine about this classification
 
-%     % [predictedLabels                                 , scores                                          ] = classify(netTransfer, imds);
-%     % [datasets{current_dataset, 1}(current_dataset, 2), datasets{current_dataset, 1}(current_dataset, 3)] = classify(netTransfer, imds);
-% end
+
+for current_model=1:models_found
+    % -- load table_performance.mat
+    % -- save for each dataset in each model:
+    % -- dataset size, images per label, top1 accuracy, top2 accuracy
+
+    % -- get number of datasets for current model
+    datasets_for_this_model = size(models{current_model,1}, 1) - 1;
+
+    % -- cycle through datasets for the current model
+    for current_dataset=1:datasets_for_this_model
+
+        % -- write headers 
+        if current_dataset == 1
+            models{current_model,1}(1,2)  = "images";
+            models{current_model,1}(1,3)  = "correct1";
+            models{current_model,1}(1,4)  = "correct2";
+            models{current_model,1}(1,5)  = "wrong1";
+            models{current_model,1}(1,6)  = "wrong2";
+            models{current_model,1}(1,7)  = "top1";
+            models{current_model,1}(1,8)  = "top2";
+            models{current_model,1}(1,9)  = "chevron_accuracy";
+            models{current_model,1}(1,10) = "complex_accuracy";
+            models{current_model,1}(1,11) = "down_fm_accuracy";
+            models{current_model,1}(1,12) = "flat_accuracy";
+            models{current_model,1}(1,13) = "mult_steps_accuracy";
+            models{current_model,1}(1,14) = "noise_dist_accuracy";
+            models{current_model,1}(1,15) = "rev_chevron_accuracy";
+            models{current_model,1}(1,16) = "short_accuracy";
+            models{current_model,1}(1,17) = "step_down_accuracy";
+            models{current_model,1}(1,18) = "step_up_accuracy";
+            models{current_model,1}(1,19) = "two_steps_accuracy";
+            models{current_model,1}(1,20) = "up_fm_accuracy";
+            
+            % models{current_model,1}(1,6) = "top2"
+            % models{current_model,1}(1,2) = "chevron_images"
+            % models{current_model,1}(1,2) = "chevron_correct"
+            % models{current_model,1}(1,2) = "flat_images"
+            % models{current_model,1}(1,2) = "flat_correct"
+        end
+
+        % -- get path to dataset and load the performance table
+        current_dataset_path = fullfile(models{current_model,1}(1,1), models{current_model,1}(current_dataset+1,1));
+        cd(current_dataset_path);
+
+        try
+            load('table_performance');
+            
+            % -- top1 statistics
+            num_images = size(T,1);
+            correct1   = sum(strcmp(T.Training_label, T.Testing_label));
+            wrong1     = size(T,1) - correct1;
+            top1       = correct1*100/num_images;
+
+            % -- move things around to get top2 statistics
+            scores          = T(:,5:16);
+            scores_labels   = scores.Properties.VariableNames;
+            scores          = table2array(scores);
+            % [value_highest idx_highest] = max(scores');
+            [value_highest idx_highest] = max(scores, [], 2);
+            % scores(value_highest) = NaN;
+            for current_highest=1:size(idx_highest,1)
+                scores(current_highest, idx_highest(current_highest)) = 0;
+            end
+            
+            [value_highest idx_highest] = max(scores, [], 2);
+
+            for current_highest=1:size(idx_highest,1)
+                T.Top2(current_highest) = string(scores_labels(1, idx_highest(current_highest)));
+            end
+
+            % [highest_score highest_score] = max(scores, [], 2);
+            % scores(:, highest_score) = 0;
+            % second_highest = max(, [], 2);
+
+            % [max_value, max_idx] = max(scores, 2);  % [3 5 6 7]
+            % A(idx) = NaN;              % [3 5 6 NaN]
+            % second_max_value = max(A); % 6
+            % A(idx) = max_value;        % [3 5 6 7]
+
+            % -- top2 statistics
+            correct2   = sum( (strcmp(T.Training_label, T.Testing_label)) | (strcmp(T.Training_label, T.Top2)) );
+            wrong2     = size(T,1) - correct2;
+            top2       = correct2*100/num_images;
+
+            % get top1 accuracy by label
+            Tarray          = table2array(T);
+            ground_truth    = Tarray(:,2);
+            predicted_label = Tarray(:,4);
+            idx             = predicted_label == ground_truth;
+
+            flat_accuracy        = sum(strcmp(T.Training_label(idx), 'flat'))/sum(strcmp(T.Training_label, 'flat'));
+            short_accuracy       = sum(strcmp(T.Training_label(idx), 'short'))/sum(strcmp(T.Training_label, 'short'));
+            chevron_accuracy     = sum(strcmp(T.Training_label(idx), 'chevron'))/sum(strcmp(T.Training_label, 'chevron'));
+            rev_chevron_accuracy = sum(strcmp(T.Training_label(idx), 'rev_chevron'))/sum(strcmp(T.Training_label, 'rev_chevron'));
+            up_fm_accuracy       = sum(strcmp(T.Training_label(idx), 'up_fm'))/sum(strcmp(T.Training_label, 'up_fm'));
+            down_fm_accuracy     = sum(strcmp(T.Training_label(idx), 'down_fm'))/sum(strcmp(T.Training_label, 'down_fm'));
+            step_down_accuracy   = sum(strcmp(T.Training_label(idx), 'step_down'))/sum(strcmp(T.Training_label, 'step_down'));
+            step_up_accuracy     = sum(strcmp(T.Training_label(idx), 'step_up'))/sum(strcmp(T.Training_label, 'step_up'));
+            two_steps_accuracy   = sum(strcmp(T.Training_label(idx), 'two_steps'))/sum(strcmp(T.Training_label, 'two_steps'));
+            mult_steps_accuracy  = sum(strcmp(T.Training_label(idx), 'mult_steps'))/sum(strcmp(T.Training_label, 'mult_steps'));
+            complex_accuracy     = sum(strcmp(T.Training_label(idx), 'complex'))/sum(strcmp(T.Training_label, 'complex'));
+            noise_dist_accuracy  = sum(strcmp(T.Training_label(idx), 'noise_dist'))/sum(strcmp(T.Training_label, 'noise_dist'));
+
+
+            models{current_model,1}(current_dataset+1,2)  = num2str(num_images);
+            models{current_model,1}(current_dataset+1,3)  = num2str(correct1);
+            models{current_model,1}(current_dataset+1,4)  = num2str(correct2);
+            models{current_model,1}(current_dataset+1,5)  = num2str(wrong1);
+            models{current_model,1}(current_dataset+1,6)  = num2str(wrong2);
+            models{current_model,1}(current_dataset+1,7)  = num2str(top1);
+            models{current_model,1}(current_dataset+1,8)  = num2str(top2);
+            models{current_model,1}(current_dataset+1,9)  = num2str(chevron_accuracy);
+            models{current_model,1}(current_dataset+1,10) = num2str(complex_accuracy);
+            models{current_model,1}(current_dataset+1,11) = num2str(down_fm_accuracy);
+            models{current_model,1}(current_dataset+1,12) = num2str(flat_accuracy);
+            models{current_model,1}(current_dataset+1,13) = num2str(mult_steps_accuracy);
+            models{current_model,1}(current_dataset+1,14) = num2str(noise_dist_accuracy);
+            models{current_model,1}(current_dataset+1,15) = num2str(rev_chevron_accuracy);
+            models{current_model,1}(current_dataset+1,16) = num2str(short_accuracy);
+            models{current_model,1}(current_dataset+1,17) = num2str(step_down_accuracy);
+            models{current_model,1}(current_dataset+1,18) = num2str(step_up_accuracy);
+            models{current_model,1}(current_dataset+1,19) = num2str(two_steps_accuracy);
+            models{current_model,1}(current_dataset+1,20) = num2str(up_fm_accuracy);
+        catch
+            models{current_model,1}(current_dataset+1,2)  = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,3)  = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,4)  = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,5)  = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,6)  = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,7)  = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,8)  = "table_performance.mat not found";
+        end
+        
+    end
+
+end
+
+% cd(whereami);
+% csvwrite('model.csv', models{1,1})
+% excel = array2table(models{1,1}(2:end,:));
+% excel.Properties.VariableNames = {'dataset' 'images' 'correct1' 'correct2' 'wrong1' 'wrong2' 'top1' 'top2'};

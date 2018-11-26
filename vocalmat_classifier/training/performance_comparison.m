@@ -1,4 +1,4 @@
-% -- compare performance for each model using each dataset
+    % -- compare performance for each model using each dataset
 % -- expected directory structure:
 % -- [raw_data]/[model_name]/[dataset_name]/[model_name|model_name_records|matlab_environment].mat
 % -- [testset_path]: path to dataset used for the test classification
@@ -8,7 +8,6 @@ raw_data     = '/Users/gustavo/git/ahof_vocalmat/vocalmat_classifier/training/.r
 % testset_path = '/Users/gustavo/git/ahof_vocalmat/vocalmat_classifier/training/.testset';
 % imds         = imageDatastore([testset_path], 'IncludeSubfolders', true);
 % imds_resnet  = augmentedImageDatastore([224 224], imds);
-
 
 % --
 % -- section I : get all models
@@ -37,7 +36,7 @@ end
 models
 
 % --
-% -- section II : get datasets used with dataset
+% -- section II : get datasets used with each model
 % --
 
 for current_model=1:models_found
@@ -64,7 +63,7 @@ for current_model=1:models_found
 end
 
 % --
-% -- section III : get statistics on each model for each dataset
+% -- section III : get statistics on each dataset for each model
 % --
 
 % -- TODO
@@ -93,7 +92,7 @@ for current_model=1:models_found
             models{current_model,1}(1,6)  = "wrong2";
             models{current_model,1}(1,7)  = "top1";
             models{current_model,1}(1,8)  = "top2";
-            models{current_model,1}(1,9)  = "chevron_accuracy";
+            models{current_model,1}(1,9) = "chevron_accuracy";
             models{current_model,1}(1,10) = "complex_accuracy";
             models{current_model,1}(1,11) = "down_fm_accuracy";
             models{current_model,1}(1,12) = "flat_accuracy";
@@ -105,12 +104,6 @@ for current_model=1:models_found
             models{current_model,1}(1,18) = "step_up_accuracy";
             models{current_model,1}(1,19) = "two_steps_accuracy";
             models{current_model,1}(1,20) = "up_fm_accuracy";
-            
-            % models{current_model,1}(1,6) = "top2"
-            % models{current_model,1}(1,2) = "chevron_images"
-            % models{current_model,1}(1,2) = "chevron_correct"
-            % models{current_model,1}(1,2) = "flat_images"
-            % models{current_model,1}(1,2) = "flat_correct"
         end
 
         % -- get path to dataset and load the performance table
@@ -125,43 +118,66 @@ for current_model=1:models_found
             correct1   = sum(strcmp(T.Training_label, T.Testing_label));
             wrong1     = size(T,1) - correct1;
             top1       = correct1*100/num_images;
+                
+            Tlabel = table2cell(T(:,2));
+            Tlabel = categorical (Tlabel);
+            
+            Tpred  = table2cell(T(:,4));
+            Tpred  = categorical(Tpred);
+            
+            failed = Tlabel ~= Tpred;
+            Twrong = T(failed,:);
 
             % -- move things around to get top2 statistics
-            scores          = T(:,5:16);
+            scores          = Twrong(:,5:16);
             scores_labels   = scores.Properties.VariableNames;
             scores          = table2array(scores);
             % [value_highest idx_highest] = max(scores');
             [value_highest idx_highest] = max(scores, [], 2);
             % scores(value_highest) = NaN;
+            
+            % -- this is very slow :)
             for current_highest=1:size(idx_highest,1)
                 scores(current_highest, idx_highest(current_highest)) = 0;
             end
             
             [value_highest idx_highest] = max(scores, [], 2);
 
+            % -- slow again
             for current_highest=1:size(idx_highest,1)
-                T.Top2(current_highest) = string(scores_labels(1, idx_highest(current_highest)));
+                Twrong.Top2(current_highest) = string(scores_labels(1, idx_highest(current_highest)));
             end
 
-            % [highest_score highest_score] = max(scores, [], 2);
-            % scores(:, highest_score) = 0;
-            % second_highest = max(, [], 2);
+            Tlabel = table2cell(Twrong(:,2));
+            Tlabel = categorical(Tlabel);
+            
+            Tpred  = table2cell(Twrong(:,end));
+            Tpred  = categorical(string(Tpred));
 
-            % [max_value, max_idx] = max(scores, 2);  % [3 5 6 7]
-            % A(idx) = NaN;              % [3 5 6 NaN]
-            % second_max_value = max(A); % 6
-            % A(idx) = max_value;        % [3 5 6 7]
+            correct_top2 = Tlabel == Tpred;
+            Ttop2        = Twrong(correct_top2,:);
+
+            % -- sort scores and get ratio for top2 accurary
+            scores        = table2array(Ttop2(:,5:16));
+            sorted_scores = sort(scores,2);
+            ratio         = 1 - (sorted_scores(:,end-1)./sorted_scores(:,end));
+            ratios{current_model,1}{current_dataset,1} = ratio;
+            % scatter(1:1:size(ratio,1), ratio);
 
             % -- top2 statistics
-            correct2   = sum( (strcmp(T.Training_label, T.Testing_label)) | (strcmp(T.Training_label, T.Top2)) );
+            correct2   = sum(strcmp(Twrong.Training_label, Twrong.Top2));
+            correct2   = correct1 + correct2;
             wrong2     = size(T,1) - correct2;
             top2       = correct2*100/num_images;
 
             % get top1 accuracy by label
-            Tarray          = table2array(T);
-            ground_truth    = Tarray(:,2);
-            predicted_label = Tarray(:,4);
-            idx             = predicted_label == ground_truth;
+            Tlabel = table2cell(T(:,2));
+            Tlabel = categorical (Tlabel);
+            
+            Tpred  = table2cell(T(:,4));
+            Tpred  = categorical(Tpred);
+            
+            idx    = Tlabel == Tpred;
 
             flat_accuracy        = sum(strcmp(T.Training_label(idx), 'flat'))/sum(strcmp(T.Training_label, 'flat'));
             short_accuracy       = sum(strcmp(T.Training_label(idx), 'short'))/sum(strcmp(T.Training_label, 'short'));
@@ -196,6 +212,8 @@ for current_model=1:models_found
             models{current_model,1}(current_dataset+1,18) = num2str(step_up_accuracy);
             models{current_model,1}(current_dataset+1,19) = num2str(two_steps_accuracy);
             models{current_model,1}(current_dataset+1,20) = num2str(up_fm_accuracy);
+
+
         catch
             models{current_model,1}(current_dataset+1,2)  = "table_performance.mat not found";
             models{current_model,1}(current_dataset+1,3)  = "table_performance.mat not found";
@@ -204,11 +222,47 @@ for current_model=1:models_found
             models{current_model,1}(current_dataset+1,6)  = "table_performance.mat not found";
             models{current_model,1}(current_dataset+1,7)  = "table_performance.mat not found";
             models{current_model,1}(current_dataset+1,8)  = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,9)  = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,10) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,11) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,12) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,13) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,14) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,15) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,16) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,17) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,18) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,19) = "table_performance.mat not found";
+            models{current_model,1}(current_dataset+1,20) = "table_performance.mat not found";
         end
-        
     end
-
 end
+
+cd(raw_data);
+
+models(end) = [];
+
+save models_stats_all.mat models
+save models_stats_ratio_top1top2.mat ratios
+
+
+% models_comparison(:,1) =  models{1,1}(:,1);
+% models_comparison(:,2) =  models{2,1}(:,7);
+% models_comparison(:,3) =  models{3,1}(:,7);
+% models_comparison(:,4) =  models{5,1}(:,7);
+% models_comparison(:,5) =  models{6,1}(:,7);
+% models_comparison(:,6) =  models{2,1}(:,8);
+% models_comparison(:,7) =  models{5,1}(:,8);
+% models_comparison(:,8) =  models{5,1}(:,8);
+% models_comparison(:,9) =  models{6,1}(:,8);
+
+% remove augmented
+% mm{1, 1}([3:4,6:7,11:12,14:15,19:20],:) = [];
+% mm{2, 1}([3:4,6:7,11:12,14:15,19:20],:) = [];
+% mm{5, 1}([3:4,6:7,11:12,14:15,19:20],:) = [];
+% mm{6, 1}([3:4,6:7,11:12,14:15,19:20],:) = [];
+% mm{7, 1}([3:4,6:7,11:12,14:15,19:20],:) = [];
+% mm{8, 1}([3:4,6:7,11:12,14:15,19:20],:) = [];
 
 % cd(whereami);
 % csvwrite('model.csv', models{1,1})

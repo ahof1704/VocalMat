@@ -36,7 +36,7 @@ list = dir('*output*.mat');
 p                         = mfilename('fullpath')
 plot_stats_per_bin        = 1
 save_plot_spectrograms    = 1 % PLots the spectograms with axes
-scatter_step              = 1 % scatter plot spectrogram step (1                          = every point; 2 = every two points)
+scatter_step              = 3 % scatter plot spectrogram step (1 = every point; 2 = every two points; ...)
 save_histogram_per_animal = 0
 save_excel_file           = 1
 save_plot_3d_info         = 0

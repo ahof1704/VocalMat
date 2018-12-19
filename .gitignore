@@ -51,7 +51,6 @@ Temporary Items
 *.WAV
 *.ignore
 *.reports
-*.workarea
 *.mat
 *.ai
 *.dataset

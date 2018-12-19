@@ -1,4 +1,4 @@
-    % -- compare performance for each model using each dataset
+% -- compare performance for each model using each dataset
 % -- expected directory structure:
 % -- [raw_data]/[model_name]/[dataset_name]/[model_name|model_name_records|matlab_environment].mat
 % -- [testset_path]: path to dataset used for the test classification
@@ -83,7 +83,7 @@ for current_model=1:models_found
     % -- cycle through datasets for the current model
     for current_dataset=1:datasets_for_this_model
 
-        % -- write headers 
+        % -- write headers
         if current_dataset == 1
             models{current_model,1}(1,2)  = "images";
             models{current_model,1}(1,3)  = "correct1";
@@ -112,19 +112,19 @@ for current_model=1:models_found
 
         try
             load('table_performance');
-            
+
             % -- top1 statistics
             num_images = size(T,1);
             correct1   = sum(strcmp(T.Training_label, T.Testing_label));
             wrong1     = size(T,1) - correct1;
             top1       = correct1*100/num_images;
-                
+
             Tlabel = table2cell(T(:,2));
             Tlabel = categorical (Tlabel);
-            
+
             Tpred  = table2cell(T(:,4));
             Tpred  = categorical(Tpred);
-            
+
             failed = Tlabel ~= Tpred;
             Twrong = T(failed,:);
 
@@ -135,12 +135,12 @@ for current_model=1:models_found
             % [value_highest idx_highest] = max(scores');
             [value_highest idx_highest] = max(scores, [], 2);
             % scores(value_highest) = NaN;
-            
+
             % -- this is very slow :)
             for current_highest=1:size(idx_highest,1)
                 scores(current_highest, idx_highest(current_highest)) = 0;
             end
-            
+
             [value_highest idx_highest] = max(scores, [], 2);
 
             % -- slow again
@@ -150,7 +150,7 @@ for current_model=1:models_found
 
             Tlabel = table2cell(Twrong(:,2));
             Tlabel = categorical(Tlabel);
-            
+
             Tpred  = table2cell(Twrong(:,end));
             Tpred  = categorical(string(Tpred));
 
@@ -173,10 +173,10 @@ for current_model=1:models_found
             % get top1 accuracy by label
             Tlabel = table2cell(T(:,2));
             Tlabel = categorical (Tlabel);
-            
+
             Tpred  = table2cell(T(:,4));
             Tpred  = categorical(Tpred);
-            
+
             idx    = Tlabel == Tpred;
 
             flat_accuracy        = sum(strcmp(T.Training_label(idx), 'flat'))/sum(strcmp(T.Training_label, 'flat'));

@@ -60,3 +60,8 @@ vocalmat_classifier/training/.raw_models/*
 vocalmat_classifier/training/.trained_models/*
 vocalmat_classifier/training/.dataset/*
 vocalmat_classifier/training/.cluster-scripts/*
+vocalmat_classifier/classifier_old.m
+vocalmat_classifier/training/heatmap.m
+vocalmat_classifier/training/performance_comparison.m
+vocalmat_classifier/training/performance_comparison_top3.m
+

@@ -66,6 +66,11 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 ```
 
 #### Requirements
+##### Recording Requirements
+- __Recording protocol:__ follow the protocol established by [Name et al](#paper).
+- __Sampling rate:__ all recordings must have a sampling rate of 250kHz (Fmax=125kHz).
+
+##### Software Requirements
 - __MATLAB:__ version 2017a, 2017b, 2018a, or 2018b. For other versions refer to the [FAQ](#faq).
 - __MATLAB Add-Ons:__
     - Computer Vision System Toolbox
@@ -90,7 +95,6 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 - __vocalmat_classifier:__ everything related to the VocalMat Classifier
 - __audios:__ place the audio files you want to process in the `audios` directory
 - __outputs:__ all output files from VocalMat will be placed in the `outputs` directory
-- __.workarea:__ files that are still under development, do not use
 
 ## Usage
 

@@ -16,7 +16,7 @@
     <br />
     <!-- MATLAB version -->
     <a href="https://www.mathworks.com/products/matlab.html">
-    <img src="https://img.shields.io/badge/MATLAB-2017a%7C2017b%7C2018a%7C2018b-blue.svg?style=flat-square"
+    <img src="https://img.shields.io/badge/MATLAB-2017a%7C2018b-blue.svg?style=flat-square"
       alt="MATLAB tested versions" />
     </a>
     <!-- LICENSE -->
@@ -71,7 +71,7 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 - __Sampling rate:__ all recordings must have a sampling rate of 250kHz (Fmax=125kHz).
 
 ##### Software Requirements
-- __MATLAB:__ version 2017a, 2017b, 2018a, or 2018b. For other versions refer to the [FAQ](#faq).
+- __MATLAB:__ versions 2017a through 2018b. For other versions refer to the [FAQ](#faq).
 - __MATLAB Add-Ons:__
     - Computer Vision System Toolbox
     - Control System Toolbox

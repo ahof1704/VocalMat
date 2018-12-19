@@ -16,17 +16,17 @@ raiz = pwd;
 model_class_DL = load('Mdl_categorical_DL.mat')
 model_class_DL = model_class_DL.netTransfer;
 
-vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
-cd(vpathname);
-list = dir('*output*.mat');
+% vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
+% cd(vpathname);
+% list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
 %Setting up
 p = mfilename('fullpath')
 vfile = fullfile(vpathname,vfilename)
 fprintf('\n')
-disp(['Reading ' vfilename])
-load(vfile);
+% disp(['Reading ' vfilename])
+% load(vfile);
 
 %We are gonna get only 10 points (time stamps) to classify the vocalization
 %Grimsley, Jasmine, Marie Gadziola, and Jeff James Wenstrup. "Automated classification of mouse pup isolation syllables: from cluster analysis to an Excel-based �mouse pup syllable classification calculator�."

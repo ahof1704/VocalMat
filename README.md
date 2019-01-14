@@ -52,7 +52,7 @@
 
 
 ## Features
-- __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations, according to adapted definitions from [Grimsley et al, 2011](#https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017460).
+- __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations, according to adapted definitions from [Grimsley et al, 2011](#paper).
 - __Noise Detection:__ eliminates vocalization candidates associated to mechanical or segmentation noise.
 - __Harmonic Detection:__ detects vocalizations with components overlapping in time.
 - __Fast Performance:__ optimized versions for personal computers and high-performance computing (clusters)
@@ -94,16 +94,16 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 - __vocalmat_identifier:__ everything related to the VocalMat Identifier
 - __vocalmat_classifier:__ everything related to the VocalMat Classifier
 - __audios:__ place the audio files you want to process in the `audios` directory
-- __outputs:__ all output files from VocalMat will be placed in the `outputs` directory
+- __outputs:__ all output files from VocalMat will be placed in the `outputs` directory. __I think we should remove this__
 
 ## Usage
 
 #### `VocalMat` Manual Execution
-<p align="justify">Navigate to the <i>vocalmat_identifier</i> directory and open <i>identifier.m</i> in MATLAB. Run and choose the audio file you want to analyze. Once finished, that <i>Identifier</i> will output two .MAT files in the same directory that the audio file is in, <i>output_*.mat</i> and <i>output_shorter_*.mat</i>. Next, navigate to <i>vocalmat_classifier</i> and open <i>classifier.m</i> in MATLAB. Run and choose the <i>output_*.mat</i> that the <i>Identifier</i> outputed. The <i>Classifier</i> will create a directory with its outputs (vocalizations and classifications) in that same directory that the audio file is in.
+<p align="justify">Navigate to the root directory and open <i>VocalMat_main.m</i> in MATLAB. Run and choose the audio file you want to analyze. The <i>Identifier</i> will output two .MAT files in the same directory that the audio file is in, <i>output_*.mat</i> (which contains the spectrograms content and detailed spectral features for each vocalization) and <i>output_shorter_*.mat</i> (same information, except the spectrogram content). The <i>Classifier</i> will create a directory with its outputs (vocalizations and classifications) in that same directory that the audio file is in.
 
 #### `VocalMat` Output Files
 
-<p align="justify">VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there are two directories (<i>All</i>, <i>All_axes</i>), and one Microsoft Excel (.xlsx) file. Inside <i>All_axes</i> you will find one image for each segment identified as a vocalization (with plotted blue circles). The raw original images are available inside <i>All</i>. The Excel file contains information on each vocalization, such as start and end time, duration, vocal intensity, and classification.
+<p align="justify">VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there will be two directories (<i>All</i>, <i>All_axes</i>), and one Microsoft Excel (.xlsx) file. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resuting segmentation illusrated by sparsed blue dots. The raw original images are available inside <i>All</i>. The Excel file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy) and call type.
 
 #### Personal Use (bash script)
 ```bash

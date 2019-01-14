@@ -103,7 +103,7 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 
 #### `VocalMat` Output Files
 
-<p align="justify">VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there will be two directories (<i>All</i>, <i>All_axes</i>), and one Microsoft Excel (.xlsx) file. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resuting segmentation illusrated by sparsed blue dots. The raw original images are available inside <i>All</i>. The Excel file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy) and call type.
+<p align="justify">VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there will be two directories (<i>All</i>, <i>All_axes</i>), and two Microsoft Excel (.xlsx) files. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resuting segmentation illusrated by sparsed blue dots. The raw original images are available inside <i>All</i>. The main Excel file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy) and call type.
 
 #### Personal Use (bash script)
 ```bash

@@ -46,15 +46,15 @@
 
 ![VocalMat Workflow](vocalmat.png)
 
-<p align="justify"> VocalMat Identifier is responsible for identifying possible vocalizations in the provided audio file. Candidates for vocalization are further analyzed and regions identenfied as noise are removed. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) with information about identified vocalizations (e.g., frequency, vocalization intensity, timestamp), that is later used by the VocalMat Classifier.
+<p align="justify"> VocalMat Identifier detects vocalization candidates in the audio file. Vocalization candidates are detected through a series of morphological operations and differential geometry analysis of the spectrogram. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) with information about the spectral content of detected vocalizations (e.g., frequency, intensity, timestamp), that is later used by the VocalMat Classifier.
 
-<p align="justify"> VocalMat Classifier uses a Convolutional Neural Network (CNN) to classify vocalization into 13 labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, complex, multi steps, two steps, step down, step up, and noise.
+<p align="justify"> VocalMat Classifier uses a Convolutional Neural Network (CNN) to classify each vocalization candidate into 12 distinct labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, complex, multi steps, two steps, step down, step up, and noise.
 
 
 ## Features
-- __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations
-- __Noise Detection:__ eliminates noisy sections that would otherwise be identified as vocalizations
-- __Harmonic Detection:__ detects when vocalizations have steps in frequency
+- __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations, according to adapted definitions from [Grimsley et al, 2011](#https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017460).
+- __Noise Detection:__ eliminates vocalization candidates associated to mechanical or segmentation noise.
+- __Harmonic Detection:__ detects vocalizations with components overlapping in time.
 - __Fast Performance:__ optimized versions for personal computers and high-performance computing (clusters)
 
 ## Getting Started

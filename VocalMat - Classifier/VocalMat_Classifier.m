@@ -1,484 +1,477 @@
-% close all
-tic
-clc
-clear all
+%clc
+%clear all
+%Setting up
+plot_stats_per_bin=1;
+scatter_step=3;
+save_plot_spectrograms=0; % PLots the spectograms with axes
+save_histogram_per_animal=0;
+save_excel_file=1;
+save_plot_3d_info=0;
+axes_dots=1; % Show the dots overlapping the vocalization (segmentation)
+size_spectrogram = [227 227];
+use_DL = 1;
+bin_size = 300; %in seconds
+disp('List of parameters used in this analysis:')
+dispzz
+
 raiz = pwd;
-[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file');
-cd(vpathname);
-list = dir('*.mat');
+model_class_DL = load('Mdl_categorical_DL.mat');
+model_class_DL = model_class_DL.netTransfer;
 
-for Name = 1:size(list,1)
-vfilename = list(Name).name;
-% vfilename = vfilename(1:end-4);
+%[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
+%cd(vpathname);
+%list = dir('*output*.mat');
+%diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
+
+%Setting up
+p = mfilename('fullpath');
 vfile = fullfile(vpathname,vfilename);
-% vfilename = vfilename(1:end-4);
-% vfile = fullfile(vpathname,vfilename);
+fprintf('\n')
+%disp(['Reading ' vfilename])
+%load(vfile);
 
-disp(['Reading ' vfilename])
-load([vfile]);
-dx = 0.4;
+%We are gonna get only 10 points (time stamps) to classify the vocalization
+%Grimsley, Jasmine, Marie Gadziola, and Jeff James Wenstrup. "Automated classification of mouse pup isolation syllables: from cluster analysis to an Excel-based �mouse pup syllable classification calculator�."
+%Frontiers in behavioral neuroscience 6 (2013): 89.
+%     disp('Verify vocalizations for steps')
+stepup_count=[];
+stepdown_count=[];
+harmonic_count=[];
+flat_count=[];
+chevron_count=[];
+revchevron_count=[];
+downfm_count=[];
+upfm_count=[];
+complex_count=[];
+noisy_vocal_count=[];
+nonlinear_count = [];
+short_count = [];
+noise_count = [];
+noise_count_dist = [];
+corr_yy2_yy3 = [];
+corr_yy2_yy4 = [];
+max_prom = [];
+max_prom2 = [];
+duration = [];
 
-% general_analysis.Animal.name = vfilename;
-% eval(['general_analysis.' num2str(k) '.interval = interval;'])
+disp('Checking for empty cells')
+time_vocal = time_vocal(~cellfun('isempty',time_vocal));
+freq_vocal = freq_vocal(~cellfun('isempty',freq_vocal));
+intens_vocal = intens_vocal(~cellfun('isempty',intens_vocal));
 
-if ~isempty(strfind(vfilename,'Control'))
-    eval(['general_analysis.Animal_' vfilename '.Categorie = ''Control'';'])
-else
-%     vfilename(6:15) = 'Agrp_Trpv1';
-    vfilename(strfind(vfilename,'-')) = '_';
-    eval(['general_analysis.Animal_' vfilename '.Categorie = ''Agrp-Trpv1'';'])
+output=[];
+cd(vpathname)
+if ~exist(vfilename, 'dir')
+    mkdir(vfilename)
 end
+cd(vfilename)
 
-if ~isempty(strfind(vfilename,'1st'))
-    eval(['general_analysis.Animal_' vfilename '.Stage = ''1st'';'])
-else
-%     general_analysis.Animal.Stage = '2nd';
-    eval(['general_analysis.Animal_' vfilename '.Stage = ''2nd'';'])
-end
-
-% figure('Name',vfilename,'NumberTitle','off')
-% hold on
-% grid on
-% plot3(T,F(nd),q,'r','linewidth',4)
-% disp('Showing segmented points')
-% for k=1:size(time_vocal,2)
-%     scatter3(time_vocal{k},freq_vocal{k},intens_vocal{k},'filled')
-% end
-% hold off
-% c = colorbar;
-% c.Label.String = 'dB';
-% view(2)
-
-%Remove too small vocalizations (< 5 points)
-% disp('Finding jumps')
-% dist_vocal = {};
-% for k=1:size(time_vocal,2)
-% 
-%    dista = [];
-%    for j = 1:size(time_vocal{k},2)-1
-%        dista = [dista; pdist([time_vocal{k}(j:j+1)' freq_vocal{k}(j:j+1)'],'euclidean')];
-%    end
-%    dist_vocal{k} = dista;
-% %    
-% %    if median(dist) > 1000 %in general, when it is a real vocalization, the median is exaclty 244.1406!!
-% %        time_vocal{k}=[];
-% %        freq_vocal{k}=[];
-% %        intens_vocal{k}=[];
-% %    end
-% end
-
-disp('Separating in bins of 5min');
-bin_1 = {};
-bin_2 = {};
-bin_3 = {};
-bin_4 = {};
-% for k=1:size(time_vocal,2)
-%      if time_vocal{k}(1) < 5*60 %5min
-%         bin_1 = [bin_1, time_vocal{k}];
-%      elseif time_vocal{k}(1) >= 5*60 && time_vocal{k}(1) < 10*60
-%         bin_2 = [bin_2, time_vocal{k}];
-%      elseif time_vocal{k}(1) >= 10*60 && time_vocal{k}(1) < 15*60
-%          bin_3 = [bin_3, time_vocal{k}];
-%      else
-%          bin_4 = [bin_4, time_vocal{k}];
-%      end
-% end
-% 
-% eval(['general_analysis.Animal_' vfilename '.bin1' '.total_vocal = bin_1;'])
-% eval(['general_analysis.Animal_' vfilename '.bin2' '.total_vocal = bin_2;'])
-% eval(['general_analysis.Animal_' vfilename '.bin3' '.total_vocal = bin_3;'])
-% eval(['general_analysis.Animal_' vfilename '.bin4' '.total_vocal = bin_4;'])
-% general_analysis.Animal.bin1.total_vocal = bin_1;
-% general_analysis.Animal.bin2.total_vocal = bin_2;
-% general_analysis.Animal.bin3.total_vocal = bin_3;
-% general_analysis.Animal.bin4.total_vocal = bin_4;
+disp('Running analysis!')
 
 for k=1:size(time_vocal,2)
-     if time_vocal{k}(1) < 5*60 %5min
-        bin_1 = [bin_1, time_vocal{k}];
-     elseif time_vocal{k}(1) >= 5*60 && time_vocal{k}(1) < 10*60
-        bin_2 = [bin_2, time_vocal{k}];
-     elseif time_vocal{k}(1) >= 10*60 && time_vocal{k}(1) < 15*60
-         bin_3 = [bin_3, time_vocal{k}];
-     else
-         bin_4 = [bin_4, time_vocal{k}];
-     end
-%      eval(['general_analysis.Animal_' vfilename '.bin' num2str(k) '.total_vocal = bin_' num2str(k) ';']);
-end
-
-eval(['general_analysis.Animal_' vfilename '.bin1' '.total_vocal = bin_1;'])
-eval(['general_analysis.Animal_' vfilename '.bin2' '.total_vocal = bin_2;'])
-eval(['general_analysis.Animal_' vfilename '.bin3' '.total_vocal = bin_3;'])
-eval(['general_analysis.Animal_' vfilename '.bin4' '.total_vocal = bin_4;'])
-
-disp('Calculating interval between vocalizations');
-for k=1:4
-   interval = [];
-   for j=1:size(eval(['bin_' num2str(k)]),2)-1
-      interval = [interval, time_vocal{j+1}(1)- time_vocal{j}(end)];
-   end
-   eval(['general_analysis.Animal_' vfilename '.bin' num2str(k) '.interval = interval;'])
-%    eval(['general_analysis.Animal.bin' num2str(k) '.interval = interval;']) 
-end
-
-disp('Calculating duration');
-for k=1:4
-   duration = [];
-   for j=1:size(eval(['bin_' num2str(k)]),2)
-      duration = [duration, time_vocal{j}(end)- time_vocal{j}(1)];
-   end
-   eval(['general_analysis.Animal_' vfilename '.bin' num2str(k) '.duration = duration;'])
-%    eval(['general_analysis.Animal.bin' num2str(k) '.duration = duration;']) 
-end
-
-disp('Calculating frequency range');
-for k=1:4
-   freq_range = [];
-   for j=1:size(eval(['bin_' num2str(k)]),2)
-      freq_range = [freq_range, max(freq_vocal{j})-min(freq_vocal{j})];
-   end
-   eval(['general_analysis.Animal_' vfilename '.bin' num2str(k) '.freq_range = freq_range;'])
-%    eval(['general_analysis.Animal.bin' num2str(k) '.freq_range = freq_range;']) 
-end
-
-% 
-% output = [];
-% %Plot names on spectrogram and organize table
-disp('Plotting names on spectrogram and organizing table')
-for i=1:size(time_vocal,2)
-    text(time_vocal{i}(round(end/2)),freq_vocal{i}(round(end/2))+5000,[num2str(i)],'HorizontalAlignment','left','FontSize',20,'Color','r');
-%     output = [output; i, size(time_vocal{i},2) , min(time_vocal{i}), max(time_vocal{i}), (max(time_vocal{i})-min(time_vocal{i})) , max(freq_vocal{i}), mean(freq_vocal{i}),(max(freq_vocal{i})-min(freq_vocal{i})) , min(freq_vocal{i}), min(intens_vocal{i}), max(intens_vocal{i}), mean(intens_vocal{i})];
-end
-
-
-% output = array2table(output,'VariableNames', {'ID','Num_points','Start_sec','End_sec','Duration_sec','Max_Freq_Hz','Mean_Freq_Hz','Range_Freq_Hz','Min_Freq_Hz','Min_dB','Max_dB','Mean_dB'});
-% warning('off','MATLAB:xlswrite:AddSheet');
-
-% xlswrite(vfile,output,filename)
-% writetable(output,[vpathname '_VocalMat'],'FileType','spreadsheet','Sheet',vfilename)
-% vfilename
-% size(time_vocal,2)
-% size(output,1)
-% cd(raiz)
-% 
-% X = [vfilename,' has ',num2str(size(output,1)),' vocalizations.'];
-% disp(X)
-% 
-% set(gca,'xlim',[0 dx]);
-% set(gca,'ylim',[0 max(F)]);
-% % Generate constants for use in uicontrol initialization
-% pos=get(gca,'position');
-% % Newpos=[pos(1) pos(2)-0.1 pos(3) 0.05];
-% % xmax=max(T);
-% % maxF = max(F);
-% yourcell = 1:size(time_vocal,2);
-% % Newpos=[pos(1) pos(2)-0.1 pos(3) 0.05];
-% hb = uicontrol('Style', 'listbox','Position',[pos(1)+10 pos(2)+100 100 pos(4)+700],...
-%      'string',yourcell,'Callback',... 
-%      ['if get(hb, ''Value'')>0 ',...
-%      ' Stri=[''set(gca,''''xlim'''',[-dx/2 dx/2]+['' num2str(time_vocal{get(hb, ''Value'')}(1)) '' '' num2str(time_vocal{get(hb, ''Value'')}(1)) ''])'']; ',...
-%      ' eval(Stri); ', ...
-%      'end']);
-%  %      ' update_slide(get(hb, ''Value''), time_vocal,xmax, maxF), ',...
-% 
-% % This avoids flickering when updating the axis
-% % set(gca,'xlim',[0 dx]);
-% % set(gca,'ylim',[0 max(F)]);
-% % Generate constants for use in uicontrol initialization
-% % pos=get(gca,'position');
-% Newpos=[pos(1) pos(2)-0.1 pos(3) 0.05];
-% xmax=max(T);
-% Stri=['set(gca,''xlim'',get(gcbo,''value'')+[0 ' num2str(dx) '])'];
-% h=uicontrol('style','slider',...
-%     'units','normalized','position',Newpos,...
-%     'callback',Stri,'min',0,'max',xmax-dx,'SliderStep',[0.0001 0.010]);
-% % set(gcf,'Renderer','OpenGL')
-% 
-% % close all
-% % save(['output_' vfilename])
-% warning('off', 'MATLAB:save:sizeTooBigForMATFile')
-% disp('Cleaning variables: y y1 S F T P fs q nd vocal id' ) 
-% clear y y1 S F T P fs q nd vocal id
-toc 
-
-end
-
-disp('Plotting # calls Control vs Agrp_Trpv1')
-list_names = fieldnames(general_analysis);
-
-control_bin1 = [];
-control_bin2 = [];
-control_bin3 = [];
-control_bin4 = [];
-agrp_bin1 = [];
-agrp_bin2 = [];
-agrp_bin3 = [];
-agrp_bin4 = [];
-
-for k=1:size(list_names,1)
-    for bin_num=1:4
-        if ~isempty(cell2mat(strfind(list_names(k),'Control')))
-           eval(['control_bin' num2str(bin_num) '= [control_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];']) 
-        else
-           eval(['agrp_bin' num2str(bin_num) '= [agrp_bin' num2str(bin_num) ';'  'size(general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal,2)];'])  
-        end
-    end
-end
-
-disp('Calculating total vocalizations through all the files')
-% figure
-agrp = [agrp_bin1, agrp_bin2, agrp_bin3, agrp_bin4];
-list_size = 1:size(agrp,1);
-agrp1 = agrp(find(mod(list_size,2)>0),:);
-agrp1 = sum(agrp1,1);
-subplot(2,1,1), plot(agrp1,'--*');
-title('1st stage')
-control = [control_bin1, control_bin2, control_bin3, control_bin4];
-list_size2 = 1:size(control,1);
-control1 = control(find(mod(list_size2,2)>0),:);
-control1 = sum(control1,1);
-hold on
-plot(control1,'--*')
-legend('agrp1','control')
-
-agrp1 = agrp(find(mod(list_size,2)==0),:);
-agrp1 = sum(agrp1,1);
-subplot(2,1,2), plot(agrp1,'--*' );
-title('2nd stage')
-control1 = control(find(mod(list_size2,2)==0),:);
-control1 = sum(control1,1);
-hold on
-plot(control1, '--*')
-legend('agrp1','control')
-
-disp('Calculating interval distribution through all the files')
-control_bin1 = [];
-control_bin2 = [];
-control_bin3 = [];
-control_bin4 = [];
-agrp_bin1 = [];
-agrp_bin2 = [];
-agrp_bin3 = [];
-agrp_bin4 = [];
-
-for k=1:size(list_names,1)
-    for bin_num=1:4
-        if ~isempty(cell2mat(strfind(list_names(k),'Control')))
-           eval(['control_bin' num2str(bin_num) '= [control_bin' num2str(bin_num) ','  'general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.interval];']) 
-        else
-           eval(['agrp_bin' num2str(bin_num) '= [agrp_bin' num2str(bin_num) ','  'general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.interval];'])  
-        end
-    end
-end
-
-figure
-agrp = [agrp_bin1, agrp_bin2, agrp_bin3, agrp_bin4];
-% list_size = 1:size(agrp,1);
-% agrp1 = agrp(find(mod(list_size,2)>0),:);
-% agrp1 = reshape(agrp1,1,[]);
-% h = histogram(agrp,10000,'Normalization','pdf');
-% h.FaceColor = [0 0.5 0.5];
-[f,x] = ecdf(agrp);
-h = plot(x,f);
-control = [control_bin1, control_bin2, control_bin3, control_bin4];
-% list_size2 = 1:size(control,1);
-% control1 = control(find(mod(list_size2,2)>0),:);
-% control1 = reshape(control1,1,[]);
-hold on
-[f,x] = ecdf(control);
-% h1 = histogram(control,10000,'Normalization','pdf');
-h1 = plot(x,f);
-legend('agrp1','control')
-xlim([0 3])
-
-figure
-% agrp = [agrp_bin1, agrp_bin2, agrp_bin3, agrp_bin4];
-% list_size = 1:size(agrp,1);
-% agrp1 = agrp(find(mod(list_size,2)>0),:);
-% agrp1 = reshape(agrp1,1,[]);
-h = histogram(agrp,10000,'Normalization','pdf');
-h.FaceColor = [0 0.5 0.5];
-% [f,x] = ecdf(agrp);
-% h = plot(x,f);
-% control = [control_bin1, control_bin2, control_bin3, control_bin4];
-% list_size2 = 1:size(control,1);
-% control1 = control(find(mod(list_size2,2)>0),:);
-% control1 = reshape(control1,1,[]);
-hold on
-% [f,x] = ecdf(control);
-h1 = histogram(control,10000,'Normalization','pdf');
-% h1 = plot(x,f);
-legend('agrp1','control')
-xlim([0 3])
-
-figure
-disp('Identify # of vocalization in clusters')
-max_interval_cluster = 2; % if >max_interval_cluster , then it is a new cluster
-idxs_agrp = find(agrp>max_interval_cluster);
-vocal_in_cluster = idxs_agrp' - circshift(idxs_agrp',[1,0]);
-vocal_in_cluster = vocal_in_cluster+2*ones(size(vocal_in_cluster));
-vocal_in_cluster = vocal_in_cluster(2:end);
-h = histogram(vocal_in_cluster',100,'Normalization','pdf');
-h.FaceColor = [0 0.5 0.5];
-hold on
-idxs_control = find(control>2);
-vocal_in_cluster = idxs_control' - circshift(idxs_control',[1,0]);
-vocal_in_cluster = vocal_in_cluster+2*ones(size(vocal_in_cluster));
-vocal_in_cluster = vocal_in_cluster(2:end);
-h1 = histogram(vocal_in_cluster',100,'Normalization','pdf');
-
-legend('agrp1','control')
-
-figure
-disp('Identify # of vocalization in clusters')
-max_interval_cluster = 2; % if >max_interval_cluster , then it is a new cluster
-idxs_agrp = find(agrp>max_interval_cluster);
-vocal_in_cluster = idxs_agrp' - circshift(idxs_agrp',[1,0]);
-vocal_in_cluster = vocal_in_cluster+2*ones(size(vocal_in_cluster));
-vocal_in_cluster = vocal_in_cluster(2:end);
-[counts,centers]  = hist(vocal_in_cluster',100);
-plot(centers,counts);
-
-hold on
-idxs_control = find(control>max_interval_cluster);
-vocal_in_cluster1 = idxs_control' - circshift(idxs_control',[1,0]);
-vocal_in_cluster1 = vocal_in_cluster1+2*ones(size(vocal_in_cluster1));
-vocal_in_cluster1 = vocal_in_cluster1(2:end);
-[counts,centers] = hist(vocal_in_cluster1',100);
-plot(centers,counts);
-
-legend('agrp1','control')
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-raster_list = {};
-list_selected = {};
-disp('Raster plot for control animals')
-for k=1:size(list_names,1)
-    if ~isempty(cell2mat(strfind(list_names(k),'Control'))) && ~isempty(cell2mat(strfind(list_names(k),'1st')))
-        all = [];
-        for bin_num=1:4
-            eval(['all'  '= [all' ','  'general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal];']) 
-        end
-        raster_list{k} = cell2mat(all); 
-        list_selected{k} = char(list_names(k));
-    end
-end
-
-disp('Removing empty cells')
-raster_list = raster_list(~cellfun('isempty',raster_list));
-list_selected = list_selected(~cellfun('isempty',list_selected));
-figure, plotSpikeRaster(raster_list,'PlotType','vertline');
-set(gca,'TickDir','out','TickLabelInterpreter','none','YTick',[1:size(list_selected,2)], 'YTickLabel',list_selected');
-
-
-raster_list = {};
-list_selected = {};
-disp('Raster plot for control animals')
-for k=1:size(list_names,1)
-    if ~isempty(cell2mat(strfind(list_names(k),'Control'))) && ~isempty(cell2mat(strfind(list_names(k),'2nd')))
-        all = [];
-        for bin_num=1:4
-            eval(['all'  '= [all' ','  'general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal];']) 
-        end
-        raster_list{k} = cell2mat(all); 
-        list_selected{k} = char(list_names(k));
-    end
-end
-
-disp('Removing empty cells')
-raster_list = raster_list(~cellfun('isempty',raster_list));
-list_selected = list_selected(~cellfun('isempty',list_selected));
-figure, plotSpikeRaster(raster_list,'PlotType','vertline');
-set(gca,'TickDir','out','TickLabelInterpreter','none','YTick',[1:size(list_selected,2)], 'YTickLabel',list_selected');
-
-
-raster_list = {};
-list_selected = {};
-disp('Raster plot for control animals')
-for k=1:size(list_names,1)
-    if ~isempty(cell2mat(strfind(list_names(k),'Agrp'))) && ~isempty(cell2mat(strfind(list_names(k),'2nd')))
-        all = [];
-        for bin_num=1:4
-            eval(['all'  '= [all' ','  'general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal];']) 
-        end
-        raster_list{k} = cell2mat(all); 
-        list_selected{k} = char(list_names(k));
-    end
-end
-
-disp('Removing empty cells')
-raster_list = raster_list(~cellfun('isempty',raster_list));
-list_selected = list_selected(~cellfun('isempty',list_selected));
-figure, plotSpikeRaster(raster_list,'PlotType','vertline');
-set(gca,'TickDir','out','TickLabelInterpreter','none','YTick',[1:size(list_selected,2)], 'YTickLabel',list_selected');
-
-raster_list = {};
-list_selected = {};
-disp('Raster plot for control animals')
-for k=1:size(list_names,1)
-    if ~isempty(cell2mat(strfind(list_names(k),'Agrp'))) && ~isempty(cell2mat(strfind(list_names(k),'1st')))
-        all = [];
-        for bin_num=1:4
-            eval(['all'  '= [all' ','  'general_analysis.' char(list_names(k)) '.bin' num2str(bin_num) '.total_vocal];']) 
-        end
-        raster_list{k} = cell2mat(all); 
-        list_selected{k} = char(list_names(k));
-    end
-end
-
-disp('Removing empty cells')
-raster_list = raster_list(~cellfun('isempty',raster_list));
-list_selected = list_selected(~cellfun('isempty',list_selected));
-figure, plotSpikeRaster(raster_list,'PlotType','vertline');
-set(gca,'TickDir','out','TickLabelInterpreter','none','YTick',[1:size(list_selected,2)], 'YTickLabel',list_selected');
-
-
-disp('Putting together 1st and 2nd stage of each animal')
-raster_list = {};
-list_selected = {};
-disp('Raster plot for control animals')
-for k=1:size(list_names,1)
-    if ~isempty(cell2mat(strfind(list_names(k),'Agrp'))) && ~isempty(cell2mat(strfind(list_names(k),'1st')))
-        if ~isempty(cell2mat(strfind(list_names(k+1),'Agrp'))) && ~isempty(cell2mat(strfind(list_names(k+1),'2nd')))
-            all = [];
-            for j=k:k+1
-                for bin_num=1:4
-                    eval(['all'  '= [all' ','  '(j-k)*600+cell2mat(general_analysis.' char(list_names(j)) '.bin' num2str(bin_num) '.total_vocal)];']) 
+    
+    harmonics = cell(1,size(time_vocal,2));
+    
+    current_freq = [];
+    harmonic_candidate = [];
+    skip_current = 0;
+    for time_stamp = 1:size(time_vocal{k},2)-1
+        
+        if size(freq_vocal{k}{time_stamp+1},1)>1 %Probably we have an harmonic
+            if (size(freq_vocal{k}{time_stamp},1)>1); %Check if they have same size (could be the continuation of harmonic)
+                if time_stamp==1 %If the vocalization starts with an harmonic
+                    current_freq = freq_vocal{k}{time_stamp}(1);
+                    harmonic_candidate = freq_vocal{k}{time_stamp}(2);
+                    if size(harmonic_candidate,1)==1
+                        start_harmonic = time_vocal{k}(time_stamp);
+                    end
+                else
+                    aux = freq_vocal{k}{time_stamp+1} - current_freq(end)*ones(size(freq_vocal{k}{time_stamp+1},1),1);
+                    [mini,mini]=min(abs(aux));
+                    temp = freq_vocal{k}{time_stamp+1};
+                    current_freq = [current_freq; temp(mini)]; temp(mini) = [];
+                    if size(harmonic_candidate,1)>1
+                        if abs(temp - harmonic_candidate(end)) < 10000
+                            harmonic_candidate = [harmonic_candidate; temp(1)];
+                        else %if it is >10khz then it is already another harmonic
+                            if size(harmonic_candidate,1)>10
+                                harmonic_count = [harmonic_count;k];
+                            end
+                            harmonic_candidate = temp;
+                        end
+                    else
+                        harmonic_candidate = [harmonic_candidate; temp(1)];
+                    end
+                    if size(harmonic_candidate,1)==1
+                        start_harmonic = time_vocal{k}(time_stamp);
+                    end
+                end
+            else %Find the closests freq to be the current and classify the other as harmonic candidate
+                try
+                    aux = freq_vocal{k}{time_stamp+1} - current_freq(end)*ones(size(freq_vocal{k}{time_stamp+1},1),1);
+                catch
+                    aux = freq_vocal{k}{time_stamp+1} - freq_vocal{k}{time_stamp}*ones(size(freq_vocal{k}{time_stamp+1},1),1);
+                end
+                
+                [mini,mini]=min(abs(aux));
+                temp = freq_vocal{k}{time_stamp+1};
+                current_freq = [current_freq; temp(mini)]; temp(mini) = [];
+                harmonic_candidate = [harmonic_candidate; temp];
+                if size(harmonic_candidate,1)==1 || (size(harmonic_candidate,1)>1 && time_stamp==1)
+                    start_harmonic = time_vocal{k}(time_stamp);
                 end
             end
-            raster_list{k} = all; 
-            list_selected{k} = char(list_names(k));
+            
+        else %There is nothing similar to harmonic right now... but there was before?
+            if (size(freq_vocal{k}{time_stamp},1)>1)
+                %                So... Was it an harmonic or not?
+                if time_stamp == 1 %If the vocalization starts with something that reminds a vocalization
+                    aux = freq_vocal{k}{time_stamp} - freq_vocal{k}{time_stamp+1}*ones(size(freq_vocal{k}{time_stamp},1),1);
+                    [mini,mini]=min(abs(aux));
+                    temp = freq_vocal{k}{time_stamp};
+                    current_freq = [current_freq; temp(mini)]; temp(mini) = [];
+                    harmonic_candidate = [harmonic_candidate; temp];
+                    if size(harmonic_candidate,1)==1
+                        start_harmonic = time_vocal{k}(time_stamp);
+                    end
+                end
+                
+                if abs(freq_vocal{k}{time_stamp+1} - harmonic_candidate(end)) < abs(freq_vocal{k}{time_stamp+1} - current_freq(end)) %Continued on the line that we thought was harmonic. So it is not harmonic
+                    if size(harmonic_candidate,1)> size(current_freq,1)
+                        
+                        current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
+                        harmonic_candidate = [];
+                    else %current_freq > harmonic_candidate -> So it is a jump, not a harmonic
+                        if size(harmonic_candidate,1)>10% && size(harmonic_candidate,1)/ size(current_freq,1)>0.8 %If the harmonic is big and close to the size of current_freq
+                            
+                            if (time_stamp+2 < size(time_vocal{k},2)) && any(abs(freq_vocal{k}{time_stamp+2} - current_freq(end)) < abs(freq_vocal{k}{time_stamp+2} - harmonic_candidate(end))) %Is there any chance of continuing with the current_freq?
+                                harmonic_candidate = [harmonic_candidate; freq_vocal{k}{time_stamp+1}];
+                                skip_current = 1;
+                                harmonic_count = [harmonic_count;k];
+                            else
+                                current_freq(end-size(harmonic_candidate,1)+1:end) = harmonic_candidate;
+                                current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
+                                harmonic_candidate = [];
+                                harmonic_count = [harmonic_count;k];
+                            end
+                            
+                        else %So they just overlapped for a little while, but was actually a step
+                            harmonic_candidate = [];
+                        end
+                    end
+                else %It was an harmonic after all
+                    current_freq = [current_freq; freq_vocal{k}{time_stamp+1}];
+                    if size(harmonic_candidate,1)>10 % at least 10 points to say it was really an harmonic
+                        harmonic_count = [harmonic_count;k];
+                    end
+                    harmonic_candidate = [];
+                end
+                
+            else
+                aux = freq_vocal{k}{time_stamp+1} - freq_vocal{k}{time_stamp};
+                if skip_current==0
+                    current_freq = [current_freq; freq_vocal{k}{time_stamp}];
+                end
+                skip_current = 0;
+                
+            end
+        end
+        
+    end
+    
+    %Extra filtering by removing the points with intensity below 5% of the average
+    tabela = [];
+    for kk = 1:size(time_vocal{k},2)
+        for ll = 1:size(freq_vocal{k}{kk},1)
+            tabela = [tabela; time_vocal{k}(kk) freq_vocal{k}{kk}(ll) intens_vocal{k}{kk}(ll)];
         end
     end
+    tabela_all_points{k} = tabela;
 end
 
-disp('Removing empty cells')
-raster_list = raster_list(~cellfun('isempty',raster_list));
-list_selected = list_selected(~cellfun('isempty',list_selected));
-figure, plotSpikeRaster(raster_list,'PlotType','vertline');
-set(gca,'TickDir','out','TickLabelInterpreter','none','YTick',[1:size(list_selected,2)], 'YTickLabel',list_selected');
+cd(raiz)
 
+if use_DL==1
+    if save_plot_spectrograms==1
+        fig = figure('Name',vfilename,'NumberTitle','off','Position',[300 200 1167 875]);
+    end
 
-raster_list = {};
-list_selected = {};
-disp('Raster plot for control animals')
-for k=1:size(list_names,1)
-    if ~isempty(cell2mat(strfind(list_names(k),'Control'))) && ~isempty(cell2mat(strfind(list_names(k),'1st')))
-        if ~isempty(cell2mat(strfind(list_names(k+1),'Control'))) && ~isempty(cell2mat(strfind(list_names(k+1),'2nd')))
-            all = [];
-            for j=k:k+1
-                for bin_num=1:4
-                    eval(['all'  '= [all' ','  '(j-k)*600+cell2mat(general_analysis.' char(list_names(j)) '.bin' num2str(bin_num) '.total_vocal)];']) 
+    cd(vpathname)
+    if ~exist(vfilename, 'dir')
+        mkdir(vfilename)
+    end
+    cd(vfilename)
+    
+    if (~exist('All_axes','dir') && save_plot_spectrograms==1)
+        mkdir('All_axes')
+    end
+    
+    if ~exist('All','dir')
+        mkdir('All')
+    end
+
+    for id_vocal = 1:size(time_vocal,2)
+        %         cd(raiz)
+        dx = 0.22;
+        
+        T_min_max = [-dx/2 dx/2]+[time_vocal{id_vocal}(ceil(size(time_vocal{id_vocal},2)/2)) time_vocal{id_vocal}(ceil(size(time_vocal{id_vocal},2)/2))];
+        [T_min T_min] = min(abs(T_orig - T_min_max(1)));
+        [T_max T_max] = min(abs(T_orig - T_min_max(2)));
+        
+        if save_plot_spectrograms==1
+           if save_plot_spectrograms==1
+            clf('reset');
+            hold on;
+            surf(T_orig(T_min:T_max),F_orig,A_total(:,T_min:T_max),'edgecolor','none');
+            axis tight; view(0,90);
+            colormap(gray);
+            xlabel('Time (s)'); ylabel('Freq (Hz)');
+            
+            if axes_dots == 1
+                for time_stamp = 1:scatter_step:size(time_vocal{id_vocal},2)
+                    try
+                        scatter(time_vocal{id_vocal}(time_stamp)*ones(size(freq_vocal{id_vocal}{time_stamp}')),freq_vocal{id_vocal}{time_stamp}',[],'b');
+                    catch
+                        scatter(time_vocal{id_vocal}(time_stamp-1)*ones(size(freq_vocal{id_vocal}{time_stamp-1}')),freq_vocal{id_vocal}{time_stamp}',[],'b');
+                    end
                 end
             end
-            raster_list{k} = all; 
-            list_selected{k} = char(list_names(k));
-        end
+            set(gca,'fontsize', 18);
+            frame = getframe(fig);
+            imwrite(frame.cdata, [vpathname '/' vfilename '/All_axes/' num2str(id_vocal)  '.png'], 'png');
+            hold off;
+            end
+        end        
+        img = imresize(flipud(mat2gray(A_total(:,T_min:T_max))),size_spectrogram);
+        img = cat(3, img, img, img);
+        %                 imwrite(img,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
+        imwrite(img,[vpathname '/' vfilename '/All/' num2str(id_vocal)  '.png'])
+        
     end
+    
 end
 
-disp('Removing empty cells')
-raster_list = raster_list(~cellfun('isempty',raster_list));
-list_selected = list_selected(~cellfun('isempty',list_selected));
-figure, plotSpikeRaster(raster_list,'PlotType','vertline');
-set(gca,'TickDir','out','TickLabelInterpreter','none','YTick',[1:size(list_selected,2)], 'YTickLabel',list_selected');
+close all
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Rebuild curr_freq
+dist_between_points=[];
+slopes =[];
+all_jumps =[];
+higher_jumps=[];
+lower_jumps=[];
+table_out={};
+duration=[];
+num_points = 15;
+for k=1:size(freq_vocal,2)
+    curr_freq = [];
+    intens_freq =[];
+    for kk=1:size(freq_vocal{k},2)
+        if size(freq_vocal{k}{kk},1)>1
+            if isempty(curr_freq)
+                j=2;
+                try
+                    while size(freq_vocal{k}{j},1)>1 %find the first element without "harmonic"
+                        j=j+1;
+                    end
+                    [min_idx, min_idx] = min(abs((freq_vocal{k}{j}*ones(size(freq_vocal{k}{kk},1),1)) - freq_vocal{k}{kk}));
+                    curr_freq = [curr_freq; freq_vocal{k}{kk}(min_idx)];
+                    intens_freq = [intens_freq; intens_vocal{k}{kk}(min_idx)];
+                catch
+                    curr_freq = [curr_freq; freq_vocal{k}{kk}(1)]; %Just get any element if there is no time stamp with only one
+                    intens_freq = [intens_freq; intens_vocal{k}{kk}(1)];
+                end
+                
+            else
+                [min_idx, min_idx] = min(abs((curr_freq(end)*ones(size(freq_vocal{k}{kk},1),1)) - freq_vocal{k}{kk}));
+                curr_freq = [curr_freq; freq_vocal{k}{kk}(min_idx)];
+                intens_freq = [intens_freq; intens_vocal{k}{kk}(min_idx)];
+            end
+        else
+            curr_freq = [curr_freq; freq_vocal{k}{kk}];
+            intens_freq = [intens_freq; intens_vocal{k}{kk}];
+        end
+    end
+    curr_freq_total{k} = curr_freq;
+end
+
+if use_DL==1
+    validationImages = imageDatastore([vpathname '/' vfilename '/All/']);
+    [predictedLabels, scores] = classify(model_class_DL,validationImages);
+    lista = [validationImages.Files, predictedLabels];
+    
+    AA2 = cellstr(lista);
+    AA = array2table(AA2);
+    ttt = model_class_DL.Layers(25).ClassNames;
+    ttt2 = cellstr(num2str(2*ones(12,1)));
+    s = strcat(ttt,ttt2);
+    T2 = array2table(scores,'VariableNames',s');
+    
+    % AA2 = strsplit(cell2mat(AA2(1,1)),'\');
+    for k=1:size(AA2,1)
+        AA1 = strsplit(cell2mat(AA2(k,1)),{'/','\'});
+        AA3 = str2double(AA1{end}(1:end-4));
+        %     AA4 = str2double(AA1{end}(1:end-20));
+        AA2(k,3) = num2cell(AA3);
+    end
+    
+    B = [T2, AA, array2table(cell2mat(AA2(:,3)))];
+    B.Properties.VariableNames{15} = 'NumVocal';
+    B.Properties.VariableNames{14} = 'DL_out';
+    B = sortrows(B,'NumVocal','ascend');
+end
+
+if use_DL==1
+    temp = [B];
+    writetable(temp,[vfilename '_DL.xlsx'])
+end
+
+% 
+chevron_count = sum(strcmp(B.DL_out,'chevron'));
+complex_count = sum(strcmp(B.DL_out,'complex'));
+down_fm_count = sum(strcmp(B.DL_out,'down_fm'));
+flat_count = sum(strcmp(B.DL_out,'flat'));
+mult_steps_count = sum(strcmp(B.DL_out,'mult_steps'));
+noise_count = sum(strcmp(B.DL_out,'noise_dist'));
+rev_chevron_count = sum(strcmp(B.DL_out,'rev_chevron'));
+short_count = sum(strcmp(B.DL_out,'short'));
+step_down_count = sum(strcmp(B.DL_out,'step_down'));
+step_up_count = sum(strcmp(B.DL_out,'step_up'));
+two_steps_count = sum(strcmp(B.DL_out,'two_steps'));
+up_fm_count = sum(strcmp(B.DL_out,'up_fm'));
+noise_dist_count = sum(strcmp(B.DL_out,'noise_dist'));
+harmonic_count = unique(harmonic_count);
+noisy_vocal_count = unique(noisy_vocal_count);
+
+disp(['Total number of vocalizations: ' num2str(size(time_vocal,2)-noise_dist_count) ' vocalizations (' num2str(noise_dist_count) ' were noise)']);
+
+for j=1:size(model_class_DL.Layers(25,1).ClassNames)
+    eval(['disp([''' cell2mat(model_class_DL.Layers(25,1).ClassNames(j)) ': '' num2str('  cell2mat(model_class_DL.Layers(25,1).ClassNames(j)) '_count)])'])
+end
+
+% Fixed up to here.
+if save_excel_file==1
+    %     names2 = model_class_DL_RF.ClassNames;
+    names = [{'Names_vocal'};{'Start_time'}; {'End_time'}; {'Inter_vocal_interval'}; {'Inter_real_vocal_interval'}; {'Duration'}; {'min_freq_main'}; {'max_freq_main'};{'mean_freq_main'};{'Bandwidth'};{'min_freq_total'};...
+        {'max_freq_total'};{'mean_freq_total'};{'min_intens_total'};{'max_intens_total'}; {'corrected_max_intens_total'};{'Background_intens'};{'mean_intens_total'};{'Class'};{'Harmonic'};{'Noisy'}];
+    tabela = zeros(size(B,1),size(names,1));
+    tabela(:,1) = 1:size(B,1);
+    tabela = num2cell(tabela);
+    
+    if ~isempty(noisy_vocal_count)
+        tabela(noisy_vocal_count,21)= {1};
+    end
+    
+    if ~isempty(harmonic_count)
+        tabela(harmonic_count,20)= {1};
+    end
+    
+    for i=1:size(time_vocal,2)
+        time_start(i) = time_vocal{i}(1);
+        time_end(i) = time_vocal{i}(end);
+        if i>1
+            time_interval(i) = time_start(i)-time_end(i-1);
+        else
+            time_interval(i) = NaN;
+        end
+        duration(i) = time_end(i)-time_start(i);
+        if ~isempty(curr_freq_total{i}), min_freq_main(i) = min(curr_freq_total{i}); else min_freq_main(i) = NaN; end
+        if ~isempty(curr_freq_total{i}), max_freq_main(i) = max(curr_freq_total{i}); else max_freq_main(i) = NaN; end
+        mean_freq_main(i) = mean(curr_freq_total{i});
+        min_freq_total(i) = min(tabela_all_points{i}(:,2));
+        max_freq_total(i) = max(tabela_all_points{i}(:,2));
+        mean_freq_total(i) = mean(tabela_all_points{i}(:,2));
+        min_intens_total(i) = min(tabela_all_points{i}(:,3));
+        max_intens_total(i) = max(tabela_all_points{i}(:,3));
+        mean_intens_total(i) = mean(tabela_all_points{i}(:,3));
+    end
+    
+    tabela(:,19) = B.DL_out;
+    
+    noise_idx = strcmp(tabela(:,18),'noise_dist');
+    time_start_real = time_start; time_start_real(noise_idx) = NaN;
+    time_end_real = time_end; time_end_real(noise_idx) = NaN;
+    curr_time = NaN;
+    for i=1:size(time_start_real,2)
+        if ~isnan(time_start_real(i))
+            time_interval_real(i) = time_start_real(i) - curr_time;
+            curr_time = time_end_real(i);
+        else
+            time_interval_real(i) = NaN;
+        end
+    end
+    
+    median_stats = [ zeros(size(median_stats,1),1) median_stats, zeros(size(median_stats,1),1)];
+    for k=1:size(time_start,2)
+        median_stats(find(median_stats(:,2)==time_start(k)),end) = 1;
+        median_stats(find(median_stats(:,2)==time_start(k)),1) = k;
+    end
+    
+    median_stats(:,7) = median_stats(:,7)/0.9;
+    median_stats = median_stats(median_stats(:,1)>0,:);
+    
+    
+    tabela(:,2) = num2cell(time_start');
+    tabela(:,3) = num2cell(time_end');
+    tabela(:,4) = num2cell(time_interval');
+    tabela(:,5) = num2cell(time_interval_real');
+    tabela(:,6) = num2cell(duration');
+    tabela(:,7) = num2cell(min_freq_main');
+    tabela(:,8) = num2cell(max_freq_main');
+    tabela(:,9) = num2cell(mean_freq_main');
+    tabela(:,10) = num2cell(max_freq_main'-min_freq_main');
+    tabela(:,11) = num2cell(min_freq_total');
+    tabela(:,12) = num2cell(max_freq_total');
+    tabela(:,13) = num2cell(mean_freq_total');
+    tabela(:,14) = num2cell(min_intens_total');
+    tabela(:,15) = num2cell(max_intens_total');
+    corrected_max_intens_total = max_intens_total' - median_stats(:,7);
+    tabela(:,16) = num2cell(corrected_max_intens_total);
+    tabela(:,17) = num2cell(median_stats(:,7)');
+    tabela(:,18) = num2cell(mean_intens_total');
+    
+    names = transpose(names);
+    T = array2table(tabela);
+    T.Properties.VariableNames = names;
+    %     VM1_out.Properties.VariableNames{1} = 'VM1_out';
+    if exist([vfilename '.xlsx'])>0
+        delete([vfilename '.xlsx'])
+    end
+    
+    writetable(T,[vfilename '.xlsx'])
+end
+
+% Estimate number of bins given the bin size
+aux = ~strcmp(T.Class,'noise_dist');
+T_no_noise = T(aux,:);
+if size(T_no_noise,1)>0
+    num_of_bins = ceil(max(cell2mat(T_no_noise.Start_time))/bin_size);
+    edges = 0:bin_size:num_of_bins*bin_size;
+    [num_vocals_in_bin] = histcounts(cell2mat(T_no_noise.Start_time),edges);
+    
+    
+    
+    disp(['Vocalizations per bin (not considering noise):'])
+    for k=1:num_of_bins
+        disp(['Bin_' num2str(k) '(' num2str(edges(k)) '-' num2str(edges(k+1)) 's): ' num2str(num_vocals_in_bin(k))])
+    end
+    
+    if plot_stats_per_bin ==1
+        
+        %Show classes per bin
+        for j=1:size(model_class_DL.Layers(25, 1).ClassNames  )
+            aux = strcmp(T.Class,model_class_DL.Layers(25, 1).ClassNames (j));
+            T_class = T(aux,:);
+            [num_vocals_in_bin,~] = histcounts(cell2mat(T_class.Start_time),edges);
+            disp(['Vocalizations per bin for class ' cell2mat(model_class_DL.Layers(25, 1).ClassNames(j)) ' :'])
+            for k=1:num_of_bins
+                disp(['Bin_' num2str(k) '(' num2str(edges(k)) '-' num2str(edges(k+1)) 's): ' num2str(num_vocals_in_bin(k))])
+            end
+        end
+        
+    end
+    
+else
+    disp('No real vocalizations detected in this file')
+end

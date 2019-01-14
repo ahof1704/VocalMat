@@ -1,32 +1,52 @@
-%clc
-%clear all
-%Setting up
-plot_stats_per_bin=1
-scatter_step=3
-save_plot_spectrograms=1 % Plots the spectograms with axes
-save_histogram_per_animal=0
-save_excel_file=1
-save_plot_3d_info=0
-axes_dots=1 % Show the dots overlapping the vocalization (segmentation)
-size_spectrogram = [227 227]
-use_DL = 1
-bin_size = 300 %in seconds
+% ----------------------------------------------------------------------------------------------
+% -- Title       : VocalMat Classifier
+% -- Project     : VocalMat - Automated Tool for Mice Vocalization Detection and Classification
+% ----------------------------------------------------------------------------------------------
+% -- File        : vocalmat_classifier.m
+% -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
+% -- Standard    : <MATLAB 2018a>
+% ----------------------------------------------------------------------------------------------
+% -- Copyright (c) 2018 Dietrich Lab - Yale University
+% ----------------------------------------------------------------------------------------------
+
+size_spectrogram = [227 227];
+
+% -- 0 = off; 1 = on.
+use_DL                    = 1;
+plot_stats_per_bin        = 1;
+save_plot_spectrograms    = 0; % plots the spectograms with axes
+axes_dots                 = 1; % show the dots overlapping the vocalization (segmentation)
+save_excel_file           = 1;
+save_plot_3d_info         = 0;
+
+% -- variable parameter sizes
+scatter_step              = 3; % plot every third point overlapping the vocalization (segmentation)
+bin_size                  = 300; % in seconds
+
+disp('[vocalmat - classifier]: List of parameters to be used in this analysis (1 = On; 0 = Off) :')
+disp('|==========================================|');
+disp(['| Bin size (in seconds)              : ' num2str(bin_size) ' |']);
+disp(['| Save Excel file                    :  ' num2str(save_excel_file) '  |']);
+disp(['| Save spectrogram segmentation plot :  ' num2str(save_plot_spectrograms) '  |']);
+disp(['| |- Plot axe dots (segmentation)    :  ' num2str(axes_dots) '  |']);
+disp(['| |- Scatter plot step size          :  ' num2str(scatter_step) '  |']);
+disp('|==========================================|');
 
 raiz = pwd;
-model_class_DL = load('Mdl_categorical_DL.mat')
+model_class_DL = load('Mdl_categorical_DL.mat');
 model_class_DL = model_class_DL.netTransfer;
 
-vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
-cd(vpathname);
-list = dir('*output*.mat');
+%[vfilename,vpathname] = uigetfile({'*.mat'},'Select the output file')
+%cd(vpathname);
+%list = dir('*output*.mat');
 %diary(['Summary_classifier' num2str(horzcat(fix(clock))) '.txt'])
 
 %Setting up
-p = mfilename('fullpath')
-vfile = fullfile(vpathname,vfilename)
+p = mfilename('fullpath');
+vfile = fullfile(vpathname,vfilename);
 fprintf('\n')
-disp(['Reading ' vfilename])
-load(vfile);
+%disp(['Reading ' vfilename])
+%load(vfile);
 
 %We are gonna get only 10 points (time stamps) to classify the vocalization
 %Grimsley, Jasmine, Marie Gadziola, and Jeff James Wenstrup. "Automated classification of mouse pup isolation syllables: from cluster analysis to an Excel-based �mouse pup syllable classification calculator�."
@@ -326,20 +346,20 @@ if use_DL==1
 end
 
 % 
-chevron_count     = sum(strcmp(B.DL_out,'chevron'));
-complex_count     = sum(strcmp(B.DL_out,'complex'));
-down_fm_count     = sum(strcmp(B.DL_out,'down_fm'));
-flat_count        = sum(strcmp(B.DL_out,'flat'));
-mult_steps_count  = sum(strcmp(B.DL_out,'mult_steps'));
-noise_count       = sum(strcmp(B.DL_out,'noise_dist'));
+chevron_count = sum(strcmp(B.DL_out,'chevron'));
+complex_count = sum(strcmp(B.DL_out,'complex'));
+down_fm_count = sum(strcmp(B.DL_out,'down_fm'));
+flat_count = sum(strcmp(B.DL_out,'flat'));
+mult_steps_count = sum(strcmp(B.DL_out,'mult_steps'));
+noise_count = sum(strcmp(B.DL_out,'noise_dist'));
 rev_chevron_count = sum(strcmp(B.DL_out,'rev_chevron'));
-short_count       = sum(strcmp(B.DL_out,'short'));
-step_down_count   = sum(strcmp(B.DL_out,'step_down'));
-step_up_count     = sum(strcmp(B.DL_out,'step_up'));
-two_steps_count   = sum(strcmp(B.DL_out,'two_steps'));
-up_fm_count       = sum(strcmp(B.DL_out,'up_fm'));
-noise_dist_count  = sum(strcmp(B.DL_out,'noise_dist'));
-harmonic_count    = unique(harmonic_count);
+short_count = sum(strcmp(B.DL_out,'short'));
+step_down_count = sum(strcmp(B.DL_out,'step_down'));
+step_up_count = sum(strcmp(B.DL_out,'step_up'));
+two_steps_count = sum(strcmp(B.DL_out,'two_steps'));
+up_fm_count = sum(strcmp(B.DL_out,'up_fm'));
+noise_dist_count = sum(strcmp(B.DL_out,'noise_dist'));
+harmonic_count = unique(harmonic_count);
 noisy_vocal_count = unique(noisy_vocal_count);
 
 disp(['Total number of vocalizations: ' num2str(size(time_vocal,2)-noise_dist_count) ' vocalizations (' num2str(noise_dist_count) ' were noise)']);
@@ -353,9 +373,9 @@ if save_excel_file==1
     %     names2 = model_class_DL_RF.ClassNames;
     names = [{'Names_vocal'};{'Start_time'}; {'End_time'}; {'Inter_vocal_interval'}; {'Inter_real_vocal_interval'}; {'Duration'}; {'min_freq_main'}; {'max_freq_main'};{'mean_freq_main'};{'Bandwidth'};{'min_freq_total'};...
         {'max_freq_total'};{'mean_freq_total'};{'min_intens_total'};{'max_intens_total'}; {'corrected_max_intens_total'};{'Background_intens'};{'mean_intens_total'};{'Class'};{'Harmonic'};{'Noisy'}];
-    tabela      = zeros(size(B,1),size(names,1));
+    tabela = zeros(size(B,1),size(names,1));
     tabela(:,1) = 1:size(B,1);
-    tabela      = num2cell(tabela);
+    tabela = num2cell(tabela);
     
     if ~isempty(noisy_vocal_count)
         tabela(noisy_vocal_count,21)= {1};
@@ -373,28 +393,28 @@ if save_excel_file==1
         else
             time_interval(i) = NaN;
         end
-        duration(i)          = time_end(i)-time_start(i);
+        duration(i) = time_end(i)-time_start(i);
         if ~isempty(curr_freq_total{i}), min_freq_main(i) = min(curr_freq_total{i}); else min_freq_main(i) = NaN; end
         if ~isempty(curr_freq_total{i}), max_freq_main(i) = max(curr_freq_total{i}); else max_freq_main(i) = NaN; end
-        mean_freq_main(i)    = mean(curr_freq_total{i});
-        min_freq_total(i)    = min(tabela_all_points{i}(:,2));
-        max_freq_total(i)    = max(tabela_all_points{i}(:,2));
-        mean_freq_total(i)   = mean(tabela_all_points{i}(:,2));
-        min_intens_total(i)  = min(tabela_all_points{i}(:,3));
-        max_intens_total(i)  = max(tabela_all_points{i}(:,3));
+        mean_freq_main(i) = mean(curr_freq_total{i});
+        min_freq_total(i) = min(tabela_all_points{i}(:,2));
+        max_freq_total(i) = max(tabela_all_points{i}(:,2));
+        mean_freq_total(i) = mean(tabela_all_points{i}(:,2));
+        min_intens_total(i) = min(tabela_all_points{i}(:,3));
+        max_intens_total(i) = max(tabela_all_points{i}(:,3));
         mean_intens_total(i) = mean(tabela_all_points{i}(:,3));
     end
     
-    tabela(:,19)    = B.DL_out;
+    tabela(:,19) = B.DL_out;
     
-    noise_idx       = strcmp(tabela(:,18),'noise_dist');
+    noise_idx = strcmp(tabela(:,18),'noise_dist');
     time_start_real = time_start; time_start_real(noise_idx) = NaN;
-    time_end_real   = time_end; time_end_real(noise_idx)     = NaN;
-    curr_time       = NaN;
+    time_end_real = time_end; time_end_real(noise_idx) = NaN;
+    curr_time = NaN;
     for i=1:size(time_start_real,2)
         if ~isnan(time_start_real(i))
             time_interval_real(i) = time_start_real(i) - curr_time;
-            curr_time             = time_end_real(i);
+            curr_time = time_end_real(i);
         else
             time_interval_real(i) = NaN;
         end
@@ -410,24 +430,24 @@ if save_excel_file==1
     median_stats = median_stats(median_stats(:,1)>0,:);
     
     
-    tabela(:,2)                = num2cell(time_start');
-    tabela(:,3)                = num2cell(time_end');
-    tabela(:,4)                = num2cell(time_interval');
-    tabela(:,5)                = num2cell(time_interval_real');
-    tabela(:,6)                = num2cell(duration');
-    tabela(:,7)                = num2cell(min_freq_main');
-    tabela(:,8)                = num2cell(max_freq_main');
-    tabela(:,9)                = num2cell(mean_freq_main');
-    tabela(:,10)               = num2cell(max_freq_main'-min_freq_main');
-    tabela(:,11)               = num2cell(min_freq_total');
-    tabela(:,12)               = num2cell(max_freq_total');
-    tabela(:,13)               = num2cell(mean_freq_total');
-    tabela(:,14)               = num2cell(min_intens_total');
-    tabela(:,15)               = num2cell(max_intens_total');
+    tabela(:,2) = num2cell(time_start');
+    tabela(:,3) = num2cell(time_end');
+    tabela(:,4) = num2cell(time_interval');
+    tabela(:,5) = num2cell(time_interval_real');
+    tabela(:,6) = num2cell(duration');
+    tabela(:,7) = num2cell(min_freq_main');
+    tabela(:,8) = num2cell(max_freq_main');
+    tabela(:,9) = num2cell(mean_freq_main');
+    tabela(:,10) = num2cell(max_freq_main'-min_freq_main');
+    tabela(:,11) = num2cell(min_freq_total');
+    tabela(:,12) = num2cell(max_freq_total');
+    tabela(:,13) = num2cell(mean_freq_total');
+    tabela(:,14) = num2cell(min_intens_total');
+    tabela(:,15) = num2cell(max_intens_total');
     corrected_max_intens_total = max_intens_total' - median_stats(:,7);
-    tabela(:,16)               = num2cell(corrected_max_intens_total);
-    tabela(:,17)               = num2cell(median_stats(:,7)');
-    tabela(:,18)               = num2cell(mean_intens_total');
+    tabela(:,16) = num2cell(corrected_max_intens_total);
+    tabela(:,17) = num2cell(median_stats(:,7)');
+    tabela(:,18) = num2cell(mean_intens_total');
     
     names = transpose(names);
     T = array2table(tabela);
@@ -473,3 +493,4 @@ if size(T_no_noise,1)>0
 else
     disp('No real vocalizations detected in this file')
 end
+

@@ -2,8 +2,7 @@
 % -- Title       : VocalMat Identifier
 % -- Project     : VocalMat - Automated Tool for Mice Vocalization Detection and Classification
 % ----------------------------------------------------------------------------------------------
-% -- File        : identifier.m
-% -- Author      : vocalmat <vocalmat@yale.edu>
+% -- File        : vocalmat_identifier.m
 % -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
 % -- Standard    : <MATLAB 2018a>
 % ----------------------------------------------------------------------------------------------
@@ -58,6 +57,7 @@
 % -- (1) SETUP BEGIN ---------------------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
 raiz = pwd;
+disp('[vocalmat]: choose the audio file to be analyzed.');
 [vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
 cd(vpathname);
 p = mfilename('fullpath');

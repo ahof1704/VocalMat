@@ -12,7 +12,6 @@ size_spectrogram = [227 227];
 use_DL = 1;
 bin_size = 300; %in seconds
 disp('List of parameters used in this analysis:')
-dispzz
 
 raiz = pwd;
 model_class_DL = load('Mdl_categorical_DL.mat');

@@ -10,22 +10,33 @@
 % -- Copyright (c) 2018 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
 
-% todo for paper
-% check dependencies
-% check paths
-% check github for update
-
 disp('[vocalmat]: Starting VocalMat')
 
-current_path = pwd;
+% -- add paths to matlab and setup for later use
+root_path    = pwd;
+identifier_path = fullfile(root_path, 'vocalmat_identifier');
+classifier_path = fullfile(root_path, 'vocalmat_classifier');
+addpath(genpath(root_path));
 
-path_identifier = fullfile(current_path, 'vocalmat_identifier');
-path_classifier = fullfile(current_path, 'vocalmat_classifier');
+% -- check for updates
+vocalmat_github_version = strsplit(webread('https://raw.githubusercontent.com/ahof1704/VocalMat/VocalMat_RC/README.md'));
+vocalmat_github_version = vocalmat_version{end-1};
+vocalmat_local_version  = strsplit(fscanf(fopen(fullfile('.','README.md'), '%c')));
+vocalmat_local_version  = vocalmat_local_version{end-1};
+if ~strcmp(vocalmat_local_version, vocalmat_github_version)
+    disp(['[vocalmat]: There is a new version of VocalMat available'])
+    disp(['[vocalmat]: Update by running git pull from the terminal or visit our github page: https://github.com/ahof1704/VocalMat/tree/VocalMat_RC'])
+end
 
-addpath(genpath(current_path));
+% -- check dependencies
+try
+    verLessThan('nnet','1');
+catch
+    error('Please download the Deep Learning Toolbox')
+end
 
 disp(['[vocalmat]: Starting VocalMat Identifier...'])
-run('vocalmat_identifier.m')
+cd(fullfile(root_path, 'audios')); run('vocalmat_identifier.m')
 
 disp(['[vocalmat]: Starting VocalMat Classifier...'])
-srun('vocalmat_classifier.m')
+cd(classifier_path); srun('vocalmat_classifier.m')

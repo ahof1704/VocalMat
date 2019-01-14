@@ -47,11 +47,8 @@ Temporary Items
 .apdisk
 
 # Custom
-*.wav
-*.WAV
 *.ignore
 *.reports
-*.mat
 *.ai
 *.dataset
 outputs/*/
@@ -60,3 +57,6 @@ vocalmat_classifier/training/.raw_models/*
 vocalmat_classifier/training/.trained_models/*
 vocalmat_classifier/training/.dataset/*
 vocalmat_classifier/training/.cluster-scripts/*
+vocalmat_classifier/training/model_alexnet_scratch_all.mat
+vocalmat_classifier/training/model_alexnet_scratch_fc.mat
+vocalmat_classifier/training/models_stats_all.mat

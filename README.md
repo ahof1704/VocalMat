@@ -176,4 +176,4 @@ If you use VocalMat or any part of it in your own work, please cite [Fonseca et 
     year =         ""
 }
 ```
-<p hidden>#version-control: 1.0</p>
+<p hidden>version-control: 1.0 </p>

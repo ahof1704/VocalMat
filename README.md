@@ -52,7 +52,7 @@
 
 
 ## Features
-- __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations, according to adapted definitions from [Grimsley et al, 2011](#paper).
+- __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations, according to adapted definitions from [Grimsley et al, 2011](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017460).
 - __Noise Detection:__ eliminates vocalization candidates associated to mechanical or segmentation noise.
 - __Harmonic Detection:__ detects vocalizations with components overlapping in time.
 - __Fast Performance:__ optimized versions for personal computers and high-performance computing (clusters)
@@ -67,7 +67,7 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 
 #### Requirements
 ##### Recording Requirements
-- __Recording protocol:__ follow the protocol established by [Name et al](#paper).
+- __Recording protocol:__ follow the protocol established by [Ferhat et al, 2016](https://www.jove.com/pdf/53871/jove-protocol-53871-recording-mouse-ultrasonic-vocalizations-to-evaluate-social).
 - __Sampling rate:__ all recordings must have a sampling rate of 250kHz (Fmax=125kHz).
 
 ##### Software Requirements
@@ -103,7 +103,7 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 
 #### `VocalMat` Output Files
 
-<p align="justify">VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there will be two directories (<i>All</i>, <i>All_axes</i>), and two Microsoft Excel (.xlsx) files. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resuting segmentation illusrated by sparsed blue dots. The raw original images are available inside <i>All</i>. The main Excel file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy) and call type.
+<p align="justify">VocalMat outputs a directory with the same name of the audio file that was processed. Inside that directory there will be two directories (<i>All</i>, <i>All_axes</i>), and two Microsoft Excel (.xlsx) files. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resuting segmentation illusrated by sparsed blue dots. The raw original images are available inside <i>All</i>. The main Excel file has the same name of the audio file analyzed (<i>audio_file_name</i>.xlsx). This file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy) and call type. The second excel file named as <i>audio_file_name</i>_DL.xlsx shows the probability distribution for each vocalization candidate across the different labels.
 
 #### Personal Use (bash script)
 ```bash

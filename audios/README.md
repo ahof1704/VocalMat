@@ -16,13 +16,13 @@
     <br />
     <!-- MATLAB version -->
     <a href="https://www.mathworks.com/products/matlab.html">
-    <img src="https://img.shields.io/badge/MATLAB-2017a%7C2017b%7C2018a-blue.svg?style=flat-square"
+    <img src="https://img.shields.io/badge/MATLAB-2017a%7C2018b-blue.svg?style=flat-square"
       alt="MATLAB tested versions" />
     </a>
     <!-- LICENSE -->
     <a href="#">
-    <img src="https://img.shields.io/badge/license-whatever-orange.svg?style=flat-square"
-      alt="MATLAB tested versions" />
+    <img src="https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square"
+      alt="Apache License 2.0" />
     </a>
     <br />
 </div>

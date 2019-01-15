@@ -470,7 +470,7 @@ if size(T_no_noise,1)>0
     
     
     
-    disp(['Vocalizations per bin (not considering noise):'])
+    disp(['[vocalmat][classifier]: vocalizations per bin (not considering noise):'])
     for k=1:num_of_bins
         disp(['Bin_' num2str(k) '(' num2str(edges(k)) '-' num2str(edges(k+1)) 's): ' num2str(num_vocals_in_bin(k))])
     end
@@ -482,7 +482,7 @@ if size(T_no_noise,1)>0
             aux = strcmp(T.Class,model_class_DL.Layers(25, 1).ClassNames (j));
             T_class = T(aux,:);
             [num_vocals_in_bin,~] = histcounts(cell2mat(T_class.Start_time),edges);
-            disp(['Vocalizations per bin for class ' cell2mat(model_class_DL.Layers(25, 1).ClassNames(j)) ' :'])
+            disp(['[vocalmat][classifier]: vocalizations per bin for class ' cell2mat(model_class_DL.Layers(25, 1).ClassNames(j)) ' :'])
             for k=1:num_of_bins
                 disp(['Bin_' num2str(k) '(' num2str(edges(k)) '-' num2str(edges(k+1)) 's): ' num2str(num_vocals_in_bin(k))])
             end

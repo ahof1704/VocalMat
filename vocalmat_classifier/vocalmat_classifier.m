@@ -23,7 +23,7 @@ save_plot_3d_info         = 0;
 scatter_step              = 3; % plot every third point overlapping the vocalization (segmentation)
 bin_size                  = 300; % in seconds
 
-disp('[vocalmat - classifier]: List of parameters to be used in this analysis (1 = On; 0 = Off) :')
+disp('[vocalma][classifier]: list of parameters to be used in this analysis (1 = On; 0 = Off) :')
 disp('|==========================================|');
 disp(['| Bin size (in seconds)              : ' num2str(bin_size) ' |']);
 disp(['| Save Excel file                    :  ' num2str(save_excel_file) '  |']);
@@ -72,7 +72,7 @@ max_prom = [];
 max_prom2 = [];
 duration = [];
 
-disp('Checking for empty cells')
+% disp('[vocalmat][classifier]: checking for empty cells')
 time_vocal = time_vocal(~cellfun('isempty',time_vocal));
 freq_vocal = freq_vocal(~cellfun('isempty',freq_vocal));
 intens_vocal = intens_vocal(~cellfun('isempty',intens_vocal));
@@ -84,7 +84,7 @@ if ~exist(vfilename, 'dir')
 end
 cd(vfilename)
 
-disp('Running analysis!')
+disp('[vocalmat][classifier]: running analysis!')
 
 for k=1:size(time_vocal,2)
     
@@ -362,7 +362,7 @@ noise_dist_count = sum(strcmp(B.DL_out,'noise_dist'));
 harmonic_count = unique(harmonic_count);
 noisy_vocal_count = unique(noisy_vocal_count);
 
-disp(['Total number of vocalizations: ' num2str(size(time_vocal,2)-noise_dist_count) ' vocalizations (' num2str(noise_dist_count) ' were noise)']);
+disp(['[vocalmat][classifier]: total number of vocalizations: ' num2str(size(time_vocal,2)-noise_dist_count) ' vocalizations (' num2str(noise_dist_count) ' were noise)']);
 
 for j=1:size(model_class_DL.Layers(25,1).ClassNames)
     eval(['disp([''' cell2mat(model_class_DL.Layers(25,1).ClassNames(j)) ': '' num2str('  cell2mat(model_class_DL.Layers(25,1).ClassNames(j)) '_count)])'])
@@ -491,6 +491,6 @@ if size(T_no_noise,1)>0
     end
     
 else
-    disp('No real vocalizations detected in this file')
+    disp('[vocalmat][classifier]: no real vocalizations detected in this file.')
 end
 

@@ -537,11 +537,11 @@ if size(time_vocal,2)>0
         intens_vocal{k} = temp;
     end
 
+    vfilename  = vfilename(1:end-4);
     if save_output_files == 1
         disp(['[vocalmat]: saving output files.'])
         % -- output identified vocalizations
         cd(fullfile(root_path, 'outputs'))
-        vfilename  = vfilename(1:end-4);
         
         save(['output_short_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats')
         

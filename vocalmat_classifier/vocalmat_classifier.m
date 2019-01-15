@@ -23,7 +23,7 @@ save_plot_3d_info         = 0;
 scatter_step              = 3; % plot every third point overlapping the vocalization (segmentation)
 bin_size                  = 300; % in seconds
 
-disp('[vocalma][classifier]: list of parameters to be used in this analysis (1 = On; 0 = Off) :')
+disp('[vocalmat][classifier]: list of parameters to be used in this analysis (1 = On; 0 = Off) :')
 disp('|==========================================|');
 disp(['| Bin size (in seconds)              : ' num2str(bin_size) ' |']);
 disp(['| Save Excel file                    :  ' num2str(save_excel_file) '  |']);

@@ -82,12 +82,11 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 - __vocalmat_identifier:__ everything related to the VocalMat Identifier
 - __vocalmat_classifier:__ everything related to the VocalMat Classifier
 - __audios:__ place the audio files you want to process in the `audios` directory
-- __outputs:__ all output files from VocalMat will be placed in the `outputs` directory. __I think we should remove this__
 
 ## Usage
 
 #### `VocalMat` Manual Execution
-<p align="justify">Navigate to the root directory in MATLAB and run <i>VocalMat.m</i> by either opening the file or typing VocalMat in MATLAB's command window. Once VocalMat is running, choose the audio file you want to analyze. One example audio file is provided with VocalMat, you can use it to see how VocalMat works.
+<p align="justify">Navigate to the VocalMat directory in MATLAB and run <i>VocalMat.m</i> by either opening the file or typing VocalMat in MATLAB's command window. Once VocalMat is running, choose the audio file you want to analyze. An example audio file is provided, and you can use it to see how VocalMat works.
 
 <!-- The <i>Identifier</i> will output two .MAT files in the same directory that the audio file is in, <i>output_*.mat</i> (which contains the spectrograms content and detailed spectral features for each vocalization) and <i>output_shorter_*.mat</i> (same information, except the spectrogram content). The <i>Classifier</i> will create a directory with its outputs (vocalizations and classifications) in that same directory that the audio file is in. -->
 

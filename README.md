@@ -73,22 +73,10 @@ $ git clone https://github.com/ahof1704/VocalMat.git
 ##### Software Requirements
 - __MATLAB:__ versions 2017a through 2018b. For other versions refer to the [FAQ](#faq).
 - __MATLAB Add-Ons:__
-    - Computer Vision System Toolbox
-    - Control System Toolbox
-    - Curve Fitting Toolbox
-    - Deep Neural Network
-    - DSP System Toolbox
-    - Fuzzy Logic Toolbox
-    - Image Processing Toolbox
-    - Instrument Control Toolbox
-    - Neural Network Toolbox
-    - Optimization Toolbox
-    - Parallel Computing Toolbox
-    - Simulink
-    - Simulink Control Design
     - Signal Processing Toolbox
+    - Deep Learning Toolbox
+    - Image Processing Toolbox
     - Statistics and Machine Learning Toolbox
-    - Symbolic Math Toolbox
 
 #### Directory Structure
 - __vocalmat_identifier:__ everything related to the VocalMat Identifier

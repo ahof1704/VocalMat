@@ -62,6 +62,9 @@ disp('[vocalmat]: choose the audio file to be analyzed.');
 cd(vpathname);
 p = mfilename('fullpath');
 
+% -- save the output from the identifier, in case you only want to rerun the classifier
+save_output_files = 0;
+
 % -- max_interval: maximum allowed interval between points to be considered part of one vocalization
 max_interval = 20;
 
@@ -534,15 +537,17 @@ if size(time_vocal,2)>0
         intens_vocal{k} = temp;
     end
 
-    disp(['[vocalmat]: saving output files.'])
-    % -- output identified vocalizations
-    cd([vpathname '../outputs/' ])
-    vfilename  = vfilename(1:end-4);
-    
-    save(['output_short_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats')
-    
-    if save_spectrogram_background == 1
-        save(['output_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats', 'A_total', '-v7.3', '-nocompression')
+    if save_output_files == 1
+        disp(['[vocalmat]: saving output files.'])
+        % -- output identified vocalizations
+        cd(fullfile(root_path, 'outputs'))
+        vfilename  = vfilename(1:end-4);
+        
+        save(['output_short_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats')
+        
+        if save_spectrogram_background == 1
+            save(['output_' vfilename], 'T_orig', 'F_orig', 'time_vocal', 'freq_vocal', 'vfilename', 'intens_vocal', 'median_stats', 'A_total', '-v7.3', '-nocompression')
+        end
     end
     
     warning('off', 'MATLAB:save:sizeTooBigForMATFile')

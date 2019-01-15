@@ -14,10 +14,9 @@ size_spectrogram = [227 227];
 % -- 0 = off; 1 = on.
 use_DL                    = 1;
 plot_stats_per_bin        = 1;
-save_plot_spectrograms    = 0; % plots the spectograms with axes
+save_plot_spectrograms    = 1; % plots the spectograms with axes
 axes_dots                 = 1; % show the dots overlapping the vocalization (segmentation)
 save_excel_file           = 1;
-save_plot_3d_info         = 0;
 
 % -- variable parameter sizes
 scatter_step              = 3; % plot every third point overlapping the vocalization (segmentation)

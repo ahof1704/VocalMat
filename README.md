@@ -21,8 +21,8 @@
     </a>
     <!-- LICENSE -->
     <a href="#">
-    <img src="https://img.shields.io/badge/license-whatever-orange.svg?style=flat-square"
-      alt="MATLAB tested versions" />
+    <img src="https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square"
+      alt="Apache License 2.0" />
     </a>
     <br />
 </div>
@@ -144,13 +144,13 @@ $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 ## License
 <div>
     <a href="#">
-    <img src="https://img.shields.io/badge/license-whatever-orange.svg?style=flat-square"
-      alt="MATLAB tested versions" />
+    <img src="https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square"
+      alt="Apache License 2.0" />
     </a>
 </div>
 
-- **[whatever license](#)**
-- Copyright 2018 © <a href="http://www.dietrich-lab.org" target="_blank">Dietrich Lab</a>.
+- **[Apache License 2.0](https://github.com/ahof1704/VocalMat/blob/VocalMat_RC/LICENSE)**
+- Copyright 2019 © <a href="http://www.dietrich-lab.org" target="_blank">Dietrich Lab</a>.
 
 If you use VocalMat or any part of it in your own work, please cite [Fonseca et al](#):
 ```

@@ -47,9 +47,9 @@
 
 ![VocalMat Workflow](vocalmat.png)
 
-<p align="justify"> VocalMat Identifier detects vocalization candidates in the audio file. Vocalization candidates are detected through a series of morphological operations and differential geometry analysis of the spectrogram. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) with information about the spectral content of detected vocalizations (e.g., frequency, intensity, timestamp), that is later used by the VocalMat Classifier.
+<p align="justify"> VocalMat <b>Identifier</b> detects vocalization candidates in the audio file. Vocalization candidates are detected through a series of morphological operations and differential geometry analysis of the spectrogram. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) with information about the spectral content of detected vocalizations (e.g., frequency, intensity, timestamp), that is later used by the VocalMat Classifier.
 
-<p align="justify"> VocalMat Classifier uses a Convolutional Neural Network (CNN) to classify each vocalization candidate into 12 distinct labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, complex, multi steps, two steps, step down, step up, and noise.
+<p align="justify"> VocalMat <b>Classifier</b> uses a Convolutional Neural Network (CNN) to classify each vocalization candidate into 12 distinct labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, complex, multi steps, two steps, step down, step up, and noise.
 
 
 ## Features
@@ -89,9 +89,9 @@ Place the audio file in the `audios` folder inside the VocalMat directory.
 Place the model file in the `vocalmat_classifier` folder inside the VocalMat directory.
 
 #### Directory Structure
-- __vocalmat_identifier:__ everything related to the VocalMat Identifier
-- __vocalmat_classifier:__ everything related to the VocalMat Classifier
-- __audios:__ place the audio files you want to process in the `audios` directory
+- __vocalmat_identifier:__ Directory with all files and scripts related to the VocalMat Identifier
+- __vocalmat_classifier:__ Directory with all files and scripts related to the VocalMat Classifier
+- __audios:__ Directory with audio files you want to analyze in the `audios` directory
 
 ## Usage
 
@@ -102,7 +102,7 @@ Place the model file in the `vocalmat_classifier` folder inside the VocalMat dir
 
 #### `VocalMat` Output Files
 
-<p align="justify">VocalMat outputs a directory with the same name as the audio file that was analyzed. Inside that directory there will be two directories (<i>All</i>, <i>All_axes</i>), and two Microsoft Excel (.xlsx) files. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resuting segmentation illusrated by sparsed blue dots. The raw original images are available inside <i>All</i>. The main Excel file has the same name of the audio file analyzed (<i>audio_file_name</i>.xlsx). This file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy) and call type. The second excel file named as <i>audio_file_name</i>_DL.xlsx shows the probability distribution for each vocalization candidate across the different labels.
+<p align="justify">VocalMat outputs a directory with the same name as the audio file that was analyzed. Inside that directory there will be two directories (<i>All</i>, <i>All_axes</i>), and two Microsoft Excel (.xlsx) files. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resulting segmentation illusrated by sparsed blue dots. The raw original images are available inside <i>All</i>. The main Excel file has the same name of the audio file analyzed (<i>audio_file_name</i>.xlsx). This file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy) and call type. The second excel file named as <i>audio_file_name</i>_DL.xlsx shows the probability distribution for each vocalization candidate across the different labels.
 
 #### Personal Use (bash script)
 ```bash

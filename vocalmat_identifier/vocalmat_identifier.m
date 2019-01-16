@@ -6,7 +6,7 @@
 % -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
 % -- Standard    : <MATLAB 2018a>
 % ----------------------------------------------------------------------------------------------
-% -- Copyright (c) 2018 Dietrich Lab - Yale University
+% -- Copyright (c) 2019 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
 % -- Description: The VocalMat Identifier is responsible for identifying possible vocalizations 
 % -- in the provided audio file. Candidates for vocalization are further analyzed and regions
@@ -68,6 +68,11 @@ save_spectrogram_background = 1;
 
 % -- local_median: option to use the local median method to detect noise
 local_median = 1;
+
+if ~save_output_files
+    disp('[vocalmat][identifier]: the output files from VocalMat Identifier will not be saved to disk (default behavior).')
+    disp('                        to change this, modify ''save_output_files'' from 0 to 1 in vocalmat_identifier.m.');
+end
 
 % -- tic: start runtime counter
 tic

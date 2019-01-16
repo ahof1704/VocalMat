@@ -3,11 +3,10 @@
 % -- Project     : VocalMat - Automated Tool for Mice Vocalization Detection and Classification
 % ----------------------------------------------------------------------------------------------
 % -- File        : VocalMat.m
-% -- Author      : vocalmat <vocalmat@yale.edu>
 % -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
 % -- Standard    : <MATLAB 2018a>
 % ----------------------------------------------------------------------------------------------
-% -- Copyright (c) 2018 Dietrich Lab - Yale University
+% -- Copyright (c) 2019 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
 
 disp('[vocalmat]: starting VocalMat.')

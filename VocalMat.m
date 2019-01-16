@@ -23,16 +23,26 @@ vocalmat_github_version = strsplit(webread('https://raw.githubusercontent.com/ah
 vocalmat_github_version = vocalmat_github_version{end-1};
 vocalmat_local_version  = strsplit(fscanf(fopen(fullfile('.','README.md'), 'r'), '%c'));
 vocalmat_local_version  = vocalmat_local_version{end-1};
-if ~strcmp(vocalmat_local_version, vocalmat_github_version)
-    disp(['[vocalmat]: there is a new version of VocalMat available'])
-    disp(['[vocalmat]: update by running git pull from the terminal or visit our github page: https://github.com/ahof1704/VocalMat/tree/VocalMat_RC'])
+if ~strcmp(vocalmat_local_version, vocalmat_github_version)    
+    
+    opts.Interpreter = 'tex';
+    opts.Default     = 'Continue';
+    btnAnswer        = questdlg('There is a new version of VocalMat available. For more information, visit github.com/ahof1704/VocalMat', ...
+                                'New Version of VocalMat Available', ...
+                                'Continue', 'Exit', opts);
+    switch btnAnswer
+        case 'Exit'
+            error('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/VocalMat_RC">GitHub page</a>. ') 
+        case 'Continue'
+            warning('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/VocalMat_RC">GitHub page</a>. ') 
+    end
 end
 
 % -- check dependencies
 disp('[vocalmat]: verifying MATLAB toolboxes needed to run');
 
 try
-    verLessThan('signal','1');
+    verLessThan('signal','1 ');
 catch
     error('[vocalmat]: please download the Signal Processing Toolbox')
 end

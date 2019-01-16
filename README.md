@@ -32,6 +32,7 @@
 - [Features](#features)
 - [Getting Started](#getting-started)
 - [Usage](#usage)
+- [Requirements](#requirements)
 - [FAQ](#faq)
 - [License](#license)
 
@@ -61,22 +62,31 @@
 ![Recordit GIF](clone.gif)
 
 #### Latest Stable Release
+
+##### Cloning from the terminal
 ```bash
 $ git clone https://github.com/ahof1704/VocalMat.git
 ```
+##### Using a Git client
+You can use a Git client to clone our repository, we recommend GitHub's own client:
+```
+Download at: https://desktop.github.com
+```
 
-#### Requirements
-##### Recording Requirements
-- __Recording protocol:__ follow the protocol established by [Ferhat et al, 2016](https://www.jove.com/pdf/53871/jove-protocol-53871-recording-mouse-ultrasonic-vocalizations-to-evaluate-social).
-- __Sampling rate:__ all recordings must have a sampling rate of 250kHz (Fmax=125kHz).
+##### Manual download
+You can download VocalMat by using GitHub's `Download Zip` option. However, since we use Git LFS (Git Large File Storage), two necessary files will not be downloaded automatically. Follow these instructions if downloading manually:
 
-##### Software Requirements
-- __MATLAB:__ versions 2017a through 2018b. For other versions refer to the [FAQ](#faq).
-- __MATLAB Add-Ons:__
-    - Signal Processing Toolbox
-    - Deep Learning Toolbox
-    - Image Processing Toolbox
-    - Statistics and Machine Learning Toolbox
+> Download this repository as a zip file: [Download Zip](https://github.com/ahof1704/VocalMat/archive/VocalMat_RC.zip)
+
+Extract the `.zip` file. This is the VocalMat directory.
+
+> Download the example audio file: [Download Audio](https://github.com/ahof1704/VocalMat/raw/VocalMat_RC/audios/audio_example.wav)
+
+Place the audio file in the `audios` folder inside the VocalMat directory.
+
+> Download the neural network model file: [Download Model](https://github.com/ahof1704/VocalMat/raw/VocalMat_RC/vocalmat_classifier/Mdl_categorical_DL.mat)
+
+Place the model file in the `vocalmat_classifier` folder inside the VocalMat directory.
 
 #### Directory Structure
 - __vocalmat_identifier:__ everything related to the VocalMat Identifier
@@ -131,12 +141,25 @@ or
 $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 ```
 
+## Requirements
+##### Recording Requirements
+- __Recording protocol:__ follow the protocol established by [Ferhat et al, 2016](https://www.jove.com/pdf/53871/jove-protocol-53871-recording-mouse-ultrasonic-vocalizations-to-evaluate-social).
+- __Sampling rate:__ all recordings must have a sampling rate of 250kHz (Fmax=125kHz).
+
+##### Software Requirements
+- __MATLAB:__ versions 2017a through 2018b. For other versions refer to the [FAQ](#faq).
+- __MATLAB Add-Ons:__
+    - Signal Processing Toolbox
+    - Deep Learning Toolbox
+    - Image Processing Toolbox
+    - Statistics and Machine Learning Toolbox
+
 ## FAQ
 - Will `VocalMat` work with my MATLAB version?
-<p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a, and 2018b versions. We cannot guarantee that it will work in other versions of MATLAB. If your MATLAB versions supports all the required Add-Ons, VocalMat should work.
+<p align="justify">VocalMat was developed and tested using MATLAB 2017a, 2017b, 2018a, and 2018b versions. We cannot guarantee that it will work in other versions of MATLAB. If your MATLAB version supports all the required Add-Ons, VocalMat should work.
 
 - What are the hardware requirements to run `VocalMat`?
-<p align="justify">The duration of the audio files that can you use in VocalMat is limited to the amount of RAM that you have in your computer. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, you should have at least 10GB of RAM available. RAM usage will vary depending on your MATLAB version and computer, these numbers are just estimates.
+<p align="justify">The duration of the audio files that can be processed in VocalMat is limited to the amount of RAM your computer has. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, your computer should have at least 10GB of RAM available. RAM usage will vary depending on your MATLAB version and computer, these numbers are just estimates.
 
 - Will `VocalMat` work with my HPC Cluster?
 <p align="justify"> In order for our script to work in your Cluster it must have Slurm support and have both deadSimpleQueue and MATLAB modules. We use the standard `module load` command to load modules. Minor changes might have to be made to adapt the script to your Cluster configuration.

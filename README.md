@@ -165,5 +165,5 @@ If you use VocalMat or any part of it in your own work, please cite [Fonseca et 
     year =         ""
 }
 ```
-![pixel](http://nebula.wsimg.com/336c52ffa2004b6e1e811e72f98861b0?AccessKeyId=9778B6E96DEE53B09D29&disposition=0&alloworigin=1&utm_source=github&utm_medium=pixel&utm_campaign=github)
+
 <!-- version-control: 1.0 -->

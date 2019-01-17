@@ -51,6 +51,7 @@
 
 <p align="justify"> VocalMat <b>Classifier</b> uses a Convolutional Neural Network (CNN) to classify each vocalization candidate into 12 distinct labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, complex, multi steps, two steps, step down, step up, and noise.
 
+![VocalMat labels](labels.png)
 
 ## Features
 - __11 Classification Classes:__ VocalMat is able to distinguish between 11 classes of vocalizations, according to adapted definitions from [Grimsley et al, 2011](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0017460).

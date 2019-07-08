@@ -256,7 +256,7 @@ if use_DL==1
             end
             set(gca,'fontsize', 18);
             frame = getframe(fig);
-            imwrite(frame.cdata, fullfile(vpathname , vfilename, 'All_axes', [num2str(id_vocal)  '.png']), 'png');
+            imwrite(frame.cdata, [vpathname '/' vfilename '/All_axes/' num2str(id_vocal)  '.png'], 'png');
             hold off;
             
             end
@@ -343,7 +343,8 @@ end
 
 if use_DL==1
 %     temp = [T_classProb];
-    writetable(T_classProb,[vfile '\' vfilename '_DL.xlsx'])
+%    writetable(T_classProb,[vfile '\' vfilename '_DL.xlsx'])
+    writetable(T_classProb,fullfile(vfile, [vfilename '_DL.xlsx']))
 end
 save T_classProb T_classProb
 % 
@@ -458,6 +459,7 @@ if save_excel_file==1
         delete([vfilename '.xlsx'])
     end
     
+%    writetable(T,[vfile '\' vfilename '.xlsx'])
     writetable(T,fullfile(vfile, [vfilename '.xlsx']))
 end
 

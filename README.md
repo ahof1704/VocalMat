@@ -64,10 +64,16 @@
 
 #### Latest Stable Release
 
-##### Cloning from the terminal
+##### Cloning from the terminal (master)
 ```bash
 $ git clone https://github.com/ahof1704/VocalMat.git
 ```
+
+##### Cloning from the terminal (latest)
+```bash
+$ git clone -b VocalMat_RC --single-branch https://github.com/ahof1704/VocalMat.git
+```
+
 ##### Using a Git client
 You can use a Git client to clone our repository, we recommend GitHub's own client:
 ```

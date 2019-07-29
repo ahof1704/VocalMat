@@ -55,7 +55,7 @@ cd(vpathname);
 p = mfilename('fullpath');
 
 % -- save the output from the identifier, in case you only want to rerun the classifier
-save_output_files = 1;
+save_output_files = 1; 
 
 % -- max_interval: maximum allowed interval between points to be considered part of one vocalization
 max_interval = 20;

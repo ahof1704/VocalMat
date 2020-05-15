@@ -1,0 +1,210 @@
+#!/bin/bash 
+
+##-.~.-TODO-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--
+## -- check if identifier exists
+## --
+## --
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Exporting for autocompletion
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+declare INPUT_FLAGS
+declare -r E_OPTERR=85
+declare -r ScriptName=${0##*/}
+declare -r ShortOpts="hM:e:c:m:t:s:p:d:x:C"
+declare -r LongOpts="help,matlab:,email:,cores:,mem:,time:,segment:,partition:,directory:,extension:,cluster"
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Script variables
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+export CLEAN_ALL=false;
+export MATLAB_VERSION="2017b"
+export CORES_TO_USE=10
+export MEM_TO_USE=32
+export TIME_TO_USE=30
+export EMAIL_CONFIG=""
+export PARTITIONS_TO_USE="scavenge,general"
+export AUDIO_FILES_DIR="audios"
+export AUDIO_FILE_EXTENSION=".wav|.WAV"
+export USE_CLUSTER=false;
+export SEGMENT_SIZE=1
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Help message function
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+usage() {
+    echo -e "Usage: ./`basename $0` [OPTIONS] --matlab [VERSION]" 1>&2
+    echo -e "\nGlobal options:"
+    echo -e "\t -M, --matlab           specify matlab version (2017a|2017b|2018a)   default: MUST SPECIFY"
+    echo -e "\t -h, --help:            shows this help message"
+    echo -e "\nYale Cluster options:"
+    echo -e "\t -C, --cluster          enable Yale Cluster usage"
+    echo -e "\t -e, --email            specify your email to receive updates"
+    echo -e "\t -c, --cores            number of cores to use                       default: 10"
+    echo -e "\t -m, --mem              amount of RAM per task to use (in GB)        default: 32"
+    echo -e "\t -t, --time             maximum time for task to run (in minutes)    default: 30"
+    echo -e "\t -p, --partition        cluster partition to use                     default: scavenge,general"
+    echo -e "\nAudio file options:"
+    echo -e "\t -s, --segment          specify segment size (in minutes)            default: 1"
+    echo -e "\t -d, --directory        specify audio files directory name           default: audios"
+    echo -e "\t -x, --extension        specify audio files extensions               default: .wav|.WAV"
+}
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Parse arguments
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+INPUT_FLAGS=$(getopt -o "${ShortOpts}" --long "${LongOpts}" --name "${ScriptName}" -- "${@}")
+
+if [[ ($? -ne 0) || ($# -eq 0) ]]; then
+    usage
+    exit $E_OPTERR
+fi
+
+eval set -- "${INPUT_FLAGS}"
+
+while true; do
+    case "${1}" in
+        -h|--help)
+            usage
+            exit 0;;
+        -M|--matlab)
+            MATLAB_VERSION="$2"
+            shift;;
+        -e|--email)
+            EMAIL_CONFIG="$2"
+            shift;;
+        -c|--cores)
+            CORES_TO_USE=$2
+            shift;;
+        -m|--mem)
+            MEM_TO_USE=$2
+            shift;;
+        -t|--time)
+            TIME_TO_USE=$2
+            shift;;
+        -s|--segment)
+            SEGMENT_SIZE=$2
+            shift;;
+        -p|--partition)
+            PARTITIONS_TO_USE=$2
+            shift;;
+        -d|--directory)
+            AUDIO_FILES_DIR="$2"
+            shift;;
+        -x|--extension)
+            AUDIO_FILE_EXTENSION="$2"
+            shift;;
+        -C|--cluster)
+            USE_CLUSTER=true;;
+        --) shift ; break ;;
+        *)
+            echo -e "Invalid parameter!"
+            usage
+            exit -1;;
+    esac
+    shift
+done
+shift $((OPTIND-1))
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Set path variables
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+export PROJECT_PATH=$(pwd)
+export AUDIO_FILES_PATH="${PROJECT_PATH}/audios"
+export IDENTIFIER_PATH="${PROJECT_PATH}/vocalmat_identifier"
+export CLASSIFIER_PATH="${PROJECT_PATH}/classifier"
+export OUTPUTS_PATH="${PROJECT_PATH}/outputs"
+export STDOUT_DIR="${OUTPUTS_PATH}/stdout"
+
+mkdir -p outputs/stdout
+# rm -r outputs
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Check for audio files.
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+NUMBER_AUDIO_FILES=`ls -1 ${AUDIO_FILES_PATH} | grep -iE '.wav|.WAV' | wc -l`
+echo -e "\n"
+echo -e "Number of available audio files: ${NUMBER_AUDIO_FILES}.\n"
+
+if [ $NUMBER_AUDIO_FILES -gt 0 ]; then
+    AUDIO_FILES_LIST=`ls -1 ${AUDIO_FILES_PATH} | grep -iE '.wav|.WAV'`
+    echo -e "Available audio files: \n${AUDIO_FILES_LIST}"
+else
+    echo -e "No audio files found, make sure there are .wav files in ${AUDIO_FILES_PATH}. Exiting."
+    exit -1
+fi
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Create job list file 
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+echo -e "\nCreating job list for audio files."
+rm jobs.txt
+max_duration=0
+for current_audio in $AUDIO_FILES_LIST
+    do
+        # get longest audio file duration to determine CORES_TO_USE
+        duration=$(soxi -D ${AUDIO_FILES_PATH}/${current_audio})
+        duration=${duration%.*}
+        [[ ${duration} -gt ${max_duration} ]] && max_duration="${duration}" || max_duration="${max_duration}"
+
+        echo -n "module load MATLAB/${MATLAB_VERSION}; " >> jobs.txt
+        echo -n "matlab -nodisplay -nosplash -nodesktop -r " >> jobs.txt
+        echo -n \"", cd("\'"${IDENTIFIER_PATH}"\'"); " >> jobs.txt
+        echo -n 'vfilename = ' >> jobs.txt
+        echo -n \'\""${current_audio}"\" >> jobs.txt
+        echo -n "', vpathname = '" >> jobs.txt
+        echo -n \""${AUDIO_FILES_PATH}/"\"\' >> jobs.txt
+        echo ', identifier_cluster"' >> jobs.txt
+    done
+echo -e "Done creating jobs.txt."
+[[ ${max_duration} -ge 30 ]] && CORES_SUGGESTION=10 || CORES_SUGGESTION=4
+echo -e "Longest file has around $(expr ${max_duration} / 60) minutes."
+echo -e "Recommended number of cores to use: ${CORES_SUGGESTION}."
+echo -e "Recommended amount of memory to use: $(expr ${max_duration} / 60 + 10)GB."
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Create slurm file with user provided configuration
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+echo -e "\nCreating slurm+dSQ file with the following options:"
+echo -e "User: ${USER}"
+echo -e "Email: ${EMAIL_CONFIG}"
+echo -e "Cores per task: ${CORES_TO_USE}"
+echo -e "Memory per task: ${MEM_TO_USE}GB"
+echo -e "Partition to run: ${PARTITIONS_TO_USE}"
+echo -e "Walltime: ${TIME_TO_USE} minutes"
+
+rm runsq.sh
+
+echo "#!/bin/bash" >> runsq.sh
+echo "" >> runsq.sh
+echo "#SBATCH --job-name=VOCALMAT_IDENTIFIER_CORES_${CORES_TO_USE}_MEM_${MEM_TO_USE}GB_FILE_COUNT_${NUMBER_AUDIO_FILES}" >> runsq.sh
+echo "#SBATCH --output=${STDOUT_DIR}/identifier_%A_%a.out" >> runsq.sh
+echo "#SBATCH --error=${STDOUT_DIR}/identifier_%A_%a.err" >> runsq.sh
+echo "#SBATCH --partition=${PARTITIONS_TO_USE}" >> runsq.sh
+echo "#SBATCH --requeue" >> runsq.sh
+echo "#SBATCH --ntasks=1" >> runsq.sh
+echo "#SBATCH --cpus-per-task=${CORES_TO_USE}" >> runsq.sh
+echo "#SBATCH --mem=${MEM_TO_USE}g " >> runsq.sh
+echo "#SBATCH --time=${TIME_TO_USE}" >> runsq.sh
+ARRAY_SIZE=$(expr $NUMBER_AUDIO_FILES - 1)
+echo "#SBATCH --array=0-${ARRAY_SIZE}" >> runsq.sh
+echo "#SBATCH --mail-type=BEGIN,END,FAIL,TIME_LIMIT,REQUEUE" >> runsq.sh
+echo "#SBATCH --mail-user=${EMAIL_CONFIG}" >> runsq.sh
+echo "" >> runsq.sh
+echo "/ysm-gpfs/apps/software/dSQ/0.92/dSQBatch.py jobs.txt" >> runsq.sh
+echo -e "Done creating runsq.sh."
+
+echo -e "\nLoading DeadSimpleQueue module."
+module load dSQ
+echo -e "Done loading dSQ."
+
+echo -e "\nSubmitting batch job."
+sbatch runsq.sh
+echo -e "\nPlease wait..."
+
+sleep 5s
+
+echo -e "\nRunnning/scheduled jobs:"
+squeue -l -u ${USER}
+echo -e "\nCheck progress using squeue -l -u ${USER}"

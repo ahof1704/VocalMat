@@ -1,0 +1,85 @@
+#!/bin/bash 
+
+## -- DO NOT RUN!!! STILL WORKING ON THIS
+##-.~.-TODO-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--
+## -- check if identifier exists
+## --
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Exporting for autocompletion
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+declare INPUT_FLAGS
+declare -r E_OPTERR=85
+declare -r ScriptName=${0##*/}
+declare -r ShortOpts="hM:e:c:m:t:d:x:C"
+declare -r LongOpts="help,matlab:,email:,cores:,mem:,time:,directory:,extension:,cluster"
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Script variables
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+export CLEAN_ALL=false;
+export MATLAB_VERSION="2017b"
+export CORES_TO_USE=4
+export MEM_TO_USE=32
+export TIME_TO_USE=30
+export EMAIL_CONFIG=""
+export PARTITIONS_TO_USE="scavenge,general"
+export AUDIO_FILES_DIR="audios"
+export AUDIO_FILE_EXTENSION=".wav|.WAV"
+export USE_CLUSTER=false;
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Help message function
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+usage() {
+    echo -e "Usage: ./`basename $0` [OPTIONS]" 1>&2
+    echo -e "\nGlobal options:"
+    echo -e "\t -M, --matlab           specify matlab version (2017a|2017b|2018a)   default: 2017b"
+    echo -e "\t -h, --help:            shows this help message"
+    echo -e "\nYale Cluster options:"
+    echo -e "\t -C, --cluster          enable Yale Cluster usage"
+    echo -e "\t -e, --email            specify your email to receive updates"
+    echo -e "\t -j, --jobs             number of cores to use                       default: 4"
+    echo -e "\t -m, --mem              amount of RAM per task to use (in GB)        default: 32"
+    echo -e "\t -t, --time             maximum time for task to run (in minutes)    default: 30"
+    echo -e "\nAudio file options:"
+    echo -e "\t -d, --directory        specify audio files directory name           default: audios"
+    echo -e "\t -x, --extension        specify audio files extensions               default: .wav|.WAV"
+    echo -e "\nCleanup options:"
+    echo -e "\t -c, --clean:           clean everything"
+}
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Parse arguments
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+
+# parse number of threads to use
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Set path variables
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+export PROJECT_PATH=$(pwd)
+export AUDIO_FILES_PATH="${PROJECT_PATH}/audios"
+export IDENTIFIER_PATH="${PROJECT_PATH}/vocalmat_identifier"
+export CLASSIFIER_PATH="${PROJECT_PATH}/classifier"
+export OUTPUTS_PATH="${PROJECT_PATH}/outputs"
+export STDOUT_DIR="${OUTPUTS_PATH}/stdout"
+mkdir -p outputs/stdout
+
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+## Check for audio files.
+##-.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.--.~.-
+NUMBER_AUDIO_FILES=`ls -1 ${AUDIO_FILES_PATH} | grep -iE '.wav|.WAV' | wc -l`
+echo -e "\n"
+echo -e "Number of available audio files: ${NUMBER_AUDIO_FILES}.\n"
+
+if [ $NUMBER_AUDIO_FILES -gt 0 ]; then
+    AUDIO_FILES_LIST=`ls -1 ${AUDIO_FILES_PATH} | grep -iE '.wav|.WAV'`
+    echo -e "Available audio files: \n${AUDIO_FILES_LIST}"
+else
+    echo -e "No audio files found, make sure there are .wav files in ${AUDIO_FILES_PATH}. Exiting."
+    exit -1
+fi
+
+# xargs number of threads, process files

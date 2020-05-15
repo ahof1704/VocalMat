@@ -1,6 +1,0 @@
-#!/bin/bash
-
-script_FN_abs=$(dirname `readlink -f -n "$BASH_SOURCE"`)
-
-cd "$script_FN_abs"
-matlab -r "fnSetupFolders; MouseHouse"

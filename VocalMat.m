@@ -27,7 +27,7 @@ minimum_size = 6;
 % -- VocalMat Classifier
 % ----------------------------------------------------------------------------------------------
 % -- 0 = off; 1 = on.
-save_plot_spectrograms    = 0; % plots the spectograms with axes
+save_plot_spectrograms    = 1; % plots the spectograms with axes
 save_excel_file           = 1; % save output excel file with vocalization stats
 scatter_step              = 3; % plot every third point overlapping the vocalization (segmentation)
 axes_dots                 = 1; % show the dots overlapping the vocalization (segmentation)

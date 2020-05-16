@@ -54,15 +54,6 @@ disp('[vocalmat]: choose the audio file to be analyzed.');
 cd(vpathname);
 p = mfilename('fullpath');
 
-% -- save the output from the identifier, in case you only want to rerun the classifier
-save_output_files = 1;
-
-% -- max_interval: maximum allowed interval between points to be considered part of one vocalization
-max_interval = 20;
-
-% -- minimum_size: minimum number of points to be considered a vocalization
-minimum_size = 6;
-
 % -- save_spectrogram_background: option to output spectrogram background
 save_spectrogram_background = 0;
 

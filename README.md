@@ -69,6 +69,10 @@ If you use VocalMat or any part of it in your own work, please cite [Fonseca et 
 ## Getting Started
 ![Recordit GIF](resources/clone.gif)
 
+**You must have Git LFS installed to be able to fully clone the repository. [Download Git LFS](https://git-lfs.github.com/)**
+
+**If in doubt, proceed to the ```Manual Download``` section**
+
 #### Latest Stable Version
 ```bash
 $ git clone https://github.com/ahof1704/VocalMat.git

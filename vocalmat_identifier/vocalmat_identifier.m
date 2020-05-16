@@ -1,12 +1,12 @@
 % ----------------------------------------------------------------------------------------------
 % -- Title       : VocalMat Identifier
-% -- Project     : VocalMat - Automated Tool for Mice Vocalization Detection and Classification
+% -- Project     : VocalMat - A Tool for Automated Mouse Vocalization Detection and Classification
 % ----------------------------------------------------------------------------------------------
 % -- File        : vocalmat_identifier.m
 % -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
 % -- Standard    : <MATLAB 2018a>
 % ----------------------------------------------------------------------------------------------
-% -- Copyright (c) 2019 Dietrich Lab - Yale University
+% -- Copyright (c) 2020 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
 % -- Description: The VocalMat Identifier is responsible for identifying possible vocalizations 
 % -- in the provided audio file. Candidates for vocalization are further analyzed and regions

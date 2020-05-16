@@ -1,30 +1,21 @@
 % ----------------------------------------------------------------------------------------------
 % -- Title       : VocalMat Classifier
-% -- Project     : VocalMat - Automated Tool for Mice Vocalization Detection and Classification
+% -- Project     : VocalMat - A Tool for Automated Mouse Vocalization Detection and Classification
 % ----------------------------------------------------------------------------------------------
 % -- File        : vocalmat_classifier.m
 % -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
 % -- Standard    : <MATLAB 2018a>
 % ----------------------------------------------------------------------------------------------
-% -- Copyright (c) 2019 Dietrich Lab - Yale University
+% -- Copyright (c) 2020 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
 
-size_spectrogram = [227 227];
-
-% -- 0 = off; 1 = on.
-use_DL                    = 1;
-plot_stats_per_bin        = 1;
-save_plot_spectrograms    = 0; % plots the spectograms with axes
-axes_dots                 = 1; % show the dots overlapping the vocalization (segmentation)
-save_excel_file           = 1;
-
-% -- variable parameter sizes
-scatter_step              = 3; % plot every third point overlapping the vocalization (segmentation)
-bin_size                  = 300; % in seconds
+size_spectrogram   = [227 227];
+use_DL             = 1;
+plot_stats_per_bin = 1;
 
 disp('[vocalmat][classifier]: list of parameters to be used in this analysis (1 = On; 0 = Off):')
 disp('|==========================================|');
-disp(['| Bin size (in seconds)              : ' num2str(bin_size) ' |']);
+disp(['| Bin size (in seconds)              :  ' num2str(bin_size) ' |']);
 disp(['| Save Excel file                    :  ' num2str(save_excel_file) '  |']);
 disp(['| Save spectrogram segmentation plot :  ' num2str(save_plot_spectrograms) '  |']);
 disp(['| |- Plot axe dots (segmentation)    :  ' num2str(axes_dots) '  |']);
@@ -263,8 +254,7 @@ if use_DL==1
         end        
         img = imresize(flipud(mat2gray(A_total(:,T_min:T_max))),size_spectrogram);
         img = cat(3, img, img, img);
-        %                 imwrite(img,[vpathname '/' vfilename '/'  name '/' num2str(id_vocal)  '.png'])
-        imwrite(img,[vpathname '/' vfilename '/All/' num2str(id_vocal)  '.png'])
+        imwrite(img,fullfile(vpathname, vfilename, 'All', [num2str(id_vocal)  '.png']))
         
     end
     
@@ -316,7 +306,7 @@ for k=1:size(freq_vocal,2)
 end
 
 if use_DL==1
-    validationImages = imageDatastore([vpathname '/' vfilename '/All/']);
+    validationImages = imageDatastore(fullfile(vpathname, vfilename, 'All'));
     [predictedLabels, scores] = classify(model_class_DL,validationImages);
     lista = [validationImages.Files, predictedLabels];
     
@@ -343,7 +333,7 @@ end
 
 if use_DL==1
 %     temp = [T_classProb];
-    writetable(T_classProb,[vfile '\' vfilename '_DL.xlsx'])
+    writetable(T_classProb,fullfile(vfile,[vfilename '_DL.xlsx']))
 end
 save T_classProb T_classProb
 % 

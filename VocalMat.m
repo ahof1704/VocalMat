@@ -1,17 +1,41 @@
 % ----------------------------------------------------------------------------------------------
 % -- Title       : VocalMat
-% -- Project     : VocalMat - Automated Tool for Mice Vocalization Detection and Classification
+% -- Project     : VocalMat - A Tool for Automated Mouse Vocalization Detection and Classification
 % ----------------------------------------------------------------------------------------------
 % -- File        : VocalMat.m
 % -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
 % -- Standard    : <MATLAB 2018a>
 % ----------------------------------------------------------------------------------------------
-% -- Copyright (c) 2019 Dietrich Lab - Yale University
+% -- Copyright (c) 2020 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
+
 clear all
+
+% ----------------------------------------------------------------------------------------------
+% -- USER DEFINED PARAMETERS
+% ----------------------------------------------------------------------------------------------
+% ----------------------------------------------------------------------------------------------
+% -- VocalMat Identifier
+% ----------------------------------------------------------------------------------------------
+% -- save the output from the identifier, in case you only want to rerun the classifier
+save_output_files = 0;
+% -- max_interval: maximum allowed interval between points to be considered part of one vocalization
+max_interval = 20;
+% -- minimum_size: minimum number of points to be considered a vocalization
+minimum_size = 6;
+% ----------------------------------------------------------------------------------------------
+% -- VocalMat Classifier
+% ----------------------------------------------------------------------------------------------
+% -- 0 = off; 1 = on.
+save_plot_spectrograms    = 0; % plots the spectograms with axes
+save_excel_file           = 1; % save output excel file with vocalization stats
+scatter_step              = 3; % plot every third point overlapping the vocalization (segmentation)
+axes_dots                 = 1; % show the dots overlapping the vocalization (segmentation)
+bin_size                  = 300; % in seconds
+
 disp('[vocalmat]: starting VocalMat.')
 % -- add paths to matlab and setup for later use
-root_path       = 'C:\Users\ahf38\Documents\GitHub\VocalMat2'; %Set this path to VocalMat's root folder
+root_path       = pwd; %Set this path to VocalMat's root folder
 identifier_path = fullfile(root_path, 'vocalmat_identifier');
 classifier_path = fullfile(root_path, 'vocalmat_classifier');
 analysis_path = fullfile(root_path, 'vocalmat_analysis');
@@ -19,7 +43,7 @@ addpath(genpath(root_path));
 
 if 1==0 
 % -- check for updates
-vocalmat_github_version = strsplit(webread('https://raw.githubusercontent.com/ahof1704/VocalMat/VocalMat_RC/README.md'));
+vocalmat_github_version = strsplit(webread('https://raw.githubusercontent.com/ahof1704/VocalMat/master/README.md'));
 vocalmat_github_version = vocalmat_github_version{end-1};
 vocalmat_local_version  = strsplit(fscanf(fopen(fullfile('.','README.md'), 'r'), '%c'));
 vocalmat_local_version  = vocalmat_local_version{end-1};
@@ -32,9 +56,9 @@ if ~strcmp(vocalmat_local_version, vocalmat_github_version)
                                 'Continue', 'Exit', opts);
     switch btnAnswer
         case 'Exit'
-            error('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/VocalMat_RC">GitHub page</a>. ') 
+            error('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/master">GitHub page</a>. ') 
         case 'Continue'
-            warning('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/VocalMat_RC">GitHub page</a>. ') 
+            warning('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/master">GitHub page</a>. ') 
     end
 end
 

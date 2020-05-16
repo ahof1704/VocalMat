@@ -1,17 +1,25 @@
-clear all; close all
+% ----------------------------------------------------------------------------------------------
+% -- Title       : Kernel Alignment
+% -- Project     : VocalMat - A Tool for Automated Mouse Vocalization Detection and Classification
+% ----------------------------------------------------------------------------------------------
+% -- File        : kernel_alignment.m
+% -- Group       : Dietrich Lab - Department of Comparative Medicine @ Yale University
+% -- Standard    : <MATLAB 2018a>
+% ----------------------------------------------------------------------------------------------
+% -- Copyright (c) 2020 Dietrich Lab - Yale University
+% This is an adaptation of the code originally published by Tuia and
+% Camps-Valls (2016), which can be found in their github: https://github.com/dtuia/KEMA
+% ----------------------------------------------------------------------------------------------
+
 all_correlations=[];
 dist_centroids_all=[];
-work_dir = 'Z:\test\Combined_Trpv1_Control'; 
 cd(work_dir)
-
-% list = list_dir;
 show_plots = 1;
 group_animals=1;
 
 %if you want to combine all the animals all the same group and then compare
 %groups
 if group_animals==1
-    keyword{1} = 'Control'; keyword{2} = 'Agrp';
     for i=1:length(keyword)
        if (exist(fullfile(work_dir, ['maps_' keyword{i}]),'dir'))>0
             rmdir(fullfile(work_dir,['maps_' keyword{i}]),'s')
@@ -93,7 +101,6 @@ for list_idx = 1:size(list,1)-1
             %Remove the ones with low samples complex and mult
             X1_group = name;
             X2_group = name2;
-            %         path_to_save = 'Z:\Dietrich_Server\MZimmer\with_diffusion_maps\';
             path_to_save = fullfile(work_dir, 'Combined');
             if ~exist(fullfile(path_to_save, [X1_group '_' X2_group]))
                 mkdir(fullfile(path_to_save, [X1_group '_' X2_group]))
@@ -186,7 +193,7 @@ for list_idx = 1:size(list,1)-1
                 dT = dT1+dT2;
                 
                 
-                %% Wang'11
+                %%% Wang'11
 %                 disp('Mapping with Wang11 method...')
                 
                 % 1) Data in a block diagonal matrix
@@ -349,7 +356,7 @@ for list_idx = 1:size(list,1)-1
                     
                 end
                 
-                %% KEMA - LINEAR KERNEL
+                %%% KEMA - LINEAR KERNEL
                 if linear_k==1
                     disp('  Mapping with the linear kernel ...')
                     
@@ -484,7 +491,7 @@ for list_idx = 1:size(list,1)-1
                 end
                 
                 if rbf_k==1
-                    %% KEMA - RBF KERNEL
+                    %%% KEMA - RBF KERNEL
                     disp('  Mapping with the RBF kernel ...')
                     
                     % 2) Compute RBF kernels
@@ -612,7 +619,7 @@ for list_idx = 1:size(list,1)-1
                     
                     
                     
-                    %% unprojected
+                    %%% unprojected
                     
                     %train error
                     YpredO11 = classify(X1',X1',Y1);
@@ -644,7 +651,7 @@ for list_idx = 1:size(list,1)-1
             end
             
             
-            %% Plots
+            %%% Plots
             
             close all
             %
@@ -756,7 +763,6 @@ for list_idx = 1:size(list,1)-1
                     dist_X2(i,:) =  vecnorm(centroid - centroid(i,:), 2, 2); %General Vector Norm between centroids
                 end
                 
-                %                     [rho,pval]=corrcoef(dist_X1,dist_X2);
                 [rho,pval] = corrcoef(dist_X1,dist_X2,'rows','complete');
                 
                 for i=1:11

@@ -101,5 +101,14 @@ cd(classifier_path); run('vocalmat_classifier.m')
 
 % -- handle execution over to the diffusion maps
 disp(['[vocalmat]: starting VocalMat Analsyis...'])
+sigma=0.5;
+t=2; % diffusion coefficient
+m=3; % dimension of embedded space
+plot_diff_maps=1; % 1: plot embedding, 0: do not plot 
 cd(analysis_path); run('diffusion_maps.m')
-run('kernel_alignment.m')
+
+% -- handle execution over to the diffusion maps and performs alignment for
+% two groups defined by the variable 'keyword'
+work_dir = 'path_to_folder_with_groups_to_be_compared'; 
+keyword{1} = 'Control'; keyword{2} = 'Treatment'; % tags for the groups
+cd(analysis_path); run('kernel_alignment.m')

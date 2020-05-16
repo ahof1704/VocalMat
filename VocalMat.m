@@ -43,9 +43,9 @@ addpath(genpath(root_path));
 
 if 1==0 
 % -- check for updates
-vocalmat_github_version = strsplit(webread('https://raw.githubusercontent.com/ahof1704/VocalMat/master/README.md'));
+vocalmat_github_version = strsplit(webread('https://github.com/ahof1704/VocalMat/raw/master/README.md'));
 vocalmat_github_version = vocalmat_github_version{end-1};
-vocalmat_local_version  = strsplit(fscanf(fopen(fullfile('.','README.md'), 'r'), '%c'));
+vocalmat_local_version  = strsplit(fscanf(fopen(fullfile(root_path,'README.md'), 'r'), '%c'));
 vocalmat_local_version  = vocalmat_local_version{end-1};
 if ~strcmp(vocalmat_local_version, vocalmat_github_version)    
     

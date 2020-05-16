@@ -53,7 +53,7 @@ If you use VocalMat or any part of it in your own work, please cite [Fonseca et 
 
 ![VocalMat Workflow](resources/vocalmat.png)
 
-<p align="justify"> VocalMat <b>Identifier</b> detects vocalization candidates in the audio file. Vocalization candidates are detected through a series of image processing operations and differential geometry analysis over spectrogram information. The VocalMat Identifier outputs a MATLAB formatted file (.MAT) with information about the spectral content of detected vocalizations (e.g., frequency, intensity, timestamp), that is later used by the VocalMat Classifier.
+<p align="justify"> VocalMat <b>Identifier</b> detects vocalization candidates in the audio file. Vocalization candidates are detected through a series of image processing operations and differential geometry analysis over spectrogram information. The VocalMat Identifier outputs (optional) a MATLAB formatted file (.MAT) with information about the spectral content of detected vocalizations (e.g., frequency, intensity, timestamp), that is later used by the VocalMat Classifier.
 
 <p align="justify"> VocalMat <b>Classifier</b> uses a Convolutional Neural Network (CNN) to classify each vocalization candidate into 12 distinct labels: short, flat, chevron, reverse chevron, downward frequency modulation, upward frequency modulation, complex, multi steps, two steps, step down, step up, and noise.
 
@@ -113,7 +113,7 @@ Place the model file in the `vocalmat_classifier` folder inside the VocalMat dir
 
 #### `VocalMat` Output Files
 
-<p align="justify">VocalMat outputs a directory with the same name as the audio file that was analyzed. Inside that directory there will be two directories (<i>All</i>, <i>All_axes</i>), and two Microsoft Excel (.xlsx) files. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resulting segmentation illusrated by blue circles. The raw original images are available inside <i>All</i>. The main Excel file has the same name of the audio file analyzed (<i>audio_file_name</i>.xlsx). This file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy), and call type. The second excel file named as <i>audio_file_name</i>_DL.xlsx shows the probability distribution for each vocalization candidate for the different vocal classes.
+<p align="justify">VocalMat outputs a directory with the same name as the audio file that was analyzed. Inside that directory there will be two directories (<i>All</i>, and <i>All_axes</i> if <i>save_plot_spectrograms=1</i>), and two Microsoft Excel (.xlsx) files. Inside <i>All_axes</i> you will find one image for each vocalization candidate detetcted with the resulting segmentation illusrated by blue circles. The raw original images are available inside <i>All</i>. The main Excel file has the same name of the audio file analyzed (<i>audio_file_name</i>.xlsx). This file contains information on each vocalization, such as start and end time, duration, frequency (minimum, mean and maximum), bandwidth, intensity (minimum, mean, maximum and corrected based on the backgroun), existence of harmonic components or distortions (noisy), and call type. The second excel file named as <i>audio_file_name</i>_DL.xlsx shows the probability distribution for each vocalization candidate for the different vocal classes.
 
 <!-- #### Personal Use (bash script, linux-based systems)
 ```bash
@@ -158,7 +158,7 @@ $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 - __Sampling rate:__ we recommend using a sampling rate of 250kHz (Fmax=125kHz).
 
 ##### Software Requirements
-- __MATLAB:__ versions 2017a through 2019a. For other versions refer to the [FAQ](#faq).
+- __MATLAB:__ versions 2017a through 2019b. For other versions refer to the [FAQ](#faq).
 - __MATLAB Add-Ons:__
     - Signal Processing Toolbox
     - Deep Learning Toolbox
@@ -167,7 +167,7 @@ $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 
 ## FAQ
 - Will `VocalMat` work with my MATLAB version?
-<p align="justify">VocalMat was developed and tested using MATLAB 2017a through 2019a versions. We cannot guarantee that it will work in other versions of MATLAB. If your MATLAB version supports all the required Add-Ons, VocalMat should work.
+<p align="justify">VocalMat was developed and tested using MATLAB 2017a through 2019b versions. We cannot guarantee that it will work in other versions of MATLAB. If your MATLAB version supports all the required Add-Ons, VocalMat should work.
 
 - What are the hardware requirements to run `VocalMat`?
 <p align="justify">The duration of the audio files that can be processed in VocalMat is limited to the amount of RAM your computer has. We estimate around 1GB of RAM for every minute of recording using one minute segments. For a 10 minute recording, your computer should have at least 10GB of RAM available. RAM usage will vary depending on your MATLAB version and computer, these numbers are just estimates.
@@ -177,16 +177,5 @@ $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 
 - I want a new feature for `VocalMat`, can I contribute?
 <p align="justify"> Yes! If you like VocalMat and want to help us add new features, please create a pull-request!
-
-## License
-<div>
-    <a href="#">
-    <img src="https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square"
-      alt="Apache License 2.0" />
-    </a>
-</div>
-
-- **[Apache License 2.0](https://github.com/ahof1704/VocalMat/blob/VocalMat_RC/LICENSE)**
-- Copyright 2019 © <a href="http://www.dietrich-lab.org" target="_blank">Dietrich Lab</a>.
 
 <!-- version-control: 1.0 -->

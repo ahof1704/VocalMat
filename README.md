@@ -35,6 +35,10 @@ If you use VocalMat or any part of it in your own work, please cite [Fonseca et 
 }
 ```
 
+For more information, visit our website: [VocalMat - Dietrich Lab](http://dietrich-lab.org/vocalmat)
+
+Dataset and audios used in the paper are available at: [OSF Repository](https://osf.io/bk2uj/)
+
 ## Table of Contents
 - [Description](#description)
 - [Features](#features)
@@ -180,6 +184,6 @@ $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
 <p align="justify"> In order for our script to work in your Cluster it must have Slurm support. Minor changes might have to be made to adapt the script to your Cluster configuration.
 
 - I want a new feature for `VocalMat`, can I contribute?
-<p align="justify"> Yes! If you like VocalMat and want to help us add new features, please create a pull-request!
+<p align="justify"> Yes! If you like VocalMat and want to help us add new features, please create a pull request!
 
 <!-- version-control: 1.0 -->

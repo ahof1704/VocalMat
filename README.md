@@ -3,7 +3,7 @@
 </div>
 
 <div align="center">
-    <strong>A Tool for Automated Mouse Vocalization Detection and Classification</strong>
+    <strong>Analysis of ultrasonic vocalizations from mice using computer vision and machine learning</strong>
 </div>
 
 <div align="center">
@@ -27,7 +27,7 @@ If you use VocalMat or any part of it in your own work, please cite [Fonseca et 
 ```
 @article{VocalMat:2020,
     author =       "Fonseca, Antonio H. O. and Santana, Gustavo M. and Bampi, Sérgio and Dietrich, Marcelo O.",
-    title =        "Analysis of ultrasonic vocalizations from mice using machine learning",
+    title =        "Analysis of ultrasonic vocalizations from mice using computer vision and machine learning",
     journal =      "bioRxiv",
     year =         "2020",
     doi =          {},

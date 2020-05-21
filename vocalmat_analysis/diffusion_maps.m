@@ -9,25 +9,6 @@
 % -- Copyright (c) 2020 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
 
-T_classProb_orig = T_classProb;
-T_classProb(strcmp(T_classProb.DL_out,'noise_dist'),:)=[]; %Remove noise
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'chevron'))={1};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'complex'))={2};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'down_fm'))={3};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'flat'))={4};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'mult_steps'))={5};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'rev_chevron'))={6};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'short'))={7};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'step_down'))={8};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'step_up'))={9};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'two_steps'))={10};
-T_classProb.DL_out(strcmp(T_classProb.DL_out,'up_fm'))={11};
-
-%remove extra columns and noise
-T_classProb.AA21=[]; T_classProb.NumVocal=[];
-T_classProb.DL_out = cell2mat(T_classProb.DL_out);
-T_classProb = table2array(T_classProb);
-
 data = T_classProb(:,1:end-1); label = T_classProb(:,end);
 Y = squareform(pdist(data,'euclidean'));
 disp(['plotting for sigma= ', num2str(sigma), '...'])

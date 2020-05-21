@@ -9,6 +9,25 @@
 % -- Copyright (c) 2020 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
 
+T_classProb_orig = T_classProb;
+T_classProb(strcmp(T_classProb.DL_out,'noise_dist'),:)=[]; %Remove noise
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'chevron'))={1};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'complex'))={2};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'down_fm'))={3};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'flat'))={4};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'mult_steps'))={5};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'rev_chevron'))={6};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'short'))={7};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'step_down'))={8};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'step_up'))={9};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'two_steps'))={10};
+T_classProb.DL_out(strcmp(T_classProb.DL_out,'up_fm'))={11};
+
+%remove extra columns and noise
+T_classProb.AA21=[]; T_classProb.NumVocal=[];
+T_classProb.DL_out = cell2mat(T_classProb.DL_out);
+T_classProb = table2array(T_classProb);
+
 data = T_classProb(:,1:end-1); label = T_classProb(:,end);
 Y = squareform(pdist(data,'euclidean'));
 disp(['plotting for sigma= ', num2str(sigma), '...'])
@@ -33,14 +52,14 @@ if plot_diff_maps==1
     
     hFig = figure('units','normalized','outerposition',[0 0 1 1]);
     axh = axes('Parent', hFig);
-    title('3-D Embedding, sigma: 0.5, AJ_control','interpreter', 'none')
+    title('3-D Embedding, sigma: 0.5','interpreter', 'none')
     p = get(axh, 'Position');
     % h = axes('Parent', gcf, 'Position', [p(1)+0.65 p(2) 0.2 0.2]);
     
     int=1;k=1;offset=200;
     while k<20
         if mod(int,10)==1
-            k
+%             k
             if exist('current_dot')
                 delete(current_dot)
                 clear current_dot
@@ -78,7 +97,7 @@ if plot_diff_maps==1
     writerObj.FrameRate = 15;
     open(writerObj);
     % write the frames to the video
-    for i=1:length(F)
+    for i=1:size(F,2)
         % convert the image to a frame
         frame = F(i) ;
         writeVideo(writerObj, frame);

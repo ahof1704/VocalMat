@@ -27,7 +27,7 @@ minimum_size = 6;
 % -- VocalMat Classifier
 % ----------------------------------------------------------------------------------------------
 % -- 0 = off; 1 = on.
-save_plot_spectrograms    = 1; % plots the spectograms with axes
+save_plot_spectrograms    = 0; % plots the spectograms with axis
 save_excel_file           = 1; % save output excel file with vocalization stats
 scatter_step              = 3; % plot every third point overlapping the vocalization (segmentation)
 axes_dots                 = 1; % show the dots overlapping the vocalization (segmentation)
@@ -35,31 +35,35 @@ bin_size                  = 300; % in seconds
 
 disp('[vocalmat]: starting VocalMat.')
 % -- add paths to matlab and setup for later use
-root_path       = pwd; %Set this path to VocalMat's root folder
+root_path       = fileparts(mfilename('fullpath')); %Set this path to VocalMat's root folder
 identifier_path = fullfile(root_path, 'vocalmat_identifier');
 classifier_path = fullfile(root_path, 'vocalmat_classifier');
 analysis_path = fullfile(root_path, 'vocalmat_analysis');
 addpath(genpath(root_path));
 
-if 1==0 
-% -- check for updates
-vocalmat_github_version = strsplit(webread('https://github.com/ahof1704/VocalMat/raw/master/README.md'));
-vocalmat_github_version = vocalmat_github_version{end-1};
-vocalmat_local_version  = strsplit(fscanf(fopen(fullfile(root_path,'README.md'), 'r'), '%c'));
-vocalmat_local_version  = vocalmat_local_version{end-1};
-if ~strcmp(vocalmat_local_version, vocalmat_github_version)    
-    
-    opts.Interpreter = 'tex';
-    opts.Default     = 'Continue';
-    btnAnswer        = questdlg('There is a new version of VocalMat available. For more information, visit github.com/ahof1704/VocalMat', ...
-                                'New Version of VocalMat Available', ...
-                                'Continue', 'Exit', opts);
-    switch btnAnswer
-        case 'Exit'
-            error('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/master">GitHub page</a>. ') 
-        case 'Continue'
-            warning('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/master">GitHub page</a>. ') 
+try
+    % -- check for updates
+    vocalmat_github_version = strsplit(webread('https://github.com/ahof1704/VocalMat/raw/master/README.md'));
+    vocalmat_github_version = vocalmat_github_version{end-2};
+    vocalmat_local_version  = strsplit(fscanf(fopen(fullfile(root_path,'README.md'), 'r'), '%c'));
+    vocalmat_local_version  = vocalmat_local_version{end-2};
+    if ~strcmp(vocalmat_local_version, vocalmat_github_version)    
+
+        opts.Interpreter = 'tex';
+        opts.Default     = 'Continue';
+        btnAnswer        = questdlg('There is a new version of VocalMat available. For more information, visit github.com/ahof1704/VocalMat', ...
+                                    'New Version of VocalMat Available', ...
+                                    'Continue', 'Exit', opts);
+        switch btnAnswer
+            case 'Exit'
+                error('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/master">GitHub page</a>. ') 
+            case 'Continue'
+                warning('[vocalmat]: there is a new version of VocalMat available. For more information, visit our <a href="https://github.com/ahof1704/VocalMat/tree/master">GitHub page</a>. ') 
+        end
     end
+catch
+    % -- could not check for updates
+    disp('[vocalmat]: checking for updates failed. Verify if you have internet connection.');
 end
 
 % -- check dependencies
@@ -89,8 +93,6 @@ catch
     error('[vocalmat]: please download the Deep Learning Toolbox')
 end
 
-end
-
 % -- handle execution over to the identifier
 disp(['[vocalmat]: starting VocalMat Identifier...'])
 cd(fullfile(root_path, 'audios')); run('vocalmat_identifier.m')
@@ -107,8 +109,11 @@ m=3; % dimension of embedded space
 plot_diff_maps=1; % 1: plot embedding, 0: do not plot 
 cd(analysis_path); run('diffusion_maps.m')
 
-% -- handle execution over to the diffusion maps and performs alignment for
+% -- (optional) handle execution over to the diffusion maps and performs alignment for
 % two groups defined by the variable 'keyword'
-work_dir = 'path_to_folder_with_groups_to_be_compared'; 
-keyword{1} = 'Control'; keyword{2} = 'Treatment'; % tags for the groups
-cd(analysis_path); run('kernel_alignment.m')
+% work_dir = 'path_to_folder_with_groups_to_be_compared'; 
+% keyword{1} = 'Control'; keyword{2} = 'Treatment'; % tags for the groups
+% cd(analysis_path); run('kernel_alignment.m')
+
+close all
+disp(['[vocalmat]: finished!'])

@@ -23,14 +23,14 @@
 
 <br />
 
-If you use VocalMat or any part of it in your own work, please cite [Fonseca et al](#):
+If you use VocalMat or any part of it in your own work, please cite [Fonseca et al](https://www.biorxiv.org/content/10.1101/2020.05.20.105023v1):
 ```
 @article{VocalMat:2020,
     author =       "Fonseca, Antonio H. O. and Santana, Gustavo M. and Bampi, Sérgio and Dietrich, Marcelo O.",
     title =        "Analysis of ultrasonic vocalizations from mice using computer vision and machine learning",
     journal =      "bioRxiv",
     year =         "2020",
-    doi =          {},
+    doi =          {10.1101/2020.05.20.105023},
     url =          {https://dietrich-lab.org/vocalmat}
 }
 ```

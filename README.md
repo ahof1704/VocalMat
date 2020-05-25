@@ -23,7 +23,7 @@
 
 <br />
 
-If you use VocalMat or any part of it in your own work, please cite [Fonseca et al](https://www.biorxiv.org/content/10.1101/2020.05.20.105023v1):
+If you use VocalMat or any part of it in your own work, please cite [Fonseca et al](https://www.biorxiv.org/content/10.1101/2020.05.20.105023v2):
 ```
 @article{VocalMat:2020,
     author =       "Fonseca, Antonio H. O. and Santana, Gustavo M. and Bampi, Sérgio and Dietrich, Marcelo O.",

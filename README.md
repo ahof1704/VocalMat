@@ -99,11 +99,11 @@ You can download VocalMat by using GitHub's `Download Zip` option. However, sinc
 
 Extract the `.zip` file. This is the VocalMat directory.
 
-> Download the example audio file: [Download Audio](https://github.com/ahof1704/VocalMat/raw/master/audios/audio_example.wav)
+> Download the example audio file: [Download Audio](https://osf.io/zvrk6/download)
 
 Place the audio file in the `audios` folder inside the VocalMat directory.
 
-> Download the neural network model file: [Download Model](https://github.com/ahof1704/VocalMat/raw/master/vocalmat_classifier/Mdl_categorical_DL.mat)
+> Download the neural network model file: [Download Model](https://osf.io/3yc79/download)
 
 Place the model file in the `vocalmat_classifier` folder inside the VocalMat directory.
 

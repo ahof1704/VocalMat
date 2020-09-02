@@ -10,7 +10,7 @@
     <br />
     <!-- MATLAB version -->
     <a href="https://www.mathworks.com/products/matlab.html">
-    <img src="https://img.shields.io/badge/MATLAB-2017%7C2018%7C2019-blue.svg?style=flat-square"
+    <img src="https://img.shields.io/badge/MATLAB-2017%7C2018%7C2019%7C2020-blue.svg?style=flat-square"
       alt="MATLAB tested versions" />
     </a>
     <!-- LICENSE -->

@@ -36,6 +36,7 @@ bin_size                  = 300; % in seconds
 disp('[vocalmat]: starting VocalMat.')
 % -- add paths to matlab and setup for later use
 root_path       = fileparts(mfilename('fullpath')); %Set this path to VocalMat's root folder
+initializer_path = fullfile(root_path, 'vocalmat_initializer');
 identifier_path = fullfile(root_path, 'vocalmat_identifier');
 classifier_path = fullfile(root_path, 'vocalmat_classifier');
 analysis_path = fullfile(root_path, 'vocalmat_analysis');
@@ -93,21 +94,30 @@ catch
     error('[vocalmat]: please download the Deep Learning Toolbox')
 end
 
-% -- handle execution over to the identifier
-disp(['[vocalmat]: starting VocalMat Identifier...'])
-cd(fullfile(root_path, 'audios')); run('vocalmat_identifier.m')
+% -- handle execution over to the initializer
+disp(['[vocalmat]: starting VocalMat Initializer...'])
+cd(fullfile(root_path, 'audios')); run('vocalmat_initializer.m')
 
-% -- handle execution over to the classifier
-disp(['[vocalmat]: starting VocalMat Classifier...'])
-cd(classifier_path); run('vocalmat_classifier.m')
+initial_vars = who;
+for i_vfilename = 1:length(vfilenames)
+    clearvars('-except', initial_vars{:}, 'initial_vars', 'i_vfilename')
+    vfilename = vfilenames{i_vfilename};
+    % -- handle execution over to the identifier
+    disp(['[vocalmat]: starting VocalMat Identifier...'])
+    cd(fullfile(root_path, 'audios')); run('vocalmat_identifier.m')
 
-% -- handle execution over to the diffusion maps
-disp(['[vocalmat]: starting VocalMat Analsyis...'])
-sigma=0.5;
-t=2; % diffusion coefficient
-m=3; % dimension of embedded space
-plot_diff_maps=1; % 1: plot embedding, 0: do not plot 
-cd(analysis_path); run('diffusion_maps.m')
+    % -- handle execution over to the classifier
+    disp(['[vocalmat]: starting VocalMat Classifier...'])
+    cd(classifier_path); run('vocalmat_classifier.m')
+
+    % -- handle execution over to the diffusion maps
+    disp(['[vocalmat]: starting VocalMat Analsyis...'])
+    sigma=0.5;
+    t=2; % diffusion coefficient
+    m=3; % dimension of embedded space
+    plot_diff_maps=1; % 1: plot embedding, 0: do not plot
+    cd(analysis_path); run('diffusion_maps.m')
+end
 
 % -- (optional) handle execution over to the diffusion maps and performs alignment for
 % two groups defined by the variable 'keyword'

@@ -49,8 +49,6 @@
 % -- (1) SETUP BEGIN ---------------------------------------------------------------------------
 % ----------------------------------------------------------------------------------------------
 raiz = pwd;
-disp('[vocalmat]: choose the audio file to be analyzed.');
-[vfilename,vpathname] = uigetfile({'*.wav'},'Select the sound track');
 cd(vpathname);
 p = mfilename('fullpath');
 

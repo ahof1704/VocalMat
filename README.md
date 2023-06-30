@@ -171,6 +171,7 @@ $ ./run_identifier_cluster --email your@email.com --cores 4 --mem 128 --time 600
     - Deep Learning Toolbox
     - Image Processing Toolbox
     - Statistics and Machine Learning Toolbox
+    - Control System Toolbox
 
 ## FAQ
 - Will `VocalMat` work with my MATLAB version?

@@ -9,6 +9,7 @@
 % -- Copyright (c) 2020 Dietrich Lab - Yale University
 % ----------------------------------------------------------------------------------------------
 
+load(strcat(vfile, '\T_classProb.mat'));
 T_classProb_orig = T_classProb;
 T_classProb(strcmp(T_classProb.DL_out,'noise_dist'),:)=[]; %Remove noise
 T_classProb.DL_out(strcmp(T_classProb.DL_out,'chevron'))={1};
